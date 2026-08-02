@@ -2,6 +2,11 @@
 
 Contiene información de planificación y seguimiento que ayude a coordinar el trabajo sin convertirse en una copia del gestor de tareas.
 
+## Documentos
+
+- [Roadmap inicial](roadmap.md)
+- [Línea base de entrega y evolución documental](delivery-baseline.md)
+
 ## Incluir
 
 - roadmap y objetivos por etapa;

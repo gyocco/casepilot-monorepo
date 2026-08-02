@@ -2,6 +2,10 @@
 
 Sirve como consulta rápida para contratos y detalles estables del sistema.
 
+## Documento base
+
+- [Convenciones y referencias del proyecto](project-conventions.md)
+
 ## Incluir
 
 - endpoints y contratos de API;

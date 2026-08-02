@@ -2,6 +2,12 @@
 
 Documenta el comportamiento esperado del producto desde la perspectiva de usuarios y negocio.
 
+## Navegación
+
+- [Visión y alcance del producto](product-vision-and-scope.md)
+- [Mapa de requisitos y cobertura](requirements-map.md)
+- [Índice de épicas](epics/README.md)
+
 ## Incluir
 
 - objetivos, alcance y fuera de alcance;

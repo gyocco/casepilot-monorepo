@@ -2,6 +2,10 @@
 
 Reúne las instrucciones necesarias para instalar, desarrollar y validar el proyecto localmente.
 
+## Documento base
+
+- [Línea base de desarrollo](development-baseline.md)
+
 ## Incluir
 
 - requisitos de herramientas y versiones;

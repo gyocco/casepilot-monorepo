@@ -2,6 +2,15 @@
 
 Este directorio contiene la documentación transversal del monorepo: decisiones, arquitectura, producto, desarrollo, operación y referencias compartidas. El [README.md de la raíz](../README.md) es la entrada general del repositorio y documenta el propósito de cada carpeta técnica.
 
+## Entradas recomendadas
+
+- [Contexto del producto y del proyecto](00-overview/product-and-project-context.md)
+- [Visión y alcance de CasePilot](01-product/product-vision-and-scope.md)
+- [Mapa de requisitos y épicas](01-product/requirements-map.md)
+- [Epic 1 — Autenticación](01-product/epics/epic-01-authentication/README.md)
+- [Contexto y arquitectura del sistema](02-architecture/system-context.md)
+- [Roadmap inicial](07-project-management/roadmap.md)
+
 ## Estructura recomendada
 
 ```text

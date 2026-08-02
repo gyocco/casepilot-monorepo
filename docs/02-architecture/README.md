@@ -2,6 +2,11 @@
 
 Describe cómo está construido el sistema y cómo se relacionan sus partes.
 
+## Documentos
+
+- [Contexto del sistema](system-context.md)
+- [Línea base de arquitectura](architecture-baseline.md)
+
 ## Incluir
 
 - diagramas de contexto, contenedores y flujos;

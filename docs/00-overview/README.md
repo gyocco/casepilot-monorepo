@@ -2,6 +2,11 @@
 
 Contiene el contexto que permite entender CasePilot sin leer el código.
 
+## Documentos
+
+- [Contexto del producto y del proyecto](product-and-project-context.md)
+- [Glosario del dominio](glossary.md)
+
 ## Incluir
 
 - resumen del producto y del problema que resuelve;

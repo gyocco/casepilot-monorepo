@@ -5,7 +5,10 @@ Aquí se guardan plantillas reutilizables para mantener una forma consistente de
 ## Plantillas recomendadas
 
 - `adr.md`: decisión técnica;
-- `feature-spec.md`: especificación de una funcionalidad;
+- `product-requirement.md`: descripción del producto y sus objetivos;
+- `epic.md`: módulo o épica de producto;
+- `feature.md`: funcionalidad dentro de una épica;
+- `user-story.md`: historia con descripción, criterios, reglas y requisitos no funcionales;
 - `runbook.md`: procedimiento operativo;
 - `package-readme.md`: documentación mínima de un paquete.
 
