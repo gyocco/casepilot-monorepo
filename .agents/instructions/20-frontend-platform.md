@@ -15,7 +15,7 @@ Referencias: [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks) 
 
 ## Estructura de la app
 
-En `apps/web/src/`, separa navegación, features, componentes locales, hooks de composición, integración y tema. Una pantalla debe orquestar; un componente de UI no debe conocer credenciales, queries o reglas de autorización.
+En `src/web-ui/apps/<app>/src/`, separa navegación, features, componentes locales, hooks de composición, integración y tema. Una pantalla debe orquestar; un componente de UI no debe conocer credenciales, queries o reglas de autorización.
 
 La cadena recomendada es:
 
@@ -54,7 +54,7 @@ Tailwind documenta el enfoque [mobile-first responsive](https://tailwindcss.com/
 - Usa Tailwind para layout, spacing, tipografía y estados repetibles. Usa CSS global o CSS del componente para tokens, estilos de Ionic y reglas que realmente no expresen bien como utilities.
 - Define colores, radios, tipografías, sombras y breakpoints como tokens; evita hexadecimales y valores arbitrarios repetidos en JSX.
 - Evita `!important`, selectores globales agresivos y estilos inline salvo para valores dinámicos que no puedan representarse como clase.
-- No mezcles dos sistemas de spacing o breakpoints sin documentarlo. La fuente de verdad del tema debe permanecer en `apps/web/src/theme/` o en el paquete de UI cuando sea compartida.
+- No mezcles dos sistemas de spacing o breakpoints sin documentarlo. La fuente de verdad del tema debe permanecer en `src/web-ui/apps/<app>/src/theme/` o en una librería frontend de UI cuando sea compartida.
 - Revisa que las clases dinámicas sean detectables por el compilador de Tailwind; no construyas nombres completos de clase a partir de strings arbitrarios.
 
 ## Vite y configuración
@@ -63,7 +63,7 @@ Tailwind documenta el enfoque [mobile-first responsive](https://tailwindcss.com/
 - Nunca pongas secretos, passwords, tokens administrativos o URLs privadas protegidas en `VITE_*`.
 - Trata las variables como strings y valida/convierte tipos en un módulo de configuración único.
 - Mantén `.env.example` con nombres y ejemplos no sensibles. Los archivos `.env.local` y equivalentes no se versionan.
-- No importes APIs Node-only, `supabase-admin` ni módulos server-only desde código que Vite pueda incluir en el navegador.
+- No importes APIs Node-only ni módulos server-only desde código que Vite pueda incluir en el navegador.
 - Si cambia la configuración de Vite, comprueba dev, build, preview y el futuro build de Capacitor.
 
 Referencia oficial: [Vite Env Variables and Modes](https://vite.dev/guide/env-and-mode.html).
@@ -71,7 +71,7 @@ Referencia oficial: [Vite Env Variables and Modes](https://vite.dev/guide/env-an
 ## Compatibilidad futura con Capacitor
 
 - Mantén la lógica de producto y dominio independiente de browser y native.
-- Encapsula cámara, archivos, notificaciones, biometría, almacenamiento, compartir y sensores detrás de interfaces/adaptadores en `packages/platform` o una frontera equivalente.
+- Encapsula cámara, archivos, notificaciones, biometría, almacenamiento, compartir y sensores detrás de interfaces/adaptadores en una librería de plataforma del workspace o una frontera equivalente.
 - Cada capability debe tener implementación web/fallback, implementación Capacitor cuando corresponda, detección de disponibilidad, manejo de permisos, manejo de error y prueba.
 - No llames APIs nativas directamente desde componentes de negocio. El componente pide una capacidad; el adaptador decide cómo resolverla.
 - Evita asumir que existen `window`, hover, mouse, filesystem local, tamaño de pantalla fijo o conectividad continua.

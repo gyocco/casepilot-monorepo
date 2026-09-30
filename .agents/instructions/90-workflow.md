@@ -20,24 +20,16 @@
 
 ## Verificación local
 
-Para la app actual, desde `apps/web/` usa cuando corresponda:
+Para la app actual, desde `src/web-ui/apps/public/` usa cuando corresponda:
 
 ```bash
-npm run lint
-npm run build
+pnpm --dir src/web-ui/apps/public lint
+pnpm --dir src/web-ui/apps/public build
 ```
 
-Para Supabase local, desde la raíz usa solo cuando el cambio lo requiera y Docker/Supabase estén disponibles:
+Para servicios NestJS, ejecuta los scripts definidos por el servicio afectado desde su carpeta y documenta cualquier dependencia local. No se asume un proveedor de base de datos o infraestructura hasta que exista una decisión y configuración versionada.
 
-```bash
-supabase start
-supabase db reset
-supabase migration list
-supabase gen types typescript --local > <ruta-canónica-de-tipos>
-supabase functions serve <nombre>
-```
-
-No ejecutes `supabase db push`, `db reset --linked`, despliegues, publicación de apps ni cambios remotos como parte de una verificación implícita.
+No ejecutes despliegues, publicación de apps ni cambios remotos como parte de una verificación implícita.
 
 ## Revisión final
 

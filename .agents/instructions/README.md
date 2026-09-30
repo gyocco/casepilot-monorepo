@@ -9,13 +9,12 @@ Estas instrucciones son la política técnica del repositorio. Se leen después 
 | `00-project-context.md` | contexto, objetivo de plataforma y fuentes de verdad |
 | `10-architecture.md` | capas, dependencias y ubicación del código |
 | `20-frontend-platform.md` | React, Vite, Tailwind, Ionic y Capacitor |
-| `30-supabase.md` | base de datos, Auth, RLS, Edge Functions y tipos |
 | `40-quality-testing.md` | calidad, pruebas, accesibilidad y performance |
 | `50-security.md` | secretos, permisos, datos sensibles y seguridad de cliente |
 | `60-documentation.md` | documentación, ADRs y sincronización con el código |
 | `90-workflow.md` | proceso de trabajo, verificación y límites operativos |
 
-Para un cambio de frontend se leen `00`, `10`, `20`, `40`, `50`, `60` y `90`. Para un cambio de backend o datos también se lee `30`. Si hay duda, se leen todas.
+Para un cambio de frontend se leen `00`, `10`, `20`, `40`, `50`, `60` y `90`. Para un cambio de backend NestJS se revisan además `10`, `40`, `50` y `60`. No se debe crear una instrucción de Supabase: esa plataforma está fuera de la arquitectura del proyecto.
 
 ## Precedencia
 

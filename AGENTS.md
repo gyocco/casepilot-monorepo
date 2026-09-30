@@ -8,7 +8,7 @@ Antes de modificar código, configuración o documentación:
 
 1. Lee este archivo y [`.agents/README.md`](.agents/README.md).
 2. Lee [`.agents/instructions/README.md`](.agents/instructions/README.md).
-3. Lee las instrucciones numeradas relevantes. Para cambios normales de producto, carga como mínimo `00`, `10`, `20`, `40`, `50`, `60` y `90`; para cambios de Supabase carga también `30`.
+3. Lee las instrucciones numeradas relevantes. Para cambios normales de producto, carga como mínimo `00`, `10`, `20`, `40`, `50`, `60` y `90`. Este proyecto no usa Supabase; no añadas instrucciones, configuración ni dependencias de esa plataforma.
 4. Consulta la documentación local enlazada desde `docs/README.md` y desde la instrucción específica.
 5. Busca primero patrones existentes en el repositorio antes de crear una abstracción nueva.
 
@@ -24,28 +24,28 @@ Las palabras `MUST`/`DEBE`, `MUST NOT`/`NO DEBE`, `SHOULD`/`DEBERÍA` y `MAY`/`P
 
 CasePilot comparte un único código de producto entre:
 
-- la aplicación web en `apps/web`;
-- una futura aplicación Android y una futura aplicación iOS empaquetadas con Capacitor/Ionic.
+- las aplicaciones browser en `src/web-ui/apps/`;
+- los servicios desplegables en `src/services/apps/`, implementados con NestJS y TypeScript;
+- las futuras aplicaciones móviles en `src/mobile-ui/apps/`, empaquetadas con Capacitor/Ionic.
 
 Por eso, toda decisión de UI y plataforma DEBE funcionar primero en una pantalla móvil estrecha y NO DEBE introducir una dependencia innecesaria del navegador o del sistema operativo. Las diferencias nativas deben aislarse detrás de adaptadores y mantenerse fuera de la lógica de dominio.
 
 ## Restricciones no negociables
 
-- No exponer secretos, claves privadas, tokens de administrador ni la clave `service_role` en código cliente, bundles Vite, logs o documentación.
-- No acceder a la base de datos directamente desde componentes React. El acceso pasa por paquetes de datos y contratos tipados.
-- No añadir tablas, funciones o cambios de permisos de Supabase sin migración versionada, RLS revisado y prueba local.
-- No modificar una migración que ya pueda haberse aplicado. Crear una migración nueva.
-- No poner código específico de una app dentro de `packages/`; los paquetes deben ser reutilizables y no importar desde `apps/`.
+- No exponer secretos, claves privadas ni tokens de administrador en código cliente, bundles Vite, logs o documentación.
+- No acceder a persistencia directamente desde componentes React. El acceso pasa por `src/web-ui/libs`, APIs NestJS, `src/services/libs` y contratos tipados.
+- No introducir Supabase como solución de datos, autenticación, storage, realtime o backend gestionado.
+- No poner código específico de una app dentro de `libs/`; las librerías deben ser reutilizables y no importar desde `apps/`.
 - No crear layouts desktop-first: las clases sin prefijo representan el mínimo móvil y las variantes responsive mejoran la experiencia en pantallas mayores.
 - No introducir APIs web o nativas directamente en múltiples lugares. Crear un adaptador compartido y probar el fallback web.
 - No saltarse lint, type-check, build, pruebas o revisión de accesibilidad sin dejar constancia de la razón.
-- No realizar despliegues, `supabase db push`, operaciones remotas destructivas ni cambios irreversibles sin autorización explícita.
+- No realizar despliegues, operaciones remotas destructivas ni cambios irreversibles sin autorización explícita.
 
 ## Flujo mínimo de trabajo
 
 1. Entender el objetivo, el alcance y las restricciones.
 2. Revisar `git status`, la estructura y los patrones existentes.
-3. Identificar las capas afectadas: app, paquete, Supabase, tests y docs.
+3. Identificar las capas afectadas: app, servicio, librería, contratos, tests, infraestructura y docs.
 4. Implementar el cambio más pequeño que mantenga las fronteras arquitectónicas.
 5. Añadir o actualizar pruebas y documentación en el mismo cambio.
 6. Ejecutar las verificaciones disponibles y revisar el diff completo.

@@ -10,7 +10,7 @@
 
 ## Identidad y autorización
 
-- Verifica identidad y permisos en el backend, RLS o Edge Function. El cliente solo mejora UX.
+- Verifica identidad y permisos en los servicios backend. El cliente solo mejora UX.
 - No confíes en user IDs, tenant IDs, roles o flags enviados por el navegador sin compararlos con una fuente autorizada.
 - Revisa expiración, refresh, logout, cambio de sesión y comportamiento offline antes de tocar Auth.
 - Mantén separadas las rutas de usuario y las operaciones administrativas.
@@ -23,12 +23,11 @@
 - Minimiza PII, define retención y no registres datos sensibles innecesarios.
 - Redacta errores para usuarios y conserva detalles técnicos solo en logs protegidos.
 
-## Supabase y APIs
+## APIs y servicios
 
-- RLS está activo en todas las tablas expuestas y sus policies tienen pruebas negativas.
-- `service_role` nunca aparece en `apps/web`, `packages/supabase-client` o cualquier código ejecutado por el navegador.
-- CORS, rate limits, webhooks e idempotencia se configuran en la frontera server-side.
-- Los permisos de Storage y Realtime se revisan como parte del esquema, no como una configuración manual olvidada.
+- La autenticación, autorización, CORS, rate limits, webhooks e idempotencia se implementan en la frontera server-side de los servicios NestJS.
+- Los clientes web y mobile consumen APIs y contratos tipados; no contienen credenciales privilegiadas ni acceden directamente a persistencia.
+- Los adaptadores de persistencia y proveedores externos se mantienen fuera de la UI y se prueban con casos permitidos y rechazados.
 
 ## Web y mobile
 
@@ -40,5 +39,5 @@
 ## Dependencias y revisión
 
 - Evalúa licencia, mantenimiento, vulnerabilidades, bundle y soporte web/native antes de añadir dependencias.
-- No desactives validaciones, RLS, CORS o checks de tipos para “hacer que funcione”. Corrige la causa.
+- No desactives validaciones, autorización, CORS o checks de tipos para “hacer que funcione”. Corrige la causa.
 - Cambios de autenticación, autorización, datos personales, criptografía o plugins nativos requieren revisión de seguridad y un ADR cuando cambien la arquitectura.

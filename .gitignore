@@ -11,10 +11,6 @@ coverage/
 .env.*
 !.env.example
 
-# Supabase local state
-supabase/.branches/
-supabase/.temp/
-
 # Editor and operating-system files
 .vscode/
 .idea/
@@ -24,3 +20,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Tool caches and local runtime state
+.cache/
+.turbo/
+.nestjs/

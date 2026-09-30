@@ -2,7 +2,7 @@
 
 ## Misión
 
-CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. La aplicación actual es `apps/web`, construida con React, Vite, Ionic React y Tailwind CSS. Supabase es la plataforma de datos, autenticación, storage, realtime y funciones server-side.
+CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. La aplicación implementada actualmente es `src/web-ui/apps/public`, construida con React, Vite, Ionic React y Tailwind CSS. Los servicios de backend se incorporarán como aplicaciones NestJS con TypeScript bajo `src/services/apps/`.
 
 El objetivo de plataforma es compartir la mayor cantidad posible de código entre:
 
@@ -10,39 +10,42 @@ El objetivo de plataforma es compartir la mayor cantidad posible de código entr
 - Android mediante Capacitor;
 - iOS mediante Capacitor.
 
-La compatibilidad nativa es un requisito de diseño desde ahora, aunque las carpetas nativas de Capacitor todavía no estén creadas.
+La compatibilidad nativa es un requisito de diseño desde ahora, aunque las carpetas nativas todavía no estén creadas.
+
+CasePilot no usa Supabase. La persistencia, identidad, mensajería, observabilidad y demás integraciones de backend deben encapsularse en servicios NestJS y librerías backend, sin acoplar la UI a un proveedor concreto.
 
 ## Fuentes de verdad
 
 - Estructura y límites del repositorio: [`README.md`](../../README.md).
 - Organización documental: [`docs/README.md`](../../docs/README.md).
 - Producto y requisitos: [`docs/01-product/`](../../docs/01-product/).
-- Arquitectura: [`docs/02-architecture/`](../../docs/02-architecture/).
-- Desarrollo local: [`docs/03-development/`](../../docs/03-development/).
+- Arquitectura: [`docs/architecture/`](../../docs/architecture/).
+- Desarrollo local: [`docs/development/`](../../docs/development/).
 - Operación y despliegue: [`docs/04-operations/`](../../docs/04-operations/).
 - Contratos y configuración: [`docs/05-reference/`](../../docs/05-reference/).
-- Decisiones de arquitectura: [`docs/06-decisions/`](../../docs/06-decisions/).
+- Decisiones de arquitectura: [`docs/adr/`](../../docs/adr/).
 
 Si dos documentos se contradicen, no elijas silenciosamente. Identifica la fuente canónica, corrige la documentación y registra un ADR si el conflicto representa una decisión técnica.
 
 ## Estado actual y evolución
 
-Actualmente `apps/web` y `supabase/config.toml` son las piezas implementadas. `packages/`, `tests/` y `tooling/` son extensiones preparadas. No inventes módulos solo para completar la estructura; crea un paquete o una carpeta cuando exista una responsabilidad clara.
+Actualmente solo está implementada `src/web-ui/apps/public`. `src/web-ui/apps/admin`, `src/web-ui/apps/backoffice`, `src/services/apps/`, `src/mobile-ui/apps/`, las librerías compartidas, los contratos y la infraestructura se crearán cuando exista una responsabilidad y un consumidor real.
 
-Los paquetes que podrán aparecer a medida que crezca el producto son:
+Las áreas del monorepo son:
 
-- `packages/ui-components`: componentes visuales y tokens compartidos;
-- `packages/domain-models`: entidades, value objects, contratos y reglas puras del dominio;
-- `packages/supabase-client`: cliente browser-safe, tipos generados y mapeadores;
-- `packages/supabase-admin`: acceso privilegiado exclusivamente server-side;
-- `packages/platform`: adaptadores web/Capacitor para capacidades de dispositivo.
+- `src/web-ui/`: aplicaciones browser y librerías frontend compartidas;
+- `src/services/`: aplicaciones NestJS desplegables y librerías backend;
+- `src/mobile-ui/`: futuras aplicaciones mobile y sus librerías específicas;
+- `contracts/`: contratos independientes de tecnología entre clientes y servicios;
+- `tests/`: pruebas que cruzan aplicaciones, servicios, contratos o arquitectura;
+- `infra/`, `deploy/` y `tools/`: operación, despliegue y automatización del repositorio.
 
-Cada paquete nuevo necesita una responsabilidad única, API pública documentada, pruebas y un `README.md` local.
+No se deben crear módulos vacíos solo para completar un árbol de carpetas.
 
 ## Principios de producto
 
 - Mobile-first es la configuración por defecto, no una tarea posterior.
 - La accesibilidad y la claridad de estados son parte de la funcionalidad.
-- La seguridad se aplica en el backend y en el cliente; ocultar un botón no es autorización.
-- La reproducibilidad local es obligatoria para migraciones, seeds y pruebas.
+- La seguridad se aplica en los servicios NestJS y en el cliente; ocultar un botón no es autorización.
+- La reproducibilidad local es obligatoria para pruebas, seeds o fixtures cuando se incorporen.
 - Las abstracciones compartidas se crean por necesidad real y con límites explícitos.

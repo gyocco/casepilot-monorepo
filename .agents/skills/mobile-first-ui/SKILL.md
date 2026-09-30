@@ -7,7 +7,7 @@ Usa esta skill para cualquier pantalla, componente, formulario, modal, navegaci�
 ## Procedimiento
 
 1. Identifica el flujo de usuario, el viewport móvil mínimo, el contenido largo y los estados de red.
-2. Decide si el elemento es específico de `apps/web` o reutilizable en `packages/ui-components`.
+2. Decide si el elemento es específico de `src/web-ui/apps/<app>` o reutilizable en una librería de `src/web-ui/libs/`.
 3. Construye la estructura con Ionic: `IonPage` como raíz de una pantalla, `IonContent` como scroll principal y componentes Ionic para interacción y navegación.
 4. Estiliza mobile-first: utilities Tailwind sin prefijo como base y variantes `sm`/`md`/`lg` solo como mejoras. Usa tokens de `theme` y evita valores arbitrarios repetidos.
 5. Comprueba safe areas, teclado, orientación, touch targets, focus visible, reduced motion, contraste, texto largo y errores de validación.

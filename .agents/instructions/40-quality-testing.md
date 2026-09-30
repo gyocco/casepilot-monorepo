@@ -7,16 +7,16 @@ Todo cambio de código debe pasar, como mínimo, las verificaciones relevantes:
 - type-check y build de la app o paquete afectado;
 - lint sin nuevos errores;
 - pruebas unitarias para lógica pura y estados de componentes;
-- pruebas de integración para contratos con Supabase o paquetes;
+- pruebas de integración para servicios NestJS, adaptadores y contratos;
 - pruebas e2e para flujos críticos de usuario;
 - revisión manual de viewport móvil, teclado, focus, estados de error y navegación.
 
-La app actual expone `npm run lint` y `npm run build` en `apps/web`. Si se añaden scripts de test, deben documentarse en el README local y en `docs/03-development/`.
+La app actual expone `npm run lint` y `npm run build` en `src/web-ui/apps/public`. Si se añaden scripts de test, deben documentarse en el README local y en `docs/development/`.
 
 ## Estrategia de pruebas
 
 - `unit`: funciones de dominio, validadores, mapeadores, reducers y componentes sin dependencias externas.
-- `integration`: cliente Supabase con stack local, RLS, Edge Functions, adapters y colaboración entre paquetes.
+- `integration`: colaboración entre aplicaciones, servicios NestJS, adaptadores y contratos.
 - `e2e`: autenticación, navegación, formularios, permisos y recorridos de negocio desde la perspectiva del usuario.
 - `fixtures`: datos mínimos y builders deterministas; nunca credenciales reales ni volcados de producción.
 
@@ -30,7 +30,7 @@ Las pruebas específicas de una app o paquete pueden vivir junto al código. Las
 - No uses sleeps arbitrarios ni dependas del orden global de pruebas.
 - Aísla tiempo, red, random, almacenamiento y Capacitor mediante adaptadores/mocks controlados.
 - Si un test es flaky, trátalo como defecto: diagnostícalo y corrígelo antes de ocultarlo o reintentarlo indefinidamente.
-- Un cambio de RLS debe incluir casos positivos y negativos.
+- Un cambio de autorización debe incluir casos positivos y negativos.
 
 ## Accesibilidad
 

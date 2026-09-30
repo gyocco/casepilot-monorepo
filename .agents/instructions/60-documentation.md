@@ -8,13 +8,13 @@ Consulta el [índice de documentación](../../docs/README.md) para elegir ubicac
 
 ## Ubicación
 
-- Código específico de `apps/web` o un paquete: README local y comentarios solo cuando aporten contexto no obvio.
+- Código específico de una aplicación o librería: README local y comentarios solo cuando aporten contexto no obvio.
 - Producto y requisitos: `docs/01-product/`.
-- Arquitectura, límites y diagramas: `docs/02-architecture/`.
-- Setup, comandos y calidad: `docs/03-development/`.
+- Arquitectura, límites y diagramas: `docs/architecture/`.
+- Setup, comandos y calidad: `docs/development/`.
 - Deploy, migraciones operativas, observabilidad e incidentes: `docs/04-operations/`.
 - APIs, variables, contratos y comandos de consulta: `docs/05-reference/`.
-- Decisiones con alternativas y consecuencias: `docs/06-decisions/`.
+- Decisiones con alternativas y consecuencias: `docs/adr/`.
 - Roadmap, hitos y alcance: `docs/07-project-management/`.
 
 No dupliques un procedimiento en varios lugares. Elige una fuente canónica y enlázala desde los demás.
@@ -34,7 +34,7 @@ Cada paquete nuevo debe documentar:
 
 Crea un ADR cuando cambie una frontera de paquete, estrategia de datos, autenticación, plataforma web/native, dependencia estructural, política de seguridad o convención que otros agentes deban seguir.
 
-Usa `docs/06-decisions/NNNN-titulo-corto.md`, incluye contexto, decisión, alternativas y consecuencias, y enlázalo desde el documento de arquitectura afectado.
+Usa `docs/adr/NNNN-titulo-corto.md`, incluye contexto, decisión, alternativas y consecuencias, y enlázalo desde el documento de arquitectura afectado.
 
 ## Referencias externas
 

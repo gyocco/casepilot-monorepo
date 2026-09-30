@@ -12,7 +12,6 @@
 │   ├── 00-project-context.md
 │   ├── 10-architecture.md
 │   ├── 20-frontend-platform.md
-│   ├── 30-supabase.md
 │   ├── 40-quality-testing.md
 │   ├── 50-security.md
 │   ├── 60-documentation.md
@@ -21,9 +20,7 @@
     ├── README.md
     ├── feature-delivery/
     │   └── SKILL.md
-    ├── mobile-first-ui/
-    │   └── SKILL.md
-    └── supabase-change/
+    └── mobile-first-ui/
         └── SKILL.md
 ```
 
@@ -38,7 +35,7 @@
 
 - [Mapa del monorepo](../README.md)
 - [Índice de documentación](../docs/README.md)
-- [Arquitectura](../docs/02-architecture/README.md)
-- [Desarrollo](../docs/03-development/README.md)
+- [Arquitectura](../docs/architecture/README.md)
+- [Desarrollo](../docs/development/README.md)
 - [Operaciones](../docs/04-operations/README.md)
-- [Decisiones técnicas](../docs/06-decisions/README.md)
+- [Decisiones técnicas](../docs/adr/README.md)
