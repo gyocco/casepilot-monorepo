@@ -1,8 +1,5 @@
 packages:
-  - "src/web-ui/apps/*"
-  - "src/web-ui/libs/*/*"
-  - "src/services/apps/*"
-  - "src/services/apps/*/*"
-  - "src/services/libs/*/*"
-  - "src/mobile-ui/apps/*"
-  - "src/mobile-ui/libs/*/*"
+  - "src/apps/*/*"
+  - "src/libs/backend/*"
+  - "src/libs/frontend/*"
+  - "src/libs/mobile/*"

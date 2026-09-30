@@ -7,14 +7,14 @@ Usa esta skill cuando una funcionalidad atraviese dos o más capas: pantalla, fe
 ## Procedimiento
 
 1. Define el objetivo, usuario, criterios de aceptación y estados `loading`, `success`, `empty`, `error` y `offline` si aplican.
-2. Lee `docs/01-product/`, `docs/architecture/` y `docs/development/` relacionados. Busca ADRs existentes.
+2. Consulta el [índice de documentación](../../../docs/README.md) y [Estructura y límites del monorepo](../../../docs/architecture/monorepo-structure.md). Lee los documentos de producto y desarrollo y los ADRs relacionados que existan; no asumas documentos ni carpetas todavía ausentes.
 3. Mapea la funcionalidad por capas:
-   - UI específica en `src/web-ui/apps/<app>` o `src/mobile-ui/apps/<app>`;
-   - UI reutilizable en las librerías frontend del workspace;
-   - dominio puro en `src/services/libs/<dominio>/domain`;
-   - aplicación e infraestructura en `src/services/libs/<dominio>/application` e `infrastructure`;
+   - UI específica en `src/apps/casepilot/casepilot-web/` o `src/apps/casepilot/casepilot-mobile/`;
+   - UI técnica reutilizable en `src/libs/frontend/`;
+   - dominio, aplicación e infraestructura específicos de una feature en la app o módulo que los posee, por ejemplo dentro de `src/apps/casepilot/casepilot-api/`;
+   - mecanismos técnicos backend generales en `src/libs/backend/<capability>/`;
    - contratos entre procesos en `contracts/`;
-   - capacidades de plataforma en la librería de plataforma del workspace.
+   - adaptadores de dispositivo y plataforma generales en `src/libs/mobile/`, o junto a la app si solo tienen un consumidor.
 4. Define primero contratos y modelos tipados. Mantén la lógica de dominio fuera de React, Ionic, NestJS y proveedores concretos.
 5. Implementa la experiencia móvil primero con `IonPage` y componentes Ionic apropiados. Añade mejoras responsive para pantallas grandes.
 6. Implementa carga, errores recuperables, validación de entrada, autorización y feedback accesible.
@@ -24,7 +24,7 @@ Usa esta skill cuando una funcionalidad atraviese dos o más capas: pantalla, fe
 
 ## Criterios de salida
 
-- La funcionalidad no importa desde `apps` hacia `libs`.
+- Las librerías no importan desde `src/apps/`; las apps consumen librerías compatibles con su runtime sin crear ciclos.
 - No hay acceso de admin ni secretos en el bundle cliente.
 - El comportamiento está cubierto para permisos aceptados y rechazados.
 - La pantalla funciona en móvil, web amplia, teclado y navegación atrás.

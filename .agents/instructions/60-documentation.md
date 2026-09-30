@@ -9,13 +9,15 @@ Consulta el [índice de documentación](../../docs/README.md) para elegir ubicac
 ## Ubicación
 
 - Código específico de una aplicación o librería: README local y comentarios solo cuando aporten contexto no obvio.
-- Producto y requisitos: `docs/01-product/`.
-- Arquitectura, límites y diagramas: `docs/architecture/`.
+- Producto y requisitos: `docs/product/`.
+- Arquitectura, límites y diagramas: `docs/architecture/`; la guía canónica de estructura es [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md).
 - Setup, comandos y calidad: `docs/development/`.
-- Deploy, migraciones operativas, observabilidad e incidentes: `docs/04-operations/`.
-- APIs, variables, contratos y comandos de consulta: `docs/05-reference/`.
+- Deploy, migraciones operativas, observabilidad e incidentes: `docs/operations/`.
+- APIs, variables, contratos y comandos de consulta: `docs/reference/`.
 - Decisiones con alternativas y consecuencias: `docs/adr/`.
-- Roadmap, hitos y alcance: `docs/07-project-management/`.
+- Roadmap, hitos y alcance: `docs/project-management/`.
+
+Las áreas sin contenido todavía son ubicaciones previstas. No crees carpetas vacías ni enlaces a documentos inexistentes; añade documentos e incorpóralos al índice cuando haya una responsabilidad real.
 
 No dupliques un procedimiento en varios lugares. Elige una fuente canónica y enlázala desde los demás.
 

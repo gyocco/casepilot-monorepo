@@ -1,7 +1,9 @@
-# Arquitectura y estructura del monorepo
+# Estructura y límites del monorepo
 
 - Estado: guía estructural vigente
 - Alcance: organización del repositorio, límites entre aplicaciones y librerías, documentación y CI/CD
+
+El estado actual es un scaffold: las carpetas de aplicaciones y librerías solo contienen `.gitkeep`. Las tecnologías y responsabilidades descritas son las previstas; todavía no hay paquetes de producto implementados.
 
 ## Propósito
 
@@ -201,6 +203,8 @@ Las pruebas unitarias estrechamente ligadas a una app o librería pueden vivir j
 
 Infraestructura como código y artefactos de runtime: por ejemplo Terraform, Kubernetes, Helm o Docker. Describe y provisiona recursos técnicos. No contiene features de producto ni secretos versionados.
 
+El entorno de dependencias locales de CasePilot vive en `infra/docker/`. La decisión sobre PostgreSQL, puertos y persistencia está en [ADR 0001](../adr/0001-local-postgresql.md); el procedimiento operativo se mantiene en su [README local](../../infra/docker/README.md).
+
 ### `deploy/`
 
 Manifiestos, overlays y configuración de release por entorno o destino de despliegue. Separa la descripción de cómo se publica una aplicación de la definición de la infraestructura que la soporta.
@@ -293,6 +297,7 @@ Reglas de frontera:
 ## Fuentes relacionadas
 
 - [README del monorepo](../../README.md)
+- [Índice de documentación](../README.md)
 - [Instrucciones de arquitectura](../../.agents/instructions/10-architecture.md)
 - [Instrucciones de documentación](../../.agents/instructions/60-documentation.md)
 - [README de infraestructura](../../infra/README.md)

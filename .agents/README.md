@@ -20,6 +20,8 @@
     ├── README.md
     ├── feature-delivery/
     │   └── SKILL.md
+    ├── monorepo-code-placement/
+    │   └── SKILL.md
     └── mobile-first-ui/
         └── SKILL.md
 ```
@@ -35,7 +37,7 @@
 
 - [Mapa del monorepo](../README.md)
 - [Índice de documentación](../docs/README.md)
-- [Arquitectura](../docs/architecture/README.md)
-- [Desarrollo](../docs/development/README.md)
-- [Operaciones](../docs/04-operations/README.md)
-- [Decisiones técnicas](../docs/adr/README.md)
+- [Estructura y límites del monorepo](../docs/architecture/monorepo-structure.md)
+- [Skills disponibles](skills/README.md)
+
+Consulta el índice de documentación para encontrar los documentos de desarrollo, operaciones y ADRs disponibles. Las áreas sin contenido se incorporarán cuando exista una responsabilidad real.

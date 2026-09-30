@@ -9,7 +9,7 @@ metadata:
 
 ## Propósito
 
-Usa esta skill antes de crear o mover archivos para elegir la carpeta correcta del monorepo. La fuente de verdad detallada es [`docs/architecture/README.md`](../../../docs/architecture/README.md); léela cuando la decisión no sea obvia o cuando el cambio afecte más de una capa.
+Usa esta skill antes de crear o mover archivos para elegir la carpeta correcta del monorepo. La fuente de verdad detallada es [Estructura y límites del monorepo](../../../docs/architecture/monorepo-structure.md); léela cuando la decisión no sea obvia o cuando el cambio afecte más de una capa.
 
 Esta skill no autoriza despliegues, operaciones remotas ni cambios destructivos. Solo ayuda a ubicar el trabajo y a mantener las fronteras de arquitectura.
 
@@ -51,7 +51,7 @@ Esta skill no autoriza despliegues, operaciones remotas ni cambios destructivos.
 | UI reusable entre apps web | `src/libs/frontend/<library>/` | Componentes, tokens y patrones accesibles; sin rutas ni queries concretas. |
 | Adaptador o capability mobile reusable | `src/libs/mobile/` o una subcarpeta con dueño claro | Aísla APIs web/native, permisos, disponibilidad, errores y fallback. |
 | Test unitario de una app o librería | Junto al código propietario | Mantiene el test cerca de la unidad que verifica. |
-| Test que cruza apps, servicios o contratos | `tests/unit/`, `tests/integration/`, `tests/e2e/`, `tests/performance/` o `tests/architecture/` | Usa la subcarpeta según el tipo de prueba. |
+| Test que cruza apps, servicios o contratos | `tests/integration/`, `tests/e2e/`, `tests/performance/` o `tests/architecture/` | Usa la subcarpeta según el tipo de prueba. |
 | Contrato HTTP, evento o mensaje | `contracts/` | Versiona el contrato externo; no dupliques modelos internos. |
 | Infraestructura como código/runtime | `infra/` | Terraform, Kubernetes, Helm, Docker y recursos técnicos. |
 | Manifiesto u overlay de release | `deploy/` | Configuración por entorno o destino de despliegue. |
@@ -84,7 +84,7 @@ No hace falta crear una carpeta raíz `ci/` si `.github/workflows/` y `tools/ci/
 ## Verificación antes de cerrar
 
 - La ruta elegida coincide con el consumidor y el runtime reales.
-- El nuevo módulo no importa desde una app hacia una librería ni crea un ciclo.
+- Ninguna librería importa desde una app y el nuevo módulo no crea un ciclo. Las apps pueden consumir librerías compatibles con su runtime.
 - La librería tiene responsabilidad, API, consumidores, pruebas y README local cuando corresponda.
 - Los contratos, tests, configuración de deploy y workflows quedaron en sus carpetas transversales.
 - Se actualizaron los documentos canónicos afectados.

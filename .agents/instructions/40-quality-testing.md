@@ -11,7 +11,9 @@ Todo cambio de código debe pasar, como mínimo, las verificaciones relevantes:
 - pruebas e2e para flujos críticos de usuario;
 - revisión manual de viewport móvil, teclado, focus, estados de error y navegación.
 
-La app actual expone `npm run lint` y `npm run build` en `src/web-ui/apps/public`. Si se añaden scripts de test, deben documentarse en el README local y en `docs/development/`.
+Actualmente las apps y librerías son placeholders y no exponen scripts de producto. Los comandos raíz `pnpm lint:web` y `pnpm build:web` apuntan a `src/apps/casepilot/casepilot-web/` y podrán ejecutarse cuando esa app tenga su propio `package.json` con `lint` y `build`. Cada paquete implementado debe definir las verificaciones pertinentes y documentarlas en su README local; los procedimientos transversales van en `docs/development/` cuando exista contenido real.
+
+Para cambios solo de documentación o configuración del scaffold, valida enlaces, rutas, manifests, workspace y diff. Deja constancia de que type-check, lint, build, tests de producto y revisión de viewport/accesibilidad no aplican o no están disponibles.
 
 ## Estrategia de pruebas
 

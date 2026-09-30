@@ -24,16 +24,18 @@ Las palabras `MUST`/`DEBE`, `MUST NOT`/`NO DEBE`, `SHOULD`/`DEBERÍA` y `MAY`/`P
 
 CasePilot comparte un único código de producto entre:
 
-- las aplicaciones browser en `src/web-ui/apps/`;
-- los servicios desplegables en `src/services/apps/`, implementados con NestJS y TypeScript;
-- las futuras aplicaciones móviles en `src/mobile-ui/apps/`, empaquetadas con Capacitor/Ionic.
+- la aplicación browser en `src/apps/casepilot/casepilot-web/`;
+- la API desplegable en `src/apps/casepilot/casepilot-api/`, implementada con NestJS y TypeScript;
+- la aplicación móvil en `src/apps/casepilot/casepilot-mobile/`, empaquetada con Capacitor/Ionic.
+
+Estas carpetas contienen actualmente placeholders. Las capacidades técnicas reutilizables se agrupan por runtime en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. La guía detallada es [Estructura y límites del monorepo](docs/architecture/monorepo-structure.md).
 
 Por eso, toda decisión de UI y plataforma DEBE funcionar primero en una pantalla móvil estrecha y NO DEBE introducir una dependencia innecesaria del navegador o del sistema operativo. Las diferencias nativas deben aislarse detrás de adaptadores y mantenerse fuera de la lógica de dominio.
 
 ## Restricciones no negociables
 
 - No exponer secretos, claves privadas ni tokens de administrador en código cliente, bundles Vite, logs o documentación.
-- No acceder a persistencia directamente desde componentes React. El acceso pasa por `src/web-ui/libs`, APIs NestJS, `src/services/libs` y contratos tipados.
+- No acceder a persistencia directamente desde componentes React. La UI consume APIs NestJS y contratos tipados; los adaptadores técnicos compartidos de persistencia viven en `src/libs/backend/` y el acceso específico de una feature permanece en el módulo backend que la posee.
 - No introducir Supabase como solución de datos, autenticación, storage, realtime o backend gestionado.
 - No poner código específico de una app dentro de `libs/`; las librerías deben ser reutilizables y no importar desde `apps/`.
 - No crear layouts desktop-first: las clases sin prefijo representan el mínimo móvil y las variantes responsive mejoran la experiencia en pantallas mayores.

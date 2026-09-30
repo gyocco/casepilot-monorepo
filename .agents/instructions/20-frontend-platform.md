@@ -15,7 +15,7 @@ Referencias: [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks) 
 
 ## Estructura de la app
 
-En `src/web-ui/apps/<app>/src/`, separa navegación, features, componentes locales, hooks de composición, integración y tema. Una pantalla debe orquestar; un componente de UI no debe conocer credenciales, queries o reglas de autorización.
+En `src/apps/casepilot/casepilot-web/src/` y `src/apps/casepilot/casepilot-mobile/src/`, separa navegación, features, componentes locales, hooks de composición, integración y tema. Una pantalla debe orquestar; un componente de UI no debe conocer credenciales, queries o reglas de autorización. La UI general reutilizable pertenece a `src/libs/frontend/`; los adaptadores de dispositivo y plataforma, a `src/libs/mobile/`.
 
 La cadena recomendada es:
 
@@ -54,7 +54,7 @@ Tailwind documenta el enfoque [mobile-first responsive](https://tailwindcss.com/
 - Usa Tailwind para layout, spacing, tipografía y estados repetibles. Usa CSS global o CSS del componente para tokens, estilos de Ionic y reglas que realmente no expresen bien como utilities.
 - Define colores, radios, tipografías, sombras y breakpoints como tokens; evita hexadecimales y valores arbitrarios repetidos en JSX.
 - Evita `!important`, selectores globales agresivos y estilos inline salvo para valores dinámicos que no puedan representarse como clase.
-- No mezcles dos sistemas de spacing o breakpoints sin documentarlo. La fuente de verdad del tema debe permanecer en `src/web-ui/apps/<app>/src/theme/` o en una librería frontend de UI cuando sea compartida.
+- No mezcles dos sistemas de spacing o breakpoints sin documentarlo. El tema específico permanece en `src/apps/casepilot/<app>/src/theme/`; los tokens compartidos, en `src/libs/frontend/pilot-ui-kit/` cuando corresponda.
 - Revisa que las clases dinámicas sean detectables por el compilador de Tailwind; no construyas nombres completos de clase a partir de strings arbitrarios.
 
 ## Vite y configuración
@@ -71,11 +71,11 @@ Referencia oficial: [Vite Env Variables and Modes](https://vite.dev/guide/env-an
 ## Compatibilidad futura con Capacitor
 
 - Mantén la lógica de producto y dominio independiente de browser y native.
-- Encapsula cámara, archivos, notificaciones, biometría, almacenamiento, compartir y sensores detrás de interfaces/adaptadores en una librería de plataforma del workspace o una frontera equivalente.
+- Encapsula cámara, archivos, notificaciones, biometría, almacenamiento, compartir y sensores detrás de interfaces/adaptadores en `src/libs/mobile/` cuando sean capacidades generales reutilizables, o en una frontera local de la app si solo tienen un consumidor.
 - Cada capability debe tener implementación web/fallback, implementación Capacitor cuando corresponda, detección de disponibilidad, manejo de permisos, manejo de error y prueba.
 - No llames APIs nativas directamente desde componentes de negocio. El componente pide una capacidad; el adaptador decide cómo resolverla.
 - Evita asumir que existen `window`, hover, mouse, filesystem local, tamaño de pantalla fijo o conectividad continua.
 - No persistas información sensible en almacenamiento web o nativo sin una decisión de seguridad documentada.
-- Cuando se añadan plataformas `ios/` y `android/`, registra cambios de permisos, plugins, configuración nativa y pasos de build en `docs/04-operations/`.
+- Cuando se añadan plataformas `ios/` y `android/` a la app mobile, registra cambios de permisos, plugins, configuración nativa y pasos de build en su README local y en `docs/operations/` si son transversales.
 
 Capacitor está diseñado para llevar una aplicación web a iOS, Android y web conservando una base de código compartida; consulta su [documentación oficial](https://capacitorjs.com/docs) y el [workflow de desarrollo](https://capacitorjs.com/docs/basics/workflow).

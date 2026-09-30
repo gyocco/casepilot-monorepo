@@ -2,7 +2,7 @@
 
 ## Misión
 
-CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. La aplicación implementada actualmente es `src/web-ui/apps/public`, construida con React, Vite, Ionic React y Tailwind CSS. Los servicios de backend se incorporarán como aplicaciones NestJS con TypeScript bajo `src/services/apps/`.
+CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. Las aplicaciones previstas se agrupan en `src/apps/casepilot/`: `casepilot-web` usará React, Vite, Ionic React y Tailwind CSS; `casepilot-mobile` usará Ionic/Capacitor y `casepilot-api` usará NestJS con TypeScript. Actualmente solo existen placeholders, sin código ni manifests de paquetes de producto.
 
 El objetivo de plataforma es compartir la mayor cantidad posible de código entre:
 
@@ -16,26 +16,24 @@ CasePilot no usa Supabase. La persistencia, identidad, mensajería, observabilid
 
 ## Fuentes de verdad
 
-- Estructura y límites del repositorio: [`README.md`](../../README.md).
+- Estructura y límites del repositorio: [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md).
+- Estado actual, mapa breve y comandos raíz: [`README.md`](../../README.md).
 - Organización documental: [`docs/README.md`](../../docs/README.md).
-- Producto y requisitos: [`docs/01-product/`](../../docs/01-product/).
-- Arquitectura: [`docs/architecture/`](../../docs/architecture/).
-- Desarrollo local: [`docs/development/`](../../docs/development/).
-- Operación y despliegue: [`docs/04-operations/`](../../docs/04-operations/).
-- Contratos y configuración: [`docs/05-reference/`](../../docs/05-reference/).
-- Decisiones de arquitectura: [`docs/adr/`](../../docs/adr/).
+
+Las demás áreas documentales son `docs/product/`, `docs/development/`, `docs/operations/`, `docs/reference/`, `docs/project-management/` y `docs/adr/`. Consulta el índice para saber cuáles existen; no asumas documentos implementados ni crees carpetas vacías.
 
 Si dos documentos se contradicen, no elijas silenciosamente. Identifica la fuente canónica, corrige la documentación y registra un ADR si el conflicto representa una decisión técnica.
 
 ## Estado actual y evolución
 
-Actualmente solo está implementada `src/web-ui/apps/public`. `src/web-ui/apps/admin`, `src/web-ui/apps/backoffice`, `src/services/apps/`, `src/mobile-ui/apps/`, las librerías compartidas, los contratos y la infraestructura se crearán cuando exista una responsabilidad y un consumidor real.
+Las carpetas `src/apps/casepilot/casepilot-web/`, `src/apps/casepilot/casepilot-mobile/` y `src/apps/casepilot/casepilot-api/`, así como las librerías previstas, contienen únicamente `.gitkeep`. Cada aplicación o librería incorporará su propio `package.json`, código, pruebas y README al implementarse.
 
 Las áreas del monorepo son:
 
-- `src/web-ui/`: aplicaciones browser y librerías frontend compartidas;
-- `src/services/`: aplicaciones NestJS desplegables y librerías backend;
-- `src/mobile-ui/`: futuras aplicaciones mobile y sus librerías específicas;
+- `src/apps/`: ejecutables y deployables agrupados por producto; aquí permanecen las features y reglas de negocio de cada app o servicio;
+- `src/libs/backend/`: capacidades técnicas server-side reutilizables, sin negocio específico de una app;
+- `src/libs/frontend/`: capacidades de interfaz reutilizables e independientes de una pantalla;
+- `src/libs/mobile/`: adaptadores y capacidades mobile reutilizables;
 - `contracts/`: contratos independientes de tecnología entre clientes y servicios;
 - `tests/`: pruebas que cruzan aplicaciones, servicios, contratos o arquitectura;
 - `infra/`, `deploy/` y `tools/`: operación, despliegue y automatización del repositorio.

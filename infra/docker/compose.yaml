@@ -1,0 +1,24 @@
+name: casepilot-local
+
+services:
+  postgres:
+    image: postgres:18-bookworm
+    restart: unless-stopped
+    shm_size: 128mb
+    environment:
+      POSTGRES_DB: ${CASEPILOT_POSTGRES_DB:-casepilot}
+      POSTGRES_USER: ${CASEPILOT_POSTGRES_USER:-casepilot}
+      POSTGRES_PASSWORD: ${CASEPILOT_POSTGRES_PASSWORD:?Run pnpm infra:env to create infra/docker/.env}
+    ports:
+      - "127.0.0.1:${CASEPILOT_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  postgres-data:

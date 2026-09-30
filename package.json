@@ -3,8 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "dev:web-public": "pnpm --dir src/web-ui/apps/public dev",
-    "lint:web-public": "pnpm --dir src/web-ui/apps/public lint",
-    "build:web-public": "pnpm --dir src/web-ui/apps/public build"
+    "dev:web": "pnpm --dir src/apps/casepilot/casepilot-web dev",
+    "lint:web": "pnpm --dir src/apps/casepilot/casepilot-web lint",
+    "build:web": "pnpm --dir src/apps/casepilot/casepilot-web build",
+    "infra:env": "node tools/scripts/setup-local-env.mjs",
+    "infra:up": "pnpm infra:env && docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml up -d --wait --wait-timeout 120",
+    "infra:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml down",
+    "infra:status": "docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml ps",
+    "infra:logs": "docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml logs --follow --tail 100",
+    "infra:check": "pnpm infra:env && docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml config --quiet"
   }
 }

@@ -1,87 +1,95 @@
 # CasePilot Monorepo
 
-Monorepo de CasePilot. La estructura separa los ejecutables y deployables de las librerías reutilizables, los contratos entre tecnologías, las pruebas y la operación. La carpeta `src/` agrupa los workspaces de código (`web-ui`, `services` y `mobile-ui`).
+Monorepo de CasePilot. `src/apps/` agrupa las aplicaciones ejecutables y desplegables por producto; `src/libs/` agrupa las capacidades técnicas reutilizables por runtime: backend, frontend y mobile. La fuente detallada de estructura y límites es [Estructura y límites del monorepo](docs/architecture/monorepo-structure.md).
 
-La implementación actual es la aplicación browser pública en [`src/web-ui/apps/public`](src/web-ui/apps/public/README.md), construida con React, Vite, Ionic React y Tailwind CSS. Los servicios futuros serán aplicaciones NestJS con TypeScript bajo `src/services/apps/`.
+## Estado actual
 
-## Estructura base
+El repositorio contiene un scaffold. Las carpetas de las aplicaciones y librerías solo tienen `.gitkeep`; todavía no contienen código ni `package.json` propios. La web prevista usará React, Vite, Ionic React y Tailwind CSS; la API usará NestJS con TypeScript y mobile se empaquetará con Ionic/Capacitor.
+
+## Estructura
 
 ```text
 .
-├── src/                            # workspaces de código
-│   ├── web-ui/
-│   │   ├── apps/                   # aplicaciones browser desplegables
-│   │   │   ├── public/             # implementada actualmente
-│   │   │   ├── admin/              # futura aplicación administrativa
-│   │   │   └── backoffice/         # futura aplicación interna
-│   │   └── libs/                   # librerías frontend de web
-│   │       ├── identity/
-│   │       ├── platform/
-│   │       └── shared/
-│   ├── services/
-│   │   ├── apps/                   # deployables NestJS/TypeScript
-│   │   │   ├── public-api/
-│   │   │   ├── admin-api/
-│   │   │   ├── workers/
-│   │   │   └── schedulers/
-│   │   └── libs/                   # dominio, aplicación e infraestructura backend
-│   │       ├── orders/
-│   │       ├── customers/
-│   │       ├── billing/
-│   │       ├── identity/
-│   │       ├── platform/
-│   │       └── shared/
-│   └── mobile-ui/
-│       ├── apps/                   # futuras aplicaciones Capacitor/Ionic
-│       │   ├── customer/
-│       │   └── internal/
-│       └── libs/                   # librerías específicas de mobile
-├── contracts/                      # OpenAPI, protobuf y eventos
-├── tests/                          # e2e, integración, performance y arquitectura
-├── infra/                          # Terraform, Kubernetes, Helm y Docker
-├── deploy/                         # configuración por entorno
-├── tools/                          # scripts, generadores y codegen
+├── .agents/                         # instrucciones y skills para agentes
+├── src/
+│   ├── apps/
+│   │   └── casepilot/
+│   │       ├── casepilot-api/       # backend desplegable
+│   │       ├── casepilot-mobile/    # aplicación Ionic/Capacitor
+│   │       └── casepilot-web/       # aplicación React/Vite/Ionic
+│   └── libs/
+│       ├── backend/                 # capacidades server-side compartidas
+│       │   ├── auth/
+│       │   ├── database/
+│       │   ├── email/
+│       │   ├── exception-handler/
+│       │   ├── logging/
+│       │   ├── pdf/
+│       │   └── security/
+│       ├── frontend/
+│       │   └── pilot-ui-kit/        # UI reusable
+│       └── mobile/                  # adaptadores y capacidades mobile
 ├── docs/
+│   ├── README.md                   # índice de documentación
 │   ├── architecture/
-│   ├── adr/
-│   ├── development/
-│   └── ...                         # producto, operaciones y referencias existentes
-├── .github/workflows/
+│   │   └── monorepo-structure.md    # estructura y límites
+│   └── adr/
+│       └── 0001-local-postgresql.md # decisión del entorno PostgreSQL local
+├── infra/                          # infraestructura y artefactos de runtime
+├── tests/                          # pruebas que cruzan límites del monorepo
+├── tools/                          # scripts, generadores y codegen
 ├── package.json
 ├── pnpm-workspace.yaml
+├── pnpm-lock.yaml
 ├── .editorconfig
 └── README.md
 ```
 
-Las carpetas que todavía no tienen un consumidor real no se crean solo para completar el árbol. Por eso pueden no existir aún `admin`, `backoffice`, `src/mobile-ui/apps`, los servicios NestJS, las librerías y los módulos de infraestructura.
+`contracts/`, `deploy/` y `.github/workflows/` se incorporarán cuando exista un contrato, despliegue o pipeline real. No se crean más módulos vacíos solo para completar un árbol.
 
 ## Límites de arquitectura
 
-- `*/apps/` contiene código ejecutable o desplegable.
-- `*/libs/` contiene código reusable y no importa desde una aplicación concreta.
-- `src/services/apps/` contiene el bootstrap, transporte y composición de cada servicio NestJS.
-- `src/services/libs/` contiene dominio, aplicación, infraestructura y adaptadores por módulo.
-- `contracts/` contiene contratos independientes del framework y del proveedor de persistencia.
+- `src/apps/` contiene bootstrap, configuración, composición y features específicas de cada aplicación. Las reglas de negocio permanecen en la app o módulo que las posee.
+- `src/libs/` contiene capacidades técnicas generales con una API clara y consumidores reales o planificados. Las librerías no importan desde aplicaciones ni contienen reglas de negocio específicas de CasePilot.
+- `src/libs/backend/` solo se consume desde procesos server-side; no debe llegar a bundles web o mobile.
+- `src/libs/frontend/` contiene UI reusable; `src/libs/mobile/` aísla capacidades y diferencias de plataforma con fallback web cuando corresponda.
+- `contracts/` contendrá contratos entre clientes, servicios y procesos, independientes del framework y del proveedor de persistencia.
 - La UI consume APIs y contratos tipados; no accede directamente a persistencia.
-- No se usa Supabase. La elección de persistencia y proveedores se mantiene detrás de las fronteras backend.
-- No se instala Nx. El workspace solo declara patrones pnpm y scripts explícitos.
+- No se usa Supabase ni se instala Nx. El workspace usa patrones pnpm y scripts explícitos.
 
-La dirección general de dependencias es:
+## Workspace y comandos
 
-```text
-src/web-ui/apps -> src/web-ui/libs y contracts
-src/services/apps -> src/services/libs y contracts
-src/mobile-ui/apps -> src/mobile-ui/libs y contracts
+`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*` y librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`. Cada paquete se declara con su propio `package.json` cuando se implemente.
+
+Los scripts raíz apuntan a `src/apps/casepilot/casepilot-web/`:
+
+```bash
+pnpm dev:web
+pnpm lint:web
+pnpm build:web
 ```
 
-## Documentación y desarrollo
+Estos comandos estarán disponibles cuando la app web tenga un `package.json` con scripts `dev`, `lint` y `build`. En el scaffold actual no se pueden ejecutar verificaciones de producto.
+
+## Dependencias locales
+
+Con Docker Desktop/Engine activo, desde la raíz:
+
+```bash
+pnpm infra:up
+pnpm infra:status
+pnpm infra:down
+```
+
+El entorno inicia PostgreSQL en `127.0.0.1:55432`, genera una contraseña local en un archivo ignorado por Git y conserva los datos al apagarlo. Los requisitos, variables, conexión de la API y demás comandos están en [Dependencias locales de CasePilot](infra/docker/README.md).
+
+## Documentación
 
 - [Índice de documentación](docs/README.md)
-- [Arquitectura](docs/architecture/README.md)
-- [Desarrollo](docs/development/README.md)
-- [Decisiones técnicas](docs/adr/README.md)
-- [Configuración de la app web pública](src/web-ui/apps/public/README.md)
+- [Estructura y límites del monorepo](docs/architecture/monorepo-structure.md)
+- [Instrucciones para agentes](AGENTS.md)
+- [Infraestructura](infra/README.md)
+- [Pruebas transversales](tests/README.md)
+- [Herramientas](tools/README.md)
 
-El backend se implementará con NestJS/TypeScript; por esa razón no se crean `Directory.Build.props`, `Directory.Packages.props`, proyectos `.csproj` ni una solución `.slnx`. Esas piezas del árbol de referencia pertenecen a una variante .NET y no aplican a CasePilot.
-
-No hay configuración, migraciones ni dependencias de Supabase en este repositorio.
+El backend previsto es NestJS/TypeScript. No se crean proyectos ni archivos de configuración .NET.

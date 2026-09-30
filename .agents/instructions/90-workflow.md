@@ -20,14 +20,16 @@
 
 ## Verificación local
 
-Para la app actual, desde `src/web-ui/apps/public/` usa cuando corresponda:
+Las apps y librerías actuales son placeholders, sin manifests ni scripts de producto. Para cambios de documentación o configuración del scaffold, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre los patrones del workspace y las carpetas existentes, y `git diff --check`.
+
+Cuando `src/apps/casepilot/casepilot-web/` tenga un `package.json` con scripts `lint` y `build`, usa desde la raíz:
 
 ```bash
-pnpm --dir src/web-ui/apps/public lint
-pnpm --dir src/web-ui/apps/public build
+pnpm lint:web
+pnpm build:web
 ```
 
-Para servicios NestJS, ejecuta los scripts definidos por el servicio afectado desde su carpeta y documenta cualquier dependencia local. No se asume un proveedor de base de datos o infraestructura hasta que exista una decisión y configuración versionada.
+Para la API NestJS en `src/apps/casepilot/casepilot-api/`, mobile en `src/apps/casepilot/casepilot-mobile/` y librerías en `src/libs/<scope>/<library>/`, ejecuta los scripts definidos por el paquete afectado desde su carpeta y documenta cualquier dependencia local. No se asume un proveedor de base de datos o infraestructura hasta que exista una decisión y configuración versionada.
 
 No ejecutes despliegues, publicación de apps ni cambios remotos como parte de una verificación implícita.
 

@@ -2,6 +2,8 @@
 
 Estas instrucciones son la política técnica del repositorio. Se leen después de `AGENTS.md` y antes de implementar cambios.
 
+Las rutas y fronteras se basan en [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md): aplicaciones en `src/apps/<producto>/<app>/` y capacidades técnicas reutilizables en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. Las features y reglas de negocio específicas permanecen en la app o módulo que las posee.
+
 ## Orden y alcance
 
 | Archivo | Alcance |
