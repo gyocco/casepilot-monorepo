@@ -5,7 +5,7 @@
 
 ## Contexto
 
-Las aplicaciones de `src/apps/casepilot/` todavía son placeholders. Se necesita una base PostgreSQL local reproducible para la futura API NestJS sin colisionar con motores instalados en el host. La ubicación y los límites vigentes son los de `AGENTS.md` y [Estructura y límites del monorepo](../architecture/monorepo-structure.md).
+Las aplicaciones de `src/apps/casepilot/` todavía son placeholders. Se necesita una base PostgreSQL local reproducible para la futura API NestJS sin colisionar con motores instalados en el host. La ubicación y los límites vigentes son los de `AGENTS.md` y [Arquitectura del monorepo](../architecture/monorepo-architecture.md).
 
 ## Decisión
 

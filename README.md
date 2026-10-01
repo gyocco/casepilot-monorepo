@@ -1,10 +1,10 @@
 # CasePilot Monorepo
 
-Monorepo de CasePilot. `src/apps/` agrupa las aplicaciones ejecutables y desplegables por producto; `src/libs/` agrupa las capacidades técnicas reutilizables por runtime: backend, frontend y mobile. La fuente detallada de estructura y límites es [Estructura y límites del monorepo](docs/architecture/monorepo-structure.md).
+Monorepo de CasePilot. `src/apps/` agrupa las aplicaciones ejecutables y desplegables por producto; `src/libs/` agrupa las capacidades técnicas reutilizables por runtime: backend, frontend y mobile. La fuente detallada de estructura y límites es [Arquitectura del monorepo](docs/architecture/monorepo-architecture.md).
 
 ## Estado actual
 
-El repositorio contiene un scaffold. Las carpetas de las aplicaciones y librerías solo tienen `.gitkeep`; todavía no contienen código ni `package.json` propios. La web prevista usará React, Vite, Ionic React y Tailwind CSS; la API usará NestJS con TypeScript y mobile se empaquetará con Ionic/Capacitor.
+La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health checks. Web, mobile y las librerías continúan como placeholders. La web prevista usará React, Vite, Ionic React y Tailwind CSS; mobile se empaquetará con Ionic/Capacitor.
 
 ## Estructura
 
@@ -32,7 +32,7 @@ El repositorio contiene un scaffold. Las carpetas de las aplicaciones y librerí
 ├── docs/
 │   ├── README.md                   # índice de documentación
 │   ├── architecture/
-│   │   └── monorepo-structure.md    # estructura y límites
+│   │   └── monorepo-architecture.md # estructura y límites
 │   └── adr/
 │       └── 0001-local-postgresql.md # decisión del entorno PostgreSQL local
 ├── infra/                          # infraestructura y artefactos de runtime
@@ -45,7 +45,7 @@ El repositorio contiene un scaffold. Las carpetas de las aplicaciones y librerí
 └── README.md
 ```
 
-`contracts/`, `deploy/` y `.github/workflows/` se incorporarán cuando exista un contrato, despliegue o pipeline real. No se crean más módulos vacíos solo para completar un árbol.
+`contracts/openapi/casepilot-api.yaml` contiene el contrato HTTP inicial. `deploy/` y `.github/workflows/` se incorporarán cuando exista un despliegue o pipeline real. No se crean módulos vacíos solo para completar un árbol.
 
 ## Límites de arquitectura
 
@@ -59,9 +59,20 @@ El repositorio contiene un scaffold. Las carpetas de las aplicaciones y librerí
 
 ## Workspace y comandos
 
-`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*` y librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`. Cada paquete se declara con su propio `package.json` cuando se implemente.
+`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*`, librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`. Cada proyecto tiene su propio manifest cuando se implementa, fuentes y pruebas; Testcontainers pertenece a devDependencies del paquete API. `tests/` global no es un paquete activo por ahora.
 
-Los scripts raíz apuntan a `src/apps/casepilot/casepilot-web/`:
+Para ejecutar la API local desde la raíz:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm infra:up
+pnpm migration:api:run
+pnpm dev:api
+```
+
+Responde en `http://127.0.0.1:3000/health` y `http://127.0.0.1:3000/health/database`. Configuración por entorno, migraciones y verificaciones: [README de la API](src/apps/casepilot/casepilot-api/README.md).
+
+Los scripts de la web apuntan a `src/apps/casepilot/casepilot-web/`:
 
 ```bash
 pnpm dev:web
@@ -69,7 +80,11 @@ pnpm lint:web
 pnpm build:web
 ```
 
-Estos comandos estarán disponibles cuando la app web tenga un `package.json` con scripts `dev`, `lint` y `build`. En el scaffold actual no se pueden ejecutar verificaciones de producto.
+Estos comandos web estarán disponibles cuando esa app tenga un `package.json` con scripts `dev`, `lint` y `build`. La API ya dispone de `lint:api`, `typecheck:api`, `build:api`, `test:api` y `test:api:integration`.
+
+`pnpm check:api:architecture` ejecuta TypeScript, ESLint, dependency-cruiser y ts-morph. `pnpm test:api:architecture` prueba sus validadores y forma parte de `test:api`. Cobertura y límites: [guía de validación de la API](src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
+
+`pnpm test:api:integration` delega en `casepilot-api/test/integration/`, junto a las unitarias de ese proyecto, con PostgreSQL efímero creado por Testcontainers. Requiere Docker, sin arrancar Compose ni usar la base persistente local. Comandos y aislamiento: [README de integración](src/apps/casepilot/casepilot-api/test/integration/README.md). `tests/` global se reserva para suites de varios proyectos; la guía de estructura define esa convención.
 
 ## Dependencias locales
 
@@ -86,10 +101,10 @@ El entorno inicia PostgreSQL en `127.0.0.1:55432`, genera una contraseña local 
 ## Documentación
 
 - [Índice de documentación](docs/README.md)
-- [Estructura y límites del monorepo](docs/architecture/monorepo-structure.md)
+- [Arquitectura del monorepo](docs/architecture/monorepo-architecture.md)
 - [Instrucciones para agentes](AGENTS.md)
 - [Infraestructura](infra/README.md)
 - [Pruebas transversales](tests/README.md)
 - [Herramientas](tools/README.md)
 
-El backend previsto es NestJS/TypeScript. No se crean proyectos ni archivos de configuración .NET.
+El backend es NestJS/TypeScript con TypeORM. No se crean proyectos ni archivos de configuración .NET.

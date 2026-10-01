@@ -1,0 +1,63 @@
+{
+  "name": "@casepilot/casepilot-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CasePilot REST API with NestJS and TypeORM",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "exports": {
+    "./bootstrap": {
+      "types": "./dist/create-app.d.ts",
+      "import": "./dist/create-app.js"
+    },
+    "./database": {
+      "types": "./dist/database/create-data-source-options.d.ts",
+      "import": "./dist/database/create-data-source-options.js"
+    },
+    "./config": {
+      "types": "./dist/config/backend-config.d.ts",
+      "import": "./dist/config/backend-config.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test tools eslint.config.mjs dependency-cruiser.config.mjs --max-warnings 0",
+    "check:dependencies": "depcruise --config dependency-cruiser.config.mjs --output-type err-long src",
+    "check:structure": "tsx tools/architecture/check-structure.ts",
+    "check:architecture": "pnpm typecheck && pnpm lint && pnpm check:dependencies && pnpm check:structure",
+    "test:architecture": "tsx --test test/architecture/dependencies.test.ts test/architecture/eslint.test.ts test/architecture/structure.test.ts",
+    "test": "tsc -p tsconfig.test.json && node --test build/test/test/unit/configuration.test.js build/test/test/unit/health.test.js && pnpm test:architecture",
+    "test:integration": "tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
+    "migration:run": "pnpm build && typeorm migration:run -d dist/database/data-source.js",
+    "migration:show": "pnpm build && typeorm migration:show -d dist/database/data-source.js",
+    "migration:revert": "pnpm build && typeorm migration:revert -d dist/database/data-source.js",
+    "migration:generate": "pnpm build && typeorm migration:generate -d dist/database/data-source.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/platform-express": "12.1.2",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "typeorm": "0.3.31"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@testcontainers/postgresql": "12.0.0",
+    "@types/node": "22.12.0",
+    "@types/pg": "8.23.1",
+    "dependency-cruiser": "18.5.0",
+    "eslint": "9.39.5",
+    "testcontainers": "12.0.0",
+    "ts-morph": "27.0.2",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0"
+  }
+}

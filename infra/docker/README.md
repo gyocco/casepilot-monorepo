@@ -1,12 +1,12 @@
 # Dependencias locales de CasePilot
 
-Este entorno Docker Compose provee las dependencias de las aplicaciones de `src/apps/casepilot/`. Por ahora contiene PostgreSQL; las aplicaciones todavía son placeholders y no se arrancan desde Compose.
+Este entorno Docker Compose provee las dependencias de las aplicaciones de `src/apps/casepilot/`. Por ahora contiene PostgreSQL. La API NestJS se ejecuta en el host; Compose no arranca aplicaciones.
 
 ## Requisitos y arranque
 
 - Docker Engine con contenedores Linux (Docker Desktop en Windows).
 - Docker Compose v2 con soporte de `up --wait`.
-- Node.js 18 o superior y pnpm para los comandos raíz.
+- Node.js 22.12 o superior y pnpm 10.13.1 para la API y los comandos raíz.
 
 Desde la raíz del repositorio:
 
@@ -38,13 +38,13 @@ El mapeo `127.0.0.1:55432:5432` mantiene libre el puerto habitual `5432` del hos
 
 Si otro proceso ocupa `55432`, cambia `CASEPILOT_POSTGRES_PORT` en `infra/docker/.env` y ejecuta de nuevo `pnpm infra:up`. Actualiza también el puerto de la configuración de la API o del cliente SQL. Las variables de entorno del shell tienen precedencia sobre el archivo de Compose.
 
-Para la futura API NestJS ejecutada en el host, configura una variable server-side `DATABASE_URL` con este formato, sustituyendo el placeholder por la contraseña local y los demás valores si los personalizaste:
+La API NestJS ejecutada en el host lee este archivo automáticamente cuando `APP_ENV=local`. No es necesario copiar sus credenciales. Puedes sustituir la conexión mediante `DATABASE_*` en el entorno de la API; por ejemplo, `DATABASE_URL` server-side con este formato:
 
 ```dotenv
 DATABASE_URL=postgresql://casepilot:REPLACE_WITH_LOCAL_PASSWORD@127.0.0.1:55432/casepilot
 ```
 
-La contraseña generada usa caracteres hexadecimales válidos en una URL. Si eliges una contraseña con caracteres especiales, codifícala como componente de URL. Una API dentro del mismo proyecto Compose usará `postgres:5432`. La web y mobile consumen la API; la URL y las credenciales de PostgreSQL nunca deben ir en variables `VITE_*` ni en el cliente. La API todavía no implementa la carga de esta variable, modelos ni migraciones.
+La contraseña generada usa caracteres hexadecimales válidos en una URL. Si eliges una contraseña con caracteres especiales, codifícala como componente de URL. Una API dentro del mismo proyecto Compose usará `postgres:5432`. La web y mobile consumen la API; las credenciales nunca van en variables `VITE_*` ni en el cliente. Después de `infra:up`, ejecuta `pnpm migration:api:run` y `pnpm dev:api`. Configuración y migraciones: [README de la API](../../src/apps/casepilot/casepilot-api/README.md).
 
 ## Comandos
 

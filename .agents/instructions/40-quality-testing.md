@@ -11,7 +11,7 @@ Todo cambio de código debe pasar, como mínimo, las verificaciones relevantes:
 - pruebas e2e para flujos críticos de usuario;
 - revisión manual de viewport móvil, teclado, focus, estados de error y navegación.
 
-Actualmente las apps y librerías son placeholders y no exponen scripts de producto. Los comandos raíz `pnpm lint:web` y `pnpm build:web` apuntan a `src/apps/casepilot/casepilot-web/` y podrán ejecutarse cuando esa app tenga su propio `package.json` con `lint` y `build`. Cada paquete implementado debe definir las verificaciones pertinentes y documentarlas en su README local; los procedimientos transversales van en `docs/development/` cuando exista contenido real.
+La API dispone de `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. Todas las pruebas de la API viven en su `test/`: unitarias e integración, con sus dependencias de desarrollo y checks del paquete API. Los full endpoint tests usan PostgreSQL efímero con Testcontainers; requieren Docker y nunca utilizan la base persistente de desarrollo. Consulta el [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md) y el [README de la API](../../src/apps/casepilot/casepilot-api/README.md). Web y librerías siguen como placeholders; sus scripts se ejecutan cuando existan manifests. Cada paquete documenta sus verificaciones.
 
 Para cambios solo de documentación o configuración del scaffold, valida enlaces, rutas, manifests, workspace y diff. Deja constancia de que type-check, lint, build, tests de producto y revisión de viewport/accesibilidad no aplican o no están disponibles.
 
@@ -22,7 +22,7 @@ Para cambios solo de documentación o configuración del scaffold, valida enlace
 - `e2e`: autenticación, navegación, formularios, permisos y recorridos de negocio desde la perspectiva del usuario.
 - `fixtures`: datos mínimos y builders deterministas; nunca credenciales reales ni volcados de producción.
 
-Las pruebas específicas de una app o paquete pueden vivir junto al código. Las pruebas que cruzan proyectos permanecen en `tests/`.
+Todas las pruebas específicas de una app o paquete, incluidas integración y endpoints, DEBEN permanecer en el proyecto propietario. `tests/` global se reserva para suites de varios proyectos y reglas transversales; atravesar capas de una API o usar PostgreSQL no cambia su propietario. El criterio canónico está en [monorepo-architecture.md](../../docs/architecture/monorepo-architecture.md).
 
 ## Reglas de tests
 

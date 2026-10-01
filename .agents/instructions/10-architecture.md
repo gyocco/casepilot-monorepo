@@ -2,7 +2,9 @@
 
 ## Capas recomendadas
 
-La guía canónica es [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md).
+La guía canónica es [Arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md).
+
+Para backend, la fuente de diseño es [Arquitectura base backend](../../docs/architecture/backend-architecture-baseline.md) y la fuente normativa es [Reglas obligatorias de la arquitectura base backend](../../docs/architecture/backend-architecture-baseline-rules.md). La [arquitectura particular de CasePilot](../../docs/architecture/casepilot-backend-architecture.md) registra su adopción. DEBE aplicar la skill [backend-architecture](../skills/backend-architecture/SKILL.md) y todas las reglas activas. En el backend, toda lógica de negocio y de casos de uso vive exclusivamente en Application; Domain contiene datos y contratos sin comportamiento de negocio. La decisión se registra en el [ADR 0002](../../docs/adr/0002-backend-application-owned-business-logic.md).
 
 Mantén una dirección de dependencias simple:
 
@@ -24,7 +26,7 @@ contracts/
   └── events
 ```
 
-Las aplicaciones pueden consumir librerías y contratos. Las librerías no deben importar código desde `apps/`. La lógica de dominio no debe depender de React, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia.
+Las aplicaciones pueden consumir librerías y contratos. Las librerías no deben importar código desde `apps/`. La lógica de negocio no debe depender de React, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia. En backend se implementa en Application; modelos de Domain y contratos internos mantienen la misma independencia.
 
 ## Dónde colocar cada cosa
 
@@ -46,6 +48,8 @@ Las features, reglas de negocio y componentes específicos permanecen en la app 
 ### `src/apps/casepilot/casepilot-api/`
 
 Contiene la API NestJS con TypeScript: bootstrap, configuración, transporte, health checks y composición de módulos. Los módulos de dominio, aplicación e infraestructura específicos de CasePilot permanecen en esta app. Si se incorporan workers o schedulers como deployables independientes, se ubican en `src/apps/<producto>/<app>/` con su propia entrada y configuración.
+
+La organización interna es por contexto propietario, con Domain, Application, Infrastructure y Presentation/Web. Cada command/query tiene un único request obligatorio y un único response concreto. Controllers delegan; repositorios hacen operaciones individuales; Application coordina transacciones. Los detalles y criterios verificables se mantienen únicamente en las reglas backend enlazadas arriba.
 
 ### `src/libs/backend/`
 
@@ -70,7 +74,7 @@ Contiene contratos independientes de tecnología: OpenAPI para APIs HTTP, protob
 Antes de copiar lógica:
 
 1. Comprueba si ya existe una librería o adaptador equivalente.
-2. Si la lógica es de dominio de CasePilot, mantenla en el módulo de la app o servicio que posee la feature, independiente del framework y de la persistencia.
+2. Si la lógica es de negocio de CasePilot, mantenla en el módulo de la app o servicio que posee la feature, independiente del framework y de la persistencia; en backend reside exclusivamente en su capa Application.
 3. Si es acceso a datos o una integración backend específica, usa la infraestructura del módulo propietario. Solo extrae el mecanismo técnico general a `src/libs/backend/<capability>/`.
 4. Si es visual y se repetirá entre aplicaciones frontend, usa la librería frontend correspondiente.
 5. Si es un contrato entre procesos o tecnologías, ubícalo en `contracts/`.

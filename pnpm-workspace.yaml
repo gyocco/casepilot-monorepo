@@ -3,3 +3,7 @@ packages:
   - "src/libs/backend/*"
   - "src/libs/frontend/*"
   - "src/libs/mobile/*"
+
+# tsx uses esbuild's platform binary; allow only this dependency's install hook.
+onlyBuiltDependencies:
+  - "esbuild"

@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: CasePilot API
+  version: 0.1.0
+  description: Sondas técnicas iniciales del backend REST de CasePilot.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Desarrollo local
+paths:
+  /health:
+    get:
+      operationId: getApiHealth
+      summary: Verifica que el proceso HTTP responde
+      description: No invoca Application ni abre una conexión a PostgreSQL.
+      security: []
+      responses:
+        '200':
+          description: API disponible
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiHealthResponse'
+  /health/database:
+    get:
+      operationId: getDatabaseHealth
+      summary: Verifica la lectura de HealthCheckObject mediante Application y TypeORM
+      description: Un SELECT sobre la tabla técnica; no escribe datos. Una tabla vacía también está disponible.
+      security: []
+      responses:
+        '200':
+          description: Tabla consultable
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseHealthResponse'
+        '503':
+          description: No es posible consultar la tabla técnica
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseUnavailableResponse'
+components:
+  schemas:
+    ApiHealthResponse:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+    HealthCheckObject:
+      type: object
+      additionalProperties: false
+      required: [guid, value]
+      properties:
+        guid:
+          type: string
+          format: uuid
+          example: 00000000-0000-4000-8000-000000000001
+        value:
+          type: string
+          example: CasePilot API
+    DatabaseHealthResponse:
+      type: object
+      additionalProperties: false
+      required: [status, objects]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        objects:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckObject'
+    DatabaseUnavailableResponse:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [unavailable]

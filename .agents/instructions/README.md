@@ -2,7 +2,7 @@
 
 Estas instrucciones son la política técnica del repositorio. Se leen después de `AGENTS.md` y antes de implementar cambios.
 
-Las rutas y fronteras se basan en [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md): aplicaciones en `src/apps/<producto>/<app>/` y capacidades técnicas reutilizables en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. Las features y reglas de negocio específicas permanecen en la app o módulo que las posee.
+Las rutas y fronteras se basan en [Arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md): aplicaciones en `src/apps/<producto>/<app>/` y capacidades técnicas reutilizables en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. Las features y reglas de negocio específicas permanecen en la app o módulo que las posee.
 
 ## Orden y alcance
 
@@ -17,6 +17,8 @@ Las rutas y fronteras se basan en [Estructura y límites del monorepo](../../doc
 | `90-workflow.md` | proceso de trabajo, verificación y límites operativos |
 
 Para un cambio de frontend se leen `00`, `10`, `20`, `40`, `50`, `60` y `90`. Para un cambio de backend NestJS se revisan además `10`, `40`, `50` y `60`. No se debe crear una instrucción de Supabase: esa plataforma está fuera de la arquitectura del proyecto.
+
+Todo trabajo backend DEBE cargar también [Arquitectura base backend](../../docs/architecture/backend-architecture-baseline.md), [Reglas obligatorias de la arquitectura base backend](../../docs/architecture/backend-architecture-baseline-rules.md) y la skill [backend-architecture](../skills/backend-architecture/SKILL.md). También DEBE leer la [adopción particular de CasePilot](../../docs/architecture/casepilot-backend-architecture.md). Las reglas activas son excluyentes y no se flexibilizan mediante ejemplos o convenciones previas.
 
 ## Precedencia
 

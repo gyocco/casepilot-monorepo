@@ -1,9 +1,11 @@
-# Estructura y límites del monorepo
+# Arquitectura del monorepo
 
 - Estado: guía estructural vigente
 - Alcance: organización del repositorio, límites entre aplicaciones y librerías, documentación y CI/CD
 
-El estado actual es un scaffold: las carpetas de aplicaciones y librerías solo contienen `.gitkeep`. Las tecnologías y responsabilidades descritas son las previstas; todavía no hay paquetes de producto implementados.
+La API ya implementa una base NestJS/TypeORM, con configuración por entorno, health checks y migración PostgreSQL. Web, mobile y las librerías continúan como placeholders. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`; los comandos de la API, en su [README](../../src/apps/casepilot/casepilot-api/README.md).
+
+Esta es la fuente canónica de las convenciones globales de carpetas, propiedad de proyectos y ubicación de pruebas. La [arquitectura particular del backend de CasePilot](casepilot-backend-architecture.md) documenta su adopción de la base backend reutilizable; las reglas internas de un backend no se definen aquí.
 
 ## Propósito
 
@@ -15,6 +17,22 @@ CasePilot se organiza como un monorepo para mantener en un mismo repositorio las
 Esta separación evita que una aplicación se convierta en una dependencia accidental de otra y evita que `libs/` se transforme en un cajón de código de negocio sin un dueño claro.
 
 Las carpetas que todavía no tienen una responsabilidad o un consumidor real no deben crearse solo para completar el árbol. Los nombres mostrados como futuros son una guía, no una obligación de crear directorios vacíos.
+
+## Carpetas globales y estructura propia de cada proyecto
+
+Las carpetas de alto nivel pertenecen al monorepo: pueden agrupar o coordinar muchos productos, aplicaciones y librerías. No son la estructura interna de una única aplicación.
+
+- `src/` organiza los proyectos y capacidades del repositorio, agrupados en `apps/` y `libs/`. No es el único directorio de fuentes TypeScript de todas las aplicaciones.
+- `tests/` se reserva exclusivamente para pruebas cuyo alcance involucre realmente varios proyectos, o reglas de arquitectura transversales que verifiquen varios proyectos del monorepo.
+- `contracts/`, `docs/`, `infra/`, `deploy/` y `tools/` coordinan contratos, documentación, recursos y automatización del repositorio según su responsabilidad. Pueden atender a múltiples proyectos sin sustituir su configuración local.
+
+Cada proyecto dentro de `src/` conserva su propia raíz y puede tener `package.json`, `tsconfig.json`, README, `src/`, `test/` y artefactos generados. El `src` global organiza proyectos; el `src` interno contiene el código fuente de su propietario. Repetir el nombre no duplica responsabilidades.
+
+La clasificación unit/integration/e2e determina el tipo y ejecución de una prueba; su propietario determina la carpeta padre. Atravesar HTTP, Application, repositorios y una base externa sigue siendo una prueba de una sola API. PostgreSQL o Testcontainers son dependencias de prueba, no otro proyecto de producto. El aislamiento de recursos no depende de la ubicación del archivo.
+
+Todas las pruebas propias de una app o librería, incluidas las de integración y sus fixtures, se mantienen en ese proyecto. Las pruebas globales consumen APIs públicas o contratos de los proyectos participantes; ningún proyecto de producto depende de `tests/`.
+
+La decisión y sus alternativas se registran en el [ADR 0005](../adr/0005-project-owned-tests.md).
 
 ## Mapa del repositorio
 
@@ -32,7 +50,7 @@ Las carpetas que todavía no tienen una responsabilidad o un consumidor real no 
 │       ├── frontend/                # capacidades compartidas de interfaz web
 │       └── mobile/                  # adaptadores y capacidades mobile compartidas
 ├── contracts/                       # contratos entre aplicaciones, servicios y procesos
-├── tests/                           # pruebas que cruzan límites del monorepo
+├── tests/                           # pruebas de varios proyectos del monorepo
 ├── infra/                           # infraestructura como código y artefactos de runtime
 ├── deploy/                          # configuración y manifiestos de despliegue
 ├── tools/                           # scripts, generadores y automatización del repositorio
@@ -106,6 +124,8 @@ Aplicación backend desplegable. Contiene el bootstrap del servicio, transporte 
 
 La autorización, validación de entrada, acceso a persistencia e integraciones externas se resuelven en la frontera server-side. Nunca se trasladan secretos o credenciales privilegiadas al cliente.
 
+Las responsabilidades internas y restricciones backend se consultan en la [arquitectura particular de CasePilot](casepilot-backend-architecture.md), que adopta una base reutilizable. Este documento determina la ubicación y propiedad del paquete, sus fuentes y pruebas.
+
 ### Estructura interna de una aplicación
 
 No es necesario crear todas las subcarpetas por adelantado. Cuando el código exista, una aplicación puede organizarse así:
@@ -126,6 +146,23 @@ No es necesario crear todas las subcarpetas por adelantado. Cuando el código ex
 ```
 
 La estructura interna puede variar entre web, mobile y API. La regla importante es que la aplicación componga su experiencia y no se convierta en una librería compartida por otra aplicación.
+
+Por ejemplo, la raíz del proyecto API mantiene separados fuentes, pruebas y configuración:
+
+```text
+casepilot-api/
+├── package.json
+├── tsconfig.json
+├── README.md
+├── src/
+├── test/
+│   ├── unit/
+│   └── integration/
+│       └── support/
+└── dist/                           # generado; no se versiona
+```
+
+`test/unit/` y `test/integration/` tienen el mismo propietario. Un proyecto puede añadir otras suites propias cuando existan; no necesita carpetas vacías. `dist/`, `build/` y otros artefactos de compilación se generan según su configuración y permanecen ignorados por Git.
 
 ## Organización de `src/libs/`
 
@@ -189,15 +226,19 @@ Los contratos describen la comunicación externa; no duplican todos los modelos 
 
 ### `tests/`
 
-Pruebas que cruzan límites del monorepo:
+Pruebas cuyo alcance involucra varios proyectos del monorepo:
 
-- `e2e/`: recorridos completos desde la perspectiva del usuario;
-- `integration/`: colaboración entre aplicaciones, servicios, adaptadores y contratos;
-- `performance/`: mediciones reproducibles;
-- `architecture/`: reglas de dependencias y estructura;
-- `fixtures/`: datos mínimos, deterministas y no sensibles.
+- `e2e/`: recorridos que verifican cliente web/mobile y API juntos;
+- `integration/`: colaboración entre varios servicios o compatibilidad de contratos entre proyectos;
+- `performance/`: mediciones de escenarios que involucren varios proyectos;
+- `architecture/`: reglas de dependencias y estructura aplicadas a varios proyectos;
+- `fixtures/`: datos sintéticos compartidos por esas suites transversales.
 
-Las pruebas unitarias estrechamente ligadas a una app o librería pueden vivir junto al código. No se guardan credenciales reales, volcados de producción ni datos personales innecesarios.
+Las unitarias, integración de persistencia y full endpoint tests de una sola app permanecen en su `test/`, aunque utilicen Docker, HTTP o una base externa. No se guarda aquí una suite específica de una API solo por llamarse integration o e2e. Una verificación de contrato de un solo propietario sigue siendo local; la compatibilidad entre proyectos sí puede ser transversal.
+
+El contenido versionado actual de `tests/` es únicamente su [README](../../tests/README.md): no es un paquete activo del workspace ni tiene suites ejecutables. Se agregará configuración propia cuando exista una necesidad real de varias aplicaciones, sin mover automáticamente pruebas locales.
+
+No se guardan credenciales reales, volcados de producción ni datos personales innecesarios. Los proyectos de producto no importan desde esta carpeta. Procedimiento concreto de las pruebas API: [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md).
 
 ### `infra/`
 
@@ -279,8 +320,9 @@ Reglas de frontera:
 | Cliente técnico de correo | `src/libs/backend/email/` | Es una capacidad server-side transversal. |
 | Manejo común de errores HTTP | `src/libs/backend/exception-handler/` | Es infraestructura compartida, no negocio. |
 | Adaptador de cámara con fallback web | `src/libs/mobile/` | Aísla una diferencia de plataforma. |
-| Regla de negocio de casos o documentos | App o módulo que posee esa feature | No pertenece a una librería general. |
+| Regla de negocio de una feature | Módulo del proyecto propietario, según su arquitectura particular | Es comportamiento del producto, no una capacidad técnica general. |
 | Esquema de una API entre cliente y servidor | `contracts/` | Es un contrato de comunicación versionado. |
+| Pruebas unitarias y endpoints de una API | `src/apps/<producto>/<api>/test/` | Verifican un único proyecto, independientemente del tipo de prueba. |
 | Recorrido e2e web + API | `tests/e2e/` | Cruza más de un deployable. |
 | Script usado por varios workflows | `tools/ci/` | Es automatización reusable del repositorio. |
 | Workflow de pull request | `.github/workflows/` | Es configuración de CI/CD del proveedor. |
@@ -290,6 +332,7 @@ Reglas de frontera:
 - Usa nombres en minúsculas con guiones cuando el nombre sea una carpeta o archivo nuevo.
 - Mantén los tests, el README local y la configuración cerca del paquete o aplicación a la que pertenecen.
 - Actualiza esta documentación cuando cambien las fronteras, las rutas o la estrategia de CI/CD.
+- Para agregar, modificar o retirar una regla, aplica [architecture-rules-sync](../../.agents/skills/architecture-rules-sync/SKILL.md) y sincroniza la documentación con los checks, pruebas y alcance realmente verificado de los proyectos afectados.
 - No versiones `node_modules/`, `dist/`, `build/`, `coverage/`, archivos `.env`, tokens ni secretos.
 - Valida datos en los bordes y usa tipos explícitos; no introduzcas `any` sin una justificación verificable.
 - Antes de mover código a `libs/`, comprueba consumidores reales, dependencias permitidas, API pública, pruebas y documentación.

@@ -2,7 +2,7 @@
 
 ## Misión
 
-CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. Las aplicaciones previstas se agrupan en `src/apps/casepilot/`: `casepilot-web` usará React, Vite, Ionic React y Tailwind CSS; `casepilot-mobile` usará Ionic/Capacitor y `casepilot-api` usará NestJS con TypeScript. Actualmente solo existen placeholders, sin código ni manifests de paquetes de producto.
+CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. Las aplicaciones se agrupan en `src/apps/casepilot/`: `casepilot-web` usará React, Vite, Ionic React y Tailwind CSS; `casepilot-mobile` usará Ionic/Capacitor y `casepilot-api` implementa la base NestJS/TypeScript con TypeORM. Web, mobile y librerías siguen como placeholders.
 
 El objetivo de plataforma es compartir la mayor cantidad posible de código entre:
 
@@ -16,7 +16,7 @@ CasePilot no usa Supabase. La persistencia, identidad, mensajería, observabilid
 
 ## Fuentes de verdad
 
-- Estructura y límites del repositorio: [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md).
+- Estructura y límites del repositorio: [Arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md).
 - Estado actual, mapa breve y comandos raíz: [`README.md`](../../README.md).
 - Organización documental: [`docs/README.md`](../../docs/README.md).
 
@@ -26,7 +26,7 @@ Si dos documentos se contradicen, no elijas silenciosamente. Identifica la fuent
 
 ## Estado actual y evolución
 
-Las carpetas `src/apps/casepilot/casepilot-web/`, `src/apps/casepilot/casepilot-mobile/` y `src/apps/casepilot/casepilot-api/`, así como las librerías previstas, contienen únicamente `.gitkeep`. Cada aplicación o librería incorporará su propio `package.json`, código, pruebas y README al implementarse.
+`src/apps/casepilot/casepilot-api/` contiene manifest, código, pruebas y README, con PostgreSQL local en Docker. Web, mobile y las librerías previstas contienen únicamente `.gitkeep`; incorporarán su propio paquete cuando se implementen. El contrato HTTP inicial está en `contracts/openapi/casepilot-api.yaml`.
 
 Las áreas del monorepo son:
 
@@ -35,7 +35,7 @@ Las áreas del monorepo son:
 - `src/libs/frontend/`: capacidades de interfaz reutilizables e independientes de una pantalla;
 - `src/libs/mobile/`: adaptadores y capacidades mobile reutilizables;
 - `contracts/`: contratos independientes de tecnología entre clientes y servicios;
-- `tests/`: pruebas que cruzan aplicaciones, servicios, contratos o arquitectura;
+- `tests/`: exclusivamente pruebas de varios proyectos y reglas de arquitectura transversales; todas las pruebas propias permanecen en su proyecto;
 - `infra/`, `deploy/` y `tools/`: operación, despliegue y automatización del repositorio.
 
 No se deben crear módulos vacíos solo para completar un árbol de carpetas.

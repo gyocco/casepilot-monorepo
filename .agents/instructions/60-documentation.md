@@ -10,7 +10,7 @@ Consulta el [índice de documentación](../../docs/README.md) para elegir ubicac
 
 - Código específico de una aplicación o librería: README local y comentarios solo cuando aporten contexto no obvio.
 - Producto y requisitos: `docs/product/`.
-- Arquitectura, límites y diagramas: `docs/architecture/`; la guía canónica de estructura es [Estructura y límites del monorepo](../../docs/architecture/monorepo-structure.md).
+- Arquitectura, límites y diagramas: `docs/architecture/`; la guía canónica de estructura es [Arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md).
 - Setup, comandos y calidad: `docs/development/`.
 - Deploy, migraciones operativas, observabilidad e incidentes: `docs/operations/`.
 - APIs, variables, contratos y comandos de consulta: `docs/reference/`.
@@ -20,6 +20,8 @@ Consulta el [índice de documentación](../../docs/README.md) para elegir ubicac
 Las áreas sin contenido todavía son ubicaciones previstas. No crees carpetas vacías ni enlaces a documentos inexistentes; añade documentos e incorpóralos al índice cuando haya una responsabilidad real.
 
 No dupliques un procedimiento en varios lugares. Elige una fuente canónica y enlázala desde los demás.
+
+Para evolucionar reglas de arquitectura o corregir divergencias con checks, aplica [architecture-rules-sync](../skills/architecture-rules-sync/SKILL.md). Coordina catálogo backend, guía base, monorepo y adopción de CasePilot con la [cobertura ejecutable de la API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md), los validadores afectados y sus pruebas en el mismo cambio; conserva explícitas las garantías que requieren evidencia adicional.
 
 ## Documentación de paquetes
 

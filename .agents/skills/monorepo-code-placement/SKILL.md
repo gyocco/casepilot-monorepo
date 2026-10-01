@@ -9,7 +9,7 @@ metadata:
 
 ## Propósito
 
-Usa esta skill antes de crear o mover archivos para elegir la carpeta correcta del monorepo. La fuente de verdad detallada es [Estructura y límites del monorepo](../../../docs/architecture/monorepo-structure.md); léela cuando la decisión no sea obvia o cuando el cambio afecte más de una capa.
+Usa esta skill antes de crear o mover archivos para elegir la carpeta correcta del monorepo. La fuente de verdad detallada es [Arquitectura del monorepo](../../../docs/architecture/monorepo-architecture.md); léela cuando la decisión no sea obvia o cuando el cambio afecte más de una capa.
 
 Esta skill no autoriza despliegues, operaciones remotas ni cambios destructivos. Solo ayuda a ubicar el trabajo y a mantener las fronteras de arquitectura.
 
@@ -50,8 +50,8 @@ Esta skill no autoriza despliegues, operaciones remotas ni cambios destructivos.
 | Capacidad backend transversal | `src/libs/backend/<capability>/` | Solo server-side; no debe llegar a bundles web/mobile ni contener negocio específico. |
 | UI reusable entre apps web | `src/libs/frontend/<library>/` | Componentes, tokens y patrones accesibles; sin rutas ni queries concretas. |
 | Adaptador o capability mobile reusable | `src/libs/mobile/` o una subcarpeta con dueño claro | Aísla APIs web/native, permisos, disponibilidad, errores y fallback. |
-| Test unitario de una app o librería | Junto al código propietario | Mantiene el test cerca de la unidad que verifica. |
-| Test que cruza apps, servicios o contratos | `tests/integration/`, `tests/e2e/`, `tests/performance/` o `tests/architecture/` | Usa la subcarpeta según el tipo de prueba. |
+| Test propio de una app o librería: unitario, integración, endpoint o e2e local | `test/` del proyecto propietario, organizado por tipo | El propietario determina la carpeta padre; atravesar capas, HTTP o una base externa no lo vuelve transversal. |
+| Test que involucra realmente varios proyectos o reglas transversales | `tests/integration/`, `tests/e2e/`, `tests/performance/` o `tests/architecture/` | Usa la subcarpeta según el tipo de prueba. |
 | Contrato HTTP, evento o mensaje | `contracts/` | Versiona el contrato externo; no dupliques modelos internos. |
 | Infraestructura como código/runtime | `infra/` | Terraform, Kubernetes, Helm, Docker y recursos técnicos. |
 | Manifiesto u overlay de release | `deploy/` | Configuración por entorno o destino de despliegue. |
@@ -73,6 +73,8 @@ No hace falta crear una carpeta raíz `ci/` si `.github/workflows/` y `tools/ci/
 - Los secretos, tokens administrativos y credenciales permanecen fuera del código cliente, bundles, logs y documentación.
 - No uses `src/libs/` como un cajón de componentes, helpers, modelos o reglas de negocio de una sola app.
 
+La diferencia entre carpetas globales y estructura interna de cada proyecto se documenta en la guía canónica. `src/` global agrupa proyectos; cada uno puede tener su propio `src/`, `test/`, manifest y configuración. `tests/` global no centraliza suites específicas de una app.
+
 ## Casos ambiguos
 
 - Si una pieza solo tiene un consumidor, déjala junto a ese consumidor hasta que exista una necesidad real de extracción.
@@ -86,6 +88,6 @@ No hace falta crear una carpeta raíz `ci/` si `.github/workflows/` y `tools/ci/
 - La ruta elegida coincide con el consumidor y el runtime reales.
 - Ninguna librería importa desde una app y el nuevo módulo no crea un ciclo. Las apps pueden consumir librerías compatibles con su runtime.
 - La librería tiene responsabilidad, API, consumidores, pruebas y README local cuando corresponda.
-- Los contratos, tests, configuración de deploy y workflows quedaron en sus carpetas transversales.
+- Las pruebas propias quedaron con su proyecto; solo las suites de varios proyectos quedaron en `tests/`. Contratos y configuración transversal mantienen su dueño y frontera.
 - Se actualizaron los documentos canónicos afectados.
 - Se ejecutaron las verificaciones relevantes del paquete o app; si una no aplica o no puede ejecutarse, se deja constancia de la razón.

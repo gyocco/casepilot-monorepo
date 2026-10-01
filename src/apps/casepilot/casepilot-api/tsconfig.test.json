@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "build/test",
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "test/**/*.mjs",
+    "tools/**/*.ts",
+    "eslint.config.mjs",
+    "dependency-cruiser.config.mjs"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
+}

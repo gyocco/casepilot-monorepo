@@ -12,6 +12,10 @@ Antes de modificar código, configuración o documentación:
 4. Consulta la documentación local enlazada desde `docs/README.md` y desde la instrucción específica.
 5. Busca primero patrones existentes en el repositorio antes de crear una abstracción nueva.
 
+Para trabajo de backend, el agente DEBE leer [Arquitectura base backend](docs/architecture/backend-architecture-baseline.md) y [Reglas obligatorias de la arquitectura base backend](docs/architecture/backend-architecture-baseline-rules.md), y aplicar la skill [backend-architecture](.agents/skills/backend-architecture/SKILL.md). También DEBE leer la [adopción particular de CasePilot](docs/architecture/casepilot-backend-architecture.md). Las reglas activas del backend son obligatorias; no se admiten excepciones locales ni implícitas. Un cambio de regla autorizado debe registrarse y sincronizarse antes de implementar una arquitectura incompatible.
+
+Para agregar, modificar o retirar reglas de arquitectura, o corregir divergencias entre documentación y validadores, el agente DEBE aplicar [architecture-rules-sync](.agents/skills/architecture-rules-sync/SKILL.md). La misma tarea sincroniza fuentes canónicas, adopción, cobertura, checks ESLint/dependency-cruiser/ts-morph afectados y sus pruebas; no basta con editar la regla escrita.
+
 ## Nivel de las reglas
 
 Las palabras `MUST`/`DEBE`, `MUST NOT`/`NO DEBE`, `SHOULD`/`DEBERÍA` y `MAY`/`PUEDE` tienen el siguiente significado:
@@ -28,7 +32,7 @@ CasePilot comparte un único código de producto entre:
 - la API desplegable en `src/apps/casepilot/casepilot-api/`, implementada con NestJS y TypeScript;
 - la aplicación móvil en `src/apps/casepilot/casepilot-mobile/`, empaquetada con Capacitor/Ionic.
 
-Estas carpetas contienen actualmente placeholders. Las capacidades técnicas reutilizables se agrupan por runtime en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. La guía detallada es [Estructura y límites del monorepo](docs/architecture/monorepo-structure.md).
+La API ya contiene una base NestJS/TypeORM y health checks; web y mobile siguen como placeholders. Las capacidades técnicas reutilizables se agrupan por runtime en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. La guía detallada es [Arquitectura del monorepo](docs/architecture/monorepo-architecture.md); los comandos backend están en el [README de la API](src/apps/casepilot/casepilot-api/README.md).
 
 Por eso, toda decisión de UI y plataforma DEBE funcionar primero en una pantalla móvil estrecha y NO DEBE introducir una dependencia innecesaria del navegador o del sistema operativo. Las diferencias nativas deben aislarse detrás de adaptadores y mantenerse fuera de la lógica de dominio.
 

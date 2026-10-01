@@ -20,7 +20,7 @@
 
 ## Verificación local
 
-Las apps y librerías actuales son placeholders, sin manifests ni scripts de producto. Para cambios de documentación o configuración del scaffold, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre los patrones del workspace y las carpetas existentes, y `git diff --check`.
+La API cuenta con manifest y scripts de producto; web, mobile y librerías siguen como placeholders. Para cambios de documentación o configuración, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre workspace y carpetas, y `git diff --check`.
 
 Cuando `src/apps/casepilot/casepilot-web/` tenga un `package.json` con scripts `lint` y `build`, usa desde la raíz:
 
@@ -29,7 +29,7 @@ pnpm lint:web
 pnpm build:web
 ```
 
-Para la API NestJS en `src/apps/casepilot/casepilot-api/`, mobile en `src/apps/casepilot/casepilot-mobile/` y librerías en `src/libs/<scope>/<library>/`, ejecuta los scripts definidos por el paquete afectado desde su carpeta y documenta cualquier dependencia local. No se asume un proveedor de base de datos o infraestructura hasta que exista una decisión y configuración versionada.
+Para la API NestJS usa `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. La integración levanta PostgreSQL efímero mediante Testcontainers: requiere Docker, no `infra:up` ni credenciales de producto, y nunca usa la base local persistente. Los checks de API incluyen fuentes, suites unitarias, integración y su lanzador. `tests/` global todavía no tiene suites ni paquete ejecutable; consulta el [README de integración de la API](../../src/apps/casepilot/casepilot-api/test/integration/README.md). Para mobile y librerías ejecuta los scripts cuando se implementen. No se asume infraestructura remota sin decisión y configuración versionada.
 
 No ejecutes despliegues, publicación de apps ni cambios remotos como parte de una verificación implícita.
 

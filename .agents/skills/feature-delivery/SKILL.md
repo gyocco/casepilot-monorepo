@@ -7,7 +7,8 @@ Usa esta skill cuando una funcionalidad atraviese dos o más capas: pantalla, fe
 ## Procedimiento
 
 1. Define el objetivo, usuario, criterios de aceptación y estados `loading`, `success`, `empty`, `error` y `offline` si aplican.
-2. Consulta el [índice de documentación](../../../docs/README.md) y [Estructura y límites del monorepo](../../../docs/architecture/monorepo-structure.md). Lee los documentos de producto y desarrollo y los ADRs relacionados que existan; no asumas documentos ni carpetas todavía ausentes.
+2. Consulta el [índice de documentación](../../../docs/README.md) y [Arquitectura del monorepo](../../../docs/architecture/monorepo-architecture.md). Lee los documentos de producto y desarrollo y los ADRs relacionados que existan; no asumas documentos ni carpetas todavía ausentes.
+   Si el cambio afecta backend, aplica la skill [backend-architecture](../backend-architecture/SKILL.md) y consulta las [reglas obligatorias vigentes](../../../docs/architecture/backend-architecture-baseline-rules.md).
 3. Mapea la funcionalidad por capas:
    - UI específica en `src/apps/casepilot/casepilot-web/` o `src/apps/casepilot/casepilot-mobile/`;
    - UI técnica reutilizable en `src/libs/frontend/`;
@@ -15,7 +16,7 @@ Usa esta skill cuando una funcionalidad atraviese dos o más capas: pantalla, fe
    - mecanismos técnicos backend generales en `src/libs/backend/<capability>/`;
    - contratos entre procesos en `contracts/`;
    - adaptadores de dispositivo y plataforma generales en `src/libs/mobile/`, o junto a la app si solo tienen un consumidor.
-4. Define primero contratos y modelos tipados. Mantén la lógica de dominio fuera de React, Ionic, NestJS y proveedores concretos.
+4. Define primero contratos y modelos tipados. Mantén la lógica de negocio fuera de React, Ionic, NestJS y proveedores concretos; en backend implementa todas las reglas y casos de uso exclusivamente en Application, con Domain limitado a modelos y contratos.
 5. Implementa la experiencia móvil primero con `IonPage` y componentes Ionic apropiados. Añade mejoras responsive para pantallas grandes.
 6. Implementa carga, errores recuperables, validación de entrada, autorización y feedback accesible.
 7. Añade pruebas unitarias de reglas y mapeos, integración de datos/permisos y e2e del flujo crítico cuando corresponda.
