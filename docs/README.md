@@ -40,10 +40,12 @@
 
 Las siguientes áreas se crearán cuando exista contenido real, siguiendo la guía de estructura:
 
-- `product/`: visión, requisitos y alcance.
 - `project-management/`: roadmap, hitos y seguimiento.
 - `development/`: instalación, comandos y calidad.
 - `operations/`: despliegue, entornos, observabilidad e incidentes.
 - `reference/`: APIs, variables, contratos y comandos de consulta.
 
 La documentación específica de una aplicación o librería vive en su README local. Cada tema transversal mantiene una fuente canónica y se enlaza desde este índice.
+- [Modelo de dominio de servicios profesionales](product/domain-model-professional-services.md): definición suministrada por el usuario, con los 28 modelos y relaciones.
+- [CRUD de servicios profesionales](../src/apps/casepilot/casepilot-api/docs/professional-services-crud.md): rutas públicas, campos, paginación, versiones, integridad y límites de la API de datos.
+- [ADR 0015 — CRUD de servicios profesionales](adr/0015-professional-services-database-crud.md): alcance de persistencia, endpoints públicos y decisiones de schema/concurrencia.

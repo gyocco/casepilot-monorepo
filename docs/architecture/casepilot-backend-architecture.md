@@ -1,6 +1,6 @@
 # Arquitectura particular del backend de CasePilot
 
-- Estado: adoptada; API NestJS/TypeORM con dominio compartido y sondas Health implementadas.
+- Estado: adoptada; API NestJS/TypeORM con dominio compartido, CRUD de 28 modelos y sondas Health implementadas.
 - Fecha: 2026-10-01.
 - Revisión: 2026-10-02.
 - Alcance: todo backend de CasePilot, incluidos APIs, workers, schedulers, adaptadores y librerías backend.
@@ -15,6 +15,9 @@ Este documento registra decisiones particulares y evidencia implementada. No man
 La [skill backend](../../.agents/skills/backend-architecture/SKILL.md) aplica esta adopción en CasePilot. Los demás productos pueden tener su propio documento de arquitectura y ADR de adopción.
 
 ## Propietarios y composición actuales
+
+Además de Health, la API posee los 28 modelos de [servicios profesionales](../product/domain-model-professional-services.md). Cada recurso tiene Domain, handlers de Application, schemas/repositorios de Infrastructure y un módulo propietario de Presentation registrado explícitamente en ApiModule. Rutas, scope de datos, versiones y operaciones: [guía CRUD](../../src/apps/casepilot/casepilot-api/docs/professional-services-crud.md). El [ADR 0015](../adr/0015-professional-services-database-crud.md) registra el alcance exclusivamente de base de datos y la instrucción de endpoints públicos, con autenticación diferida; la selección de cuenta no es autorización.
+
 
 El host inicial es [CasePilot API](../../src/apps/casepilot/casepilot-api/README.md), una aplicación con composición NestJS y TypeORM como adaptador de persistencia. Mantiene una única `application/`, `domain/`, `infrastructure/` y `presentation/` bajo `src/`, sin división por contextos. Domain/Application mantienen contratos y modelos independientes del framework. `AppModule` configura los mecanismos globales e importa `ApiModule`, que registra los módulos de composición por recurso. Estos módulos construyen los handlers y enlazan los puertos con sus implementaciones, sin definir nuevas fronteras de dominio ni repetir capas.
 

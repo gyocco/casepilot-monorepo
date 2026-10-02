@@ -142,6 +142,32 @@ void test('BCK-004 checks direct call sites, including missing, extra and struct
   }
 });
 
+void test('BCK-004 resolves each receiver when different handlers have structurally identical execute signatures', () => {
+  const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+  project.createSourceFile(resolve(apiDirectory, 'src/application/users/models.ts'), `
+    export class ReadUserRequest { id = "user"; }
+    export class ReadUserResponse { found = true; }
+  `);
+  project.createSourceFile(resolve(apiDirectory, 'src/application/users/read-user.query.ts'), `
+    import { ReadUserRequest, ReadUserResponse } from './models.js';
+    export class ReadUserQuery {
+      execute(request: ReadUserRequest): ReadUserResponse { return new ReadUserResponse(); }
+    }
+  `);
+  const consumer = project.createSourceFile(resolve(apiDirectory, 'src/consumer.ts'), `
+    import { ReadCaseQuery } from './application/cases/read-case.query.js';
+    import { ReadCaseRequest } from './application/cases/models.js';
+    import { ReadUserQuery } from './application/users/read-user.query.js';
+    import { ReadUserRequest } from './application/users/models.js';
+    new ReadCaseQuery().execute(new ReadCaseRequest());
+    new ReadUserQuery().execute(new ReadUserRequest());
+  `);
+  assert.deepEqual(project.getPreEmitDiagnostics(), []);
+  assert.deepEqual(check(project), []);
+  consumer.replaceWithText(consumer.getFullText().replace('new ReadUserQuery().execute(new ReadUserRequest())', 'new ReadUserQuery().execute(new ReadCaseRequest())'));
+  assert.ok(check(project).some(finding => finding.rule === 'BCK-004' && finding.message.includes('ReadUserQuery')));
+});
+
 void test('a function-only handler file cannot silently escape class-based checks', () => {
   const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
   project.getSourceFileOrThrow('read-case.query.ts').replaceWithText('export function execute(): void {}');

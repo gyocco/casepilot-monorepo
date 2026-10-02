@@ -132,6 +132,10 @@ export function validateUseCases(project: Project, apiDirectory: string): Archit
         const call = member?.getParent();
         if (!member || !Node.isPropertyAccessExpression(member) || !call || !Node.isCallExpression(call)
           || call.getExpression() !== member) continue;
+        // TypeScript references can group structurally equivalent execute methods.
+        // Only this receiver's resolved declaration identifies a direct call to this handler.
+        const receiverMethod = member.getExpression().getType().getProperty(member.getName());
+        if (!receiverMethod?.getDeclarations().some(target => target === method)) continue;
         const argumentsList = call.getArguments();
         const argument = argumentsList[0];
         if (argumentsList.length !== 1 || !argument || Node.isSpreadElement(argument)

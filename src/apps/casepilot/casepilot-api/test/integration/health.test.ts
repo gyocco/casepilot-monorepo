@@ -76,6 +76,7 @@ void describe('CasePilot API health endpoints with isolated PostgreSQL', { concu
 
   void it('a missing table returns the standard UnexpectedError 500, keeps liveness available and recovers after migration', { timeout: 15_000 }, async () => {
     await fixture.database.undoLastMigration({ transaction: 'all' });
+    await fixture.database.undoLastMigration({ transaction: 'all' });
     try {
       const unavailable = await fixture.get('/health/database');
       await assertUnavailableResponse(unavailable);

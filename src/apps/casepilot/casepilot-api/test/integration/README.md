@@ -42,6 +42,9 @@ La integración compila fuentes y pruebas con `tsconfig.test.json`. Los tests im
 
 ## Cobertura inicial
 
+La suite [professional-services.test.ts](professional-services.test.ts) añade altas, obtención, PATCH, DELETE y paginación de los 28 recursos. Acredita FKs por cuenta, rechazo de referencias cruzadas, unicidad, rollback, conflictos concurrentes/versiones, ciclos de Folder, pertenencia de DocumentVersion, exactitud decimal/bigint/JSON, ausencia de drift y down/up de la migración. Los endpoints se ejercitan públicamente conforme al [ADR 0015](../../../../../../docs/adr/0015-professional-services-database-crud.md), sin simular autenticación todavía no implementada. El fixture usa las mismas migraciones reales y conserva el aislamiento de Testcontainers.
+
+
 | Escenario | Resultado comprobado |
 | --- | --- |
 | `GET /health` | `200`, JSON exacto `{ status: 'ok' }`, `Cache-Control: no-store`. |

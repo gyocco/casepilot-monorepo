@@ -1,0 +1,22 @@
+import type { Handler } from '@casepilot/cqrs';
+import { type UnitOfWork, NotFoundError } from '@casepilot/abstractions';
+import type { User } from '../../domain/entities/user.js';
+import { GetUserResponse, toUserResponse, type GetUserRequest } from './user.models.js';
+import type { CrudScope } from '../shared/crud-models.js';
+import { runPersistence } from '../shared/crud-persistence.js';
+import { validateTenant } from '../shared/crud-relations.js';
+import { validateId } from '../shared/crud-validation.js';
+
+export class GetUserHandler implements Handler<GetUserRequest, GetUserResponse> {
+  constructor(private readonly work: UnitOfWork<CrudScope<User>>) {}
+
+  async execute(request: GetUserRequest): Promise<GetUserResponse> {
+    return runPersistence(() => this.work.execute(async scope => {
+      await validateTenant(scope.references, request.businessAccountId, false);
+      validateId(request.id);
+      const entity = await scope.resource.getById(request.id, request.businessAccountId);
+      if (!entity) throw new NotFoundError();
+      return new GetUserResponse(toUserResponse(entity));
+    }, 'REPEATABLE READ'));
+  }
+}

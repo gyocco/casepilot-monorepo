@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
   title: CasePilot API
-  version: 0.3.0
-  description: Sondas técnicas iniciales del backend REST de CasePilot.
+  version: 0.4.0
+  description: CRUD público de los 28 modelos de servicios profesionales y sondas técnicas. Autenticación diferida; businessAccountId es selección de datos, no identidad verificada.
 servers:
   - url: http://127.0.0.1:3000
     description: Desarrollo local
@@ -67,6 +67,2076 @@ paths:
                         enum: [UNEXPECTED_ERROR]
         default:
           $ref: '#/components/responses/ApiError'
+  /users:
+    get:
+      operationId: listUsers
+      summary: Listado paginado de User
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","email","emailVerifiedAt","firstName","lastName","displayName","avatarUrl","locale","timezone","status","lastLoginAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/UsersPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateUserData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/UserItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /users/{id}:
+    parameters: [{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getUser
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/UserItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateUser
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateUserData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/UserItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteUser
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts:
+    get:
+      operationId: listBusinessAccounts
+      summary: Listado paginado de BusinessAccount
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","name","legalName","slug","type","taxId","email","phone","website","timezone","locale","currency","countryCode","status"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/BusinessAccountsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createBusinessAccount
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateBusinessAccountData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/BusinessAccountItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{id}:
+    parameters: [{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getBusinessAccount
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/BusinessAccountItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateBusinessAccount
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateBusinessAccountData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/BusinessAccountItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteBusinessAccount
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/members:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listMembers
+      summary: Listado paginado de Member
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","userId","role","status","title","professionalRegistration","hourlyRate","joinedAt","invitedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/MembersPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createMember
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateMemberData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/MemberItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/members/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getMember
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/MemberItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateMember
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateMemberData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/MemberItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteMember
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/external-parties:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listExternalParties
+      summary: Listado paginado de ExternalParty
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","type","displayName","firstName","lastName","legalName","taxId","email","phone","website","addressLine_1","addressLine_2","city","region","postalCode","countryCode","status"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExternalPartiesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createExternalParty
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateExternalPartyData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExternalPartyItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/external-parties/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getExternalParty
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExternalPartyItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateExternalParty
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateExternalPartyData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExternalPartyItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteExternalParty
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/cases:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCases
+      summary: Listado paginado de Case
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseTypeId","number","externalReference","title","status","priority","openedAt","closedAt","responsibleMemberId","billingType","hourlyRate","currency","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CasesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCase
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCaseData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/cases/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCase
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCase
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCaseData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCase
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/case-types:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCaseTypes
+      summary: Listado paginado de CaseType
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","name","code","isActive","defaultWorkflowId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseTypesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCaseType
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCaseTypeData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseTypeItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/case-types/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCaseType
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseTypeItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCaseType
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCaseTypeData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseTypeItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCaseType
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/case-external-parties:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCaseExternalParties
+      summary: Listado paginado de CaseExternalParty
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","role","isPrimary"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseExternalPartiesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCaseExternalParty
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCaseExternalPartyData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseExternalPartyItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/case-external-parties/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCaseExternalParty
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseExternalPartyItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCaseExternalParty
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCaseExternalPartyData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseExternalPartyItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCaseExternalParty
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/case-members:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCaseMembers
+      summary: Listado paginado de CaseMember
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","role","isPrimary","assignedAt","removedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseMembersPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCaseMember
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCaseMemberData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseMemberItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/case-members/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCaseMember
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseMemberItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCaseMember
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCaseMemberData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CaseMemberItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCaseMember
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/tasks:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listTasks
+      summary: Listado paginado de Task
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","title","status","priority","assignedMemberId","createdByMemberId","dueAt","completedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TasksPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createTask
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateTaskData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TaskItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/tasks/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getTask
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TaskItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateTask
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateTaskData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TaskItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteTask
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/events:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listEvents
+      summary: Listado paginado de Event
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","title","eventType","startsAt","endsAt","allDay","location","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/EventsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createEvent
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateEventData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/EventItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/events/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getEvent
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/EventItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateEvent
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateEventData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/EventItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteEvent
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/deadlines:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listDeadlines
+      summary: Listado paginado de Deadline
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","title","dueAt","status","responsibleMemberId","completedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeadlinesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createDeadline
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateDeadlineData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeadlineItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/deadlines/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getDeadline
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeadlineItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateDeadline
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateDeadlineData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeadlineItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteDeadline
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/folders:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listFolders
+      summary: Listado paginado de Folder
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","parentFolderId","name","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/FoldersPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createFolder
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateFolderData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/FolderItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/folders/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getFolder
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/FolderItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateFolder
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateFolderData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/FolderItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteFolder
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/documents:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listDocuments
+      summary: Listado paginado de Document
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","folderId","name","documentType","currentVersionId","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createDocument
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateDocumentData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/documents/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getDocument
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateDocument
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateDocumentData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteDocument
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/document-versions:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listDocumentVersions
+      summary: Listado paginado de DocumentVersion
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","documentId","versionNumber","storageKey","fileName","mimeType","sizeBytes","checksum","uploadedByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentVersionsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createDocumentVersion
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateDocumentVersionData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentVersionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/document-versions/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getDocumentVersion
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentVersionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateDocumentVersion
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateDocumentVersionData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DocumentVersionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteDocumentVersion
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/notes:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listNotes
+      summary: Listado paginado de Note
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","authorMemberId","title","isPrivate"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/NotesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createNote
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateNoteData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/NoteItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/notes/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getNote
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/NoteItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateNote
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateNoteData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/NoteItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteNote
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/comments:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listComments
+      summary: Listado paginado de Comment
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","authorMemberId","targetType","targetId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommentsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createComment
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCommentData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/comments/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getComment
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateComment
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCommentData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteComment
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/communications:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCommunications
+      summary: Listado paginado de Communication
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","memberId","type","direction","subject","occurredAt","externalReference"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommunicationsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCommunication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCommunicationData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommunicationItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/communications/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCommunication
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommunicationItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCommunication
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCommunicationData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CommunicationItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCommunication
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/activities:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listActivities
+      summary: Listado paginado de Activity
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","actorMemberId","action","entityType","entityId","caseId","occurredAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ActivitiesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createActivity
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateActivityData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ActivityItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/activities/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getActivity
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ActivityItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateActivity
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateActivityData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ActivityItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteActivity
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/time-entries:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listTimeEntries
+      summary: Listado paginado de TimeEntry
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","taskId","startedAt","endedAt","durationMinutes","billable","hourlyRate","currency","invoiceLineId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TimeEntriesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createTimeEntry
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateTimeEntryData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TimeEntryItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/time-entries/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getTimeEntry
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TimeEntryItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateTimeEntry
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateTimeEntryData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/TimeEntryItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteTimeEntry
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/expenses:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listExpenses
+      summary: Listado paginado de Expense
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","description","amount","currency","occurredOn","billable","invoiceLineId","documentId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExpensesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createExpense
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateExpenseData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExpenseItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/expenses/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getExpense
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExpenseItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateExpense
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateExpenseData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/ExpenseItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteExpense
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/invoices:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listInvoices
+      summary: Listado paginado de Invoice
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","externalPartyId","caseId","number","status","currency","issueDate","dueDate","subtotal","taxAmount","total","balanceDue"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoicesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createInvoice
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateInvoiceData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/invoices/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getInvoice
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateInvoice
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateInvoiceData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteInvoice
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/invoice-lines:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listInvoiceLines
+      summary: Listado paginado de InvoiceLine
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","invoiceId","caseId","description","quantity","unitPrice","taxRate","subtotal","total","sortOrder"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceLinesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createInvoiceLine
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateInvoiceLineData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceLineItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/invoice-lines/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getInvoiceLine
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceLineItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateInvoiceLine
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateInvoiceLineData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/InvoiceLineItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteInvoiceLine
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/payments:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listPayments
+      summary: Listado paginado de Payment
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","invoiceId","amount","currency","paymentMethod","reference","paidAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/PaymentsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createPayment
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreatePaymentData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/PaymentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/payments/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getPayment
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/PaymentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updatePayment
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdatePaymentData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/PaymentItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deletePayment
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/custom-field-definitions:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCustomFieldDefinitions
+      summary: Listado paginado de CustomFieldDefinition
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","entityType","caseTypeId","name","key","dataType","required","sortOrder","isActive"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldDefinitionsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCustomFieldDefinition
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCustomFieldDefinitionData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldDefinitionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/custom-field-definitions/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCustomFieldDefinition
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldDefinitionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCustomFieldDefinition
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCustomFieldDefinitionData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldDefinitionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCustomFieldDefinition
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/custom-field-values:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listCustomFieldValues
+      summary: Listado paginado de CustomFieldValue
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","customFieldDefinitionId","entityType","entityId","valueNumber","valueDate","valueBoolean"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldValuesPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createCustomFieldValue
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateCustomFieldValueData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldValueItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/custom-field-values/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getCustomFieldValue
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldValueItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCustomFieldValue
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateCustomFieldValueData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/CustomFieldValueItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteCustomFieldValue
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/status-definitions:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listStatusDefinitions
+      summary: Listado paginado de StatusDefinition
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","entityType","caseTypeId","name","code","category","sortOrder","isInitial","isTerminal","isActive"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/StatusDefinitionsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createStatusDefinition
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateStatusDefinitionData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/StatusDefinitionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/status-definitions/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getStatusDefinition
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/StatusDefinitionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateStatusDefinition
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateStatusDefinitionData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/StatusDefinitionItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteStatusDefinition
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/workflows:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listWorkflows
+      summary: Listado paginado de Workflow
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","name","isActive"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createWorkflow
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateWorkflowData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/workflows/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getWorkflow
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateWorkflow
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateWorkflowData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteWorkflow
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/workflow-steps:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: listWorkflowSteps
+      summary: Listado paginado de WorkflowStep
+      security: []
+      parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","workflowId","statusDefinitionId","name","sortOrder","isInitial","isTerminal"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowStepsPageResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    post:
+      operationId: createWorkflowStep
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/CreateWorkflowStepData"}
+      responses:
+        '201':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowStepItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+  /business-accounts/{businessAccountId}/workflow-steps/{id}:
+    parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
+    get:
+      operationId: getWorkflowStep
+      security: []
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowStepItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateWorkflowStep
+      description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {"$ref":"#/components/schemas/UpdateWorkflowStepData"}
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/WorkflowStepItemResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
+    delete:
+      operationId: deleteWorkflowStep
+      description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
+      security: []
+      parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
+      responses:
+        '200':
+          description: Operación completada
+          content:
+            application/json:
+              schema: {"$ref":"#/components/schemas/DeleteResourceResponse"}
+        default:
+          $ref: '#/components/responses/ApiError'
 components:
   responses:
     ApiError:
@@ -81,6 +2151,1760 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
   schemas:
+    User:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","email","emailVerifiedAt","firstName","lastName","displayName","avatarUrl","locale","timezone","status","lastLoginAt"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        email: {"type":"string","maxLength":255,"minLength":1}
+        emailVerifiedAt: {"type":"string","format":"date-time","nullable":true}
+        firstName: {"type":"string","maxLength":255,"minLength":1}
+        lastName: {"type":"string","maxLength":255,"minLength":1}
+        displayName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        avatarUrl: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        locale: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        timezone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        lastLoginAt: {"type":"string","format":"date-time","nullable":true}
+    CreateUserData:
+      type: object
+      additionalProperties: false
+      required: ["email","firstName","lastName","status"]
+      properties:
+        email: {"type":"string","maxLength":255,"minLength":1}
+        emailVerifiedAt: {"type":"string","format":"date-time","nullable":true}
+        firstName: {"type":"string","maxLength":255,"minLength":1}
+        lastName: {"type":"string","maxLength":255,"minLength":1}
+        displayName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        avatarUrl: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        locale: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        timezone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        lastLoginAt: {"type":"string","format":"date-time","nullable":true}
+    UpdateUserData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        email: {"type":"string","maxLength":255,"minLength":1}
+        emailVerifiedAt: {"type":"string","format":"date-time","nullable":true}
+        firstName: {"type":"string","maxLength":255,"minLength":1}
+        lastName: {"type":"string","maxLength":255,"minLength":1}
+        displayName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        avatarUrl: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        locale: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        timezone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        lastLoginAt: {"type":"string","format":"date-time","nullable":true}
+    UserItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/User"}
+    UsersPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/User"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    BusinessAccount:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","name","legalName","slug","type","taxId","email","phone","website","timezone","locale","currency","countryCode","status","settings"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        legalName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        slug: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        taxId: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        email: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        phone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        website: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        timezone: {"type":"string","maxLength":255,"minLength":1}
+        locale: {"type":"string","maxLength":255,"minLength":1}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        countryCode: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{2}$"}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["ACTIVE","SUSPENDED","CLOSED"]}
+        settings: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+    CreateBusinessAccountData:
+      type: object
+      additionalProperties: false
+      required: ["name","timezone","locale","currency","countryCode","status"]
+      properties:
+        name: {"type":"string","maxLength":255,"minLength":1}
+        legalName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        slug: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        taxId: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        email: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        phone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        website: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        timezone: {"type":"string","maxLength":255,"minLength":1}
+        locale: {"type":"string","maxLength":255,"minLength":1}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        countryCode: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{2}$"}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["ACTIVE","SUSPENDED","CLOSED"]}
+        settings: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+    UpdateBusinessAccountData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        legalName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        slug: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        taxId: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        email: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        phone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        website: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        timezone: {"type":"string","maxLength":255,"minLength":1}
+        locale: {"type":"string","maxLength":255,"minLength":1}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        countryCode: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{2}$"}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["ACTIVE","SUSPENDED","CLOSED"]}
+        settings: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+    BusinessAccountItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/BusinessAccount"}
+    BusinessAccountsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/BusinessAccount"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Member:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","userId","role","status","title","professionalRegistration","hourlyRate","joinedAt","invitedAt"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        userId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["INVITED","ACTIVE","SUSPENDED","REMOVED"]}
+        title: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        professionalRegistration: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        joinedAt: {"type":"string","format":"date-time","nullable":true}
+        invitedAt: {"type":"string","format":"date-time","nullable":true}
+    CreateMemberData:
+      type: object
+      additionalProperties: false
+      required: ["userId","role","status"]
+      properties:
+        userId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["INVITED","ACTIVE","SUSPENDED","REMOVED"]}
+        title: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        professionalRegistration: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        joinedAt: {"type":"string","format":"date-time","nullable":true}
+        invitedAt: {"type":"string","format":"date-time","nullable":true}
+    UpdateMemberData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        userId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["INVITED","ACTIVE","SUSPENDED","REMOVED"]}
+        title: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        professionalRegistration: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        joinedAt: {"type":"string","format":"date-time","nullable":true}
+        invitedAt: {"type":"string","format":"date-time","nullable":true}
+    MemberItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Member"}
+    MembersPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Member"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    ExternalParty:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","type","displayName","firstName","lastName","legalName","taxId","email","phone","website","addressLine_1","addressLine_2","city","region","postalCode","countryCode","notes","status"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"enum":["PERSON","ORGANIZATION"]}
+        displayName: {"type":"string","maxLength":255,"minLength":1}
+        firstName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        lastName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        legalName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        taxId: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        email: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        phone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        website: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        addressLine_1: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        addressLine_2: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        city: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        region: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        postalCode: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        countryCode: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{2}$"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["ACTIVE","INACTIVE","ARCHIVED"]}
+    CreateExternalPartyData:
+      type: object
+      additionalProperties: false
+      required: ["type","displayName"]
+      properties:
+        type: {"type":"string","maxLength":255,"minLength":1,"enum":["PERSON","ORGANIZATION"]}
+        displayName: {"type":"string","maxLength":255,"minLength":1}
+        firstName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        lastName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        legalName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        taxId: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        email: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        phone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        website: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        addressLine_1: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        addressLine_2: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        city: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        region: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        postalCode: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        countryCode: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{2}$"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["ACTIVE","INACTIVE","ARCHIVED"]}
+    UpdateExternalPartyData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        type: {"type":"string","maxLength":255,"minLength":1,"enum":["PERSON","ORGANIZATION"]}
+        displayName: {"type":"string","maxLength":255,"minLength":1}
+        firstName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        lastName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        legalName: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        taxId: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        email: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        phone: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        website: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        addressLine_1: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        addressLine_2: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        city: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        region: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        postalCode: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        countryCode: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{2}$"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["ACTIVE","INACTIVE","ARCHIVED"]}
+    ExternalPartyItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/ExternalParty"}
+    ExternalPartiesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/ExternalParty"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Case:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseTypeId","number","externalReference","title","description","status","priority","openedAt","closedAt","responsibleMemberId","billingType","hourlyRate","currency","createdByMemberId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        number: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        externalReference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        priority: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["LOW","NORMAL","HIGH","URGENT"]}
+        openedAt: {"type":"string","format":"date-time","nullable":true}
+        closedAt: {"type":"string","format":"date-time","nullable":true}
+        responsibleMemberId: {"type":"string","format":"uuid","nullable":true}
+        billingType: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["HOURLY","FIXED","RETAINER","NON_BILLABLE"]}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        currency: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{3}$"}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    CreateCaseData:
+      type: object
+      additionalProperties: false
+      required: ["title","status","createdByMemberId"]
+      properties:
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        number: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        externalReference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        priority: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["LOW","NORMAL","HIGH","URGENT"]}
+        openedAt: {"type":"string","format":"date-time","nullable":true}
+        closedAt: {"type":"string","format":"date-time","nullable":true}
+        responsibleMemberId: {"type":"string","format":"uuid","nullable":true}
+        billingType: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["HOURLY","FIXED","RETAINER","NON_BILLABLE"]}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        currency: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{3}$"}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    UpdateCaseData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        number: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        externalReference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        priority: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["LOW","NORMAL","HIGH","URGENT"]}
+        openedAt: {"type":"string","format":"date-time","nullable":true}
+        closedAt: {"type":"string","format":"date-time","nullable":true}
+        responsibleMemberId: {"type":"string","format":"uuid","nullable":true}
+        billingType: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["HOURLY","FIXED","RETAINER","NON_BILLABLE"]}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        currency: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{3}$"}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    CaseItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Case"}
+    CasesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Case"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    CaseType:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","name","description","code","isActive","defaultWorkflowId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        code: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        isActive: {"type":"boolean"}
+        defaultWorkflowId: {"type":"string","format":"uuid","nullable":true}
+    CreateCaseTypeData:
+      type: object
+      additionalProperties: false
+      required: ["name","isActive"]
+      properties:
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        code: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        isActive: {"type":"boolean"}
+        defaultWorkflowId: {"type":"string","format":"uuid","nullable":true}
+    UpdateCaseTypeData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        code: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        isActive: {"type":"boolean"}
+        defaultWorkflowId: {"type":"string","format":"uuid","nullable":true}
+    CaseTypeItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/CaseType"}
+    CaseTypesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/CaseType"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    CaseExternalParty:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","role","isPrimary","notes"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid"}
+        externalPartyId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1}
+        isPrimary: {"type":"boolean"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    CreateCaseExternalPartyData:
+      type: object
+      additionalProperties: false
+      required: ["caseId","externalPartyId","role","isPrimary"]
+      properties:
+        caseId: {"type":"string","format":"uuid"}
+        externalPartyId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1}
+        isPrimary: {"type":"boolean"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    UpdateCaseExternalPartyData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid"}
+        externalPartyId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1}
+        isPrimary: {"type":"boolean"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    CaseExternalPartyItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/CaseExternalParty"}
+    CaseExternalPartiesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/CaseExternalParty"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    CaseMember:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","role","isPrimary","assignedAt","removedAt"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        isPrimary: {"type":"boolean"}
+        assignedAt: {"type":"string","format":"date-time"}
+        removedAt: {"type":"string","format":"date-time","nullable":true}
+    CreateCaseMemberData:
+      type: object
+      additionalProperties: false
+      required: ["caseId","memberId","isPrimary","assignedAt"]
+      properties:
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        isPrimary: {"type":"boolean"}
+        assignedAt: {"type":"string","format":"date-time"}
+        removedAt: {"type":"string","format":"date-time","nullable":true}
+    UpdateCaseMemberData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid"}
+        role: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        isPrimary: {"type":"boolean"}
+        assignedAt: {"type":"string","format":"date-time"}
+        removedAt: {"type":"string","format":"date-time","nullable":true}
+    CaseMemberItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/CaseMember"}
+    CaseMembersPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/CaseMember"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Task:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","title","description","status","priority","assignedMemberId","createdByMemberId","dueAt","completedAt"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        priority: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        assignedMemberId: {"type":"string","format":"uuid","nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+        dueAt: {"type":"string","format":"date-time","nullable":true}
+        completedAt: {"type":"string","format":"date-time","nullable":true}
+    CreateTaskData:
+      type: object
+      additionalProperties: false
+      required: ["title","status","createdByMemberId"]
+      properties:
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        priority: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        assignedMemberId: {"type":"string","format":"uuid","nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+        dueAt: {"type":"string","format":"date-time","nullable":true}
+        completedAt: {"type":"string","format":"date-time","nullable":true}
+    UpdateTaskData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        status: {"type":"string","maxLength":255,"minLength":1}
+        priority: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        assignedMemberId: {"type":"string","format":"uuid","nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+        dueAt: {"type":"string","format":"date-time","nullable":true}
+        completedAt: {"type":"string","format":"date-time","nullable":true}
+    TaskItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Task"}
+    TasksPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Task"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Event:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","title","description","eventType","startsAt","endsAt","allDay","location","createdByMemberId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        eventType: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        startsAt: {"type":"string","format":"date-time"}
+        endsAt: {"type":"string","format":"date-time","nullable":true}
+        allDay: {"type":"boolean"}
+        location: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    CreateEventData:
+      type: object
+      additionalProperties: false
+      required: ["title","startsAt","allDay","createdByMemberId"]
+      properties:
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        eventType: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        startsAt: {"type":"string","format":"date-time"}
+        endsAt: {"type":"string","format":"date-time","nullable":true}
+        allDay: {"type":"boolean"}
+        location: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    UpdateEventData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        eventType: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        startsAt: {"type":"string","format":"date-time"}
+        endsAt: {"type":"string","format":"date-time","nullable":true}
+        allDay: {"type":"boolean"}
+        location: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    EventItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Event"}
+    EventsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Event"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Deadline:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","title","dueAt","status","responsibleMemberId","completedAt","notes"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid"}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        dueAt: {"type":"string","format":"date-time"}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["PENDING","COMPLETED","MISSED","CANCELLED"]}
+        responsibleMemberId: {"type":"string","format":"uuid","nullable":true}
+        completedAt: {"type":"string","format":"date-time","nullable":true}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    CreateDeadlineData:
+      type: object
+      additionalProperties: false
+      required: ["caseId","title","dueAt","status"]
+      properties:
+        caseId: {"type":"string","format":"uuid"}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        dueAt: {"type":"string","format":"date-time"}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["PENDING","COMPLETED","MISSED","CANCELLED"]}
+        responsibleMemberId: {"type":"string","format":"uuid","nullable":true}
+        completedAt: {"type":"string","format":"date-time","nullable":true}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    UpdateDeadlineData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid"}
+        title: {"type":"string","maxLength":255,"minLength":1}
+        dueAt: {"type":"string","format":"date-time"}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["PENDING","COMPLETED","MISSED","CANCELLED"]}
+        responsibleMemberId: {"type":"string","format":"uuid","nullable":true}
+        completedAt: {"type":"string","format":"date-time","nullable":true}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    DeadlineItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Deadline"}
+    DeadlinesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Deadline"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Folder:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","parentFolderId","name","createdByMemberId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        parentFolderId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    CreateFolderData:
+      type: object
+      additionalProperties: false
+      required: ["name","createdByMemberId"]
+      properties:
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        parentFolderId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    UpdateFolderData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        parentFolderId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    FolderItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Folder"}
+    FoldersPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Folder"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Document:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","folderId","name","description","documentType","currentVersionId","createdByMemberId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        folderId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        documentType: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        currentVersionId: {"type":"string","format":"uuid","nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    CreateDocumentData:
+      type: object
+      additionalProperties: false
+      required: ["name","createdByMemberId"]
+      properties:
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        folderId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        documentType: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        currentVersionId: {"type":"string","format":"uuid","nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    UpdateDocumentData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        folderId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        documentType: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        currentVersionId: {"type":"string","format":"uuid","nullable":true}
+        createdByMemberId: {"type":"string","format":"uuid"}
+    DocumentItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Document"}
+    DocumentsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Document"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    DocumentVersion:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","documentId","versionNumber","storageKey","fileName","mimeType","sizeBytes","checksum","uploadedByMemberId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        documentId: {"type":"string","format":"uuid"}
+        versionNumber: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        storageKey: {"type":"string","maxLength":255,"minLength":1}
+        fileName: {"type":"string","maxLength":255,"minLength":1}
+        mimeType: {"type":"string","maxLength":255,"minLength":1}
+        sizeBytes: {"type":"string","pattern":"^\\d{1,19}$","description":"Entero exacto entre 0 y 9223372036854775807, representado como string."}
+        checksum: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        uploadedByMemberId: {"type":"string","format":"uuid"}
+    CreateDocumentVersionData:
+      type: object
+      additionalProperties: false
+      required: ["documentId","versionNumber","storageKey","fileName","mimeType","sizeBytes","uploadedByMemberId"]
+      properties:
+        documentId: {"type":"string","format":"uuid"}
+        versionNumber: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        storageKey: {"type":"string","maxLength":255,"minLength":1}
+        fileName: {"type":"string","maxLength":255,"minLength":1}
+        mimeType: {"type":"string","maxLength":255,"minLength":1}
+        sizeBytes: {"type":"string","pattern":"^\\d{1,19}$","description":"Entero exacto entre 0 y 9223372036854775807, representado como string."}
+        checksum: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        uploadedByMemberId: {"type":"string","format":"uuid"}
+    UpdateDocumentVersionData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        documentId: {"type":"string","format":"uuid"}
+        versionNumber: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        storageKey: {"type":"string","maxLength":255,"minLength":1}
+        fileName: {"type":"string","maxLength":255,"minLength":1}
+        mimeType: {"type":"string","maxLength":255,"minLength":1}
+        sizeBytes: {"type":"string","pattern":"^\\d{1,19}$","description":"Entero exacto entre 0 y 9223372036854775807, representado como string."}
+        checksum: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        uploadedByMemberId: {"type":"string","format":"uuid"}
+    DocumentVersionItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/DocumentVersion"}
+    DocumentVersionsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/DocumentVersion"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Note:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","authorMemberId","title","body","isPrivate"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        authorMemberId: {"type":"string","format":"uuid"}
+        title: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        body: {"type":"string","maxLength":100000}
+        isPrivate: {"type":"boolean"}
+    CreateNoteData:
+      type: object
+      additionalProperties: false
+      required: ["authorMemberId","body","isPrivate"]
+      properties:
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        authorMemberId: {"type":"string","format":"uuid"}
+        title: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        body: {"type":"string","maxLength":100000}
+        isPrivate: {"type":"boolean"}
+    UpdateNoteData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        authorMemberId: {"type":"string","format":"uuid"}
+        title: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        body: {"type":"string","maxLength":100000}
+        isPrivate: {"type":"boolean"}
+    NoteItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Note"}
+    NotesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Note"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Comment:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","authorMemberId","targetType","targetId","body"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        authorMemberId: {"type":"string","format":"uuid"}
+        targetType: {"type":"string","maxLength":255,"minLength":1}
+        targetId: {"type":"string","format":"uuid"}
+        body: {"type":"string","maxLength":100000}
+    CreateCommentData:
+      type: object
+      additionalProperties: false
+      required: ["authorMemberId","targetType","targetId","body"]
+      properties:
+        authorMemberId: {"type":"string","format":"uuid"}
+        targetType: {"type":"string","maxLength":255,"minLength":1}
+        targetId: {"type":"string","format":"uuid"}
+        body: {"type":"string","maxLength":100000}
+    UpdateCommentData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        authorMemberId: {"type":"string","format":"uuid"}
+        targetType: {"type":"string","maxLength":255,"minLength":1}
+        targetId: {"type":"string","format":"uuid"}
+        body: {"type":"string","maxLength":100000}
+    CommentItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Comment"}
+    CommentsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Comment"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Communication:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","memberId","type","direction","subject","body","occurredAt","externalReference"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        memberId: {"type":"string","format":"uuid","nullable":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"enum":["EMAIL","PHONE","MEETING","MESSAGE","LETTER"]}
+        direction: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["INBOUND","OUTBOUND"]}
+        subject: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        body: {"type":"string","maxLength":100000,"nullable":true}
+        occurredAt: {"type":"string","format":"date-time"}
+        externalReference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+    CreateCommunicationData:
+      type: object
+      additionalProperties: false
+      required: ["type","occurredAt"]
+      properties:
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        memberId: {"type":"string","format":"uuid","nullable":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"enum":["EMAIL","PHONE","MEETING","MESSAGE","LETTER"]}
+        direction: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["INBOUND","OUTBOUND"]}
+        subject: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        body: {"type":"string","maxLength":100000,"nullable":true}
+        occurredAt: {"type":"string","format":"date-time"}
+        externalReference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+    UpdateCommunicationData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        externalPartyId: {"type":"string","format":"uuid","nullable":true}
+        memberId: {"type":"string","format":"uuid","nullable":true}
+        type: {"type":"string","maxLength":255,"minLength":1,"enum":["EMAIL","PHONE","MEETING","MESSAGE","LETTER"]}
+        direction: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"enum":["INBOUND","OUTBOUND"]}
+        subject: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        body: {"type":"string","maxLength":100000,"nullable":true}
+        occurredAt: {"type":"string","format":"date-time"}
+        externalReference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+    CommunicationItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Communication"}
+    CommunicationsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Communication"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Activity:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","actorMemberId","action","entityType","entityId","caseId","metadata","occurredAt"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        actorMemberId: {"type":"string","format":"uuid","nullable":true}
+        action: {"type":"string","maxLength":255,"minLength":1}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        entityId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        metadata: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+        occurredAt: {"type":"string","format":"date-time"}
+    CreateActivityData:
+      type: object
+      additionalProperties: false
+      required: ["action","entityType","entityId","occurredAt"]
+      properties:
+        actorMemberId: {"type":"string","format":"uuid","nullable":true}
+        action: {"type":"string","maxLength":255,"minLength":1}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        entityId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        metadata: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+        occurredAt: {"type":"string","format":"date-time"}
+    UpdateActivityData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        actorMemberId: {"type":"string","format":"uuid","nullable":true}
+        action: {"type":"string","maxLength":255,"minLength":1}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        entityId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        metadata: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+        occurredAt: {"type":"string","format":"date-time"}
+    ActivityItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Activity"}
+    ActivitiesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Activity"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    TimeEntry:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","taskId","description","startedAt","endedAt","durationMinutes","billable","hourlyRate","currency","invoiceLineId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid"}
+        taskId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        startedAt: {"type":"string","format":"date-time","nullable":true}
+        endedAt: {"type":"string","format":"date-time","nullable":true}
+        durationMinutes: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        billable: {"type":"boolean"}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        currency: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{3}$"}
+        invoiceLineId: {"type":"string","format":"uuid","nullable":true}
+    CreateTimeEntryData:
+      type: object
+      additionalProperties: false
+      required: ["caseId","memberId","durationMinutes","billable"]
+      properties:
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid"}
+        taskId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        startedAt: {"type":"string","format":"date-time","nullable":true}
+        endedAt: {"type":"string","format":"date-time","nullable":true}
+        durationMinutes: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        billable: {"type":"boolean"}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        currency: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{3}$"}
+        invoiceLineId: {"type":"string","format":"uuid","nullable":true}
+    UpdateTimeEntryData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid"}
+        taskId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        startedAt: {"type":"string","format":"date-time","nullable":true}
+        endedAt: {"type":"string","format":"date-time","nullable":true}
+        durationMinutes: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        billable: {"type":"boolean"}
+        hourlyRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        currency: {"type":"string","maxLength":255,"minLength":1,"nullable":true,"pattern":"^[A-Z]{3}$"}
+        invoiceLineId: {"type":"string","format":"uuid","nullable":true}
+    TimeEntryItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/TimeEntry"}
+    TimeEntriesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/TimeEntry"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Expense:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","description","amount","currency","occurredOn","billable","invoiceLineId","documentId"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":255,"minLength":1}
+        amount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        occurredOn: {"type":"string","format":"date"}
+        billable: {"type":"boolean"}
+        invoiceLineId: {"type":"string","format":"uuid","nullable":true}
+        documentId: {"type":"string","format":"uuid","nullable":true}
+    CreateExpenseData:
+      type: object
+      additionalProperties: false
+      required: ["caseId","description","amount","currency","occurredOn","billable"]
+      properties:
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":255,"minLength":1}
+        amount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        occurredOn: {"type":"string","format":"date"}
+        billable: {"type":"boolean"}
+        invoiceLineId: {"type":"string","format":"uuid","nullable":true}
+        documentId: {"type":"string","format":"uuid","nullable":true}
+    UpdateExpenseData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        caseId: {"type":"string","format":"uuid"}
+        memberId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":255,"minLength":1}
+        amount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        occurredOn: {"type":"string","format":"date"}
+        billable: {"type":"boolean"}
+        invoiceLineId: {"type":"string","format":"uuid","nullable":true}
+        documentId: {"type":"string","format":"uuid","nullable":true}
+    ExpenseItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Expense"}
+    ExpensesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Expense"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Invoice:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","externalPartyId","caseId","number","status","currency","issueDate","dueDate","subtotal","taxAmount","total","balanceDue","notes"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        externalPartyId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        number: {"type":"string","maxLength":255,"minLength":1}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["DRAFT","ISSUED","PAID","VOID","OVERDUE"]}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        issueDate: {"type":"string","format":"date"}
+        dueDate: {"type":"string","format":"date","nullable":true}
+        subtotal: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        taxAmount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        total: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        balanceDue: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    CreateInvoiceData:
+      type: object
+      additionalProperties: false
+      required: ["externalPartyId","number","status","currency","issueDate","subtotal","taxAmount","total","balanceDue"]
+      properties:
+        externalPartyId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        number: {"type":"string","maxLength":255,"minLength":1}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["DRAFT","ISSUED","PAID","VOID","OVERDUE"]}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        issueDate: {"type":"string","format":"date"}
+        dueDate: {"type":"string","format":"date","nullable":true}
+        subtotal: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        taxAmount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        total: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        balanceDue: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    UpdateInvoiceData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        externalPartyId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        number: {"type":"string","maxLength":255,"minLength":1}
+        status: {"type":"string","maxLength":255,"minLength":1,"enum":["DRAFT","ISSUED","PAID","VOID","OVERDUE"]}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        issueDate: {"type":"string","format":"date"}
+        dueDate: {"type":"string","format":"date","nullable":true}
+        subtotal: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        taxAmount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        total: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        balanceDue: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    InvoiceItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Invoice"}
+    InvoicesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Invoice"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    InvoiceLine:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","invoiceId","caseId","description","quantity","unitPrice","taxRate","subtotal","total","sortOrder"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        invoiceId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":255,"minLength":1}
+        quantity: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        unitPrice: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        taxRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        subtotal: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        total: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+    CreateInvoiceLineData:
+      type: object
+      additionalProperties: false
+      required: ["invoiceId","description","quantity","unitPrice","subtotal","total","sortOrder"]
+      properties:
+        invoiceId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":255,"minLength":1}
+        quantity: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        unitPrice: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        taxRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        subtotal: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        total: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+    UpdateInvoiceLineData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        invoiceId: {"type":"string","format":"uuid"}
+        caseId: {"type":"string","format":"uuid","nullable":true}
+        description: {"type":"string","maxLength":255,"minLength":1}
+        quantity: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        unitPrice: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        taxRate: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        subtotal: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        total: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+    InvoiceLineItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/InvoiceLine"}
+    InvoiceLinesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/InvoiceLine"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Payment:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","invoiceId","amount","currency","paymentMethod","reference","paidAt","notes"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        invoiceId: {"type":"string","format":"uuid"}
+        amount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        paymentMethod: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        reference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        paidAt: {"type":"string","format":"date-time"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    CreatePaymentData:
+      type: object
+      additionalProperties: false
+      required: ["invoiceId","amount","currency","paidAt"]
+      properties:
+        invoiceId: {"type":"string","format":"uuid"}
+        amount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        paymentMethod: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        reference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        paidAt: {"type":"string","format":"date-time"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    UpdatePaymentData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        invoiceId: {"type":"string","format":"uuid"}
+        amount: {"type":"string","pattern":"^\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string."}
+        currency: {"type":"string","maxLength":255,"minLength":1,"pattern":"^[A-Z]{3}$"}
+        paymentMethod: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        reference: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        paidAt: {"type":"string","format":"date-time"}
+        notes: {"type":"string","maxLength":100000,"nullable":true}
+    PaymentItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Payment"}
+    PaymentsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Payment"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    CustomFieldDefinition:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","entityType","caseTypeId","name","key","dataType","required","configuration","sortOrder","isActive"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        key: {"type":"string","maxLength":255,"minLength":1}
+        dataType: {"type":"string","maxLength":255,"minLength":1}
+        required: {"type":"boolean"}
+        configuration: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isActive: {"type":"boolean"}
+    CreateCustomFieldDefinitionData:
+      type: object
+      additionalProperties: false
+      required: ["entityType","name","key","dataType","required","sortOrder","isActive"]
+      properties:
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        key: {"type":"string","maxLength":255,"minLength":1}
+        dataType: {"type":"string","maxLength":255,"minLength":1}
+        required: {"type":"boolean"}
+        configuration: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isActive: {"type":"boolean"}
+    UpdateCustomFieldDefinitionData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        key: {"type":"string","maxLength":255,"minLength":1}
+        dataType: {"type":"string","maxLength":255,"minLength":1}
+        required: {"type":"boolean"}
+        configuration: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isActive: {"type":"boolean"}
+    CustomFieldDefinitionItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/CustomFieldDefinition"}
+    CustomFieldDefinitionsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/CustomFieldDefinition"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    CustomFieldValue:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","customFieldDefinitionId","entityType","entityId","valueText","valueNumber","valueDate","valueBoolean","valueJson"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        customFieldDefinitionId: {"type":"string","format":"uuid"}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        entityId: {"type":"string","format":"uuid"}
+        valueText: {"type":"string","maxLength":100000,"nullable":true}
+        valueNumber: {"type":"string","pattern":"^-?\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        valueDate: {"type":"string","format":"date-time","nullable":true}
+        valueBoolean: {"type":"boolean","nullable":true}
+        valueJson: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+    CreateCustomFieldValueData:
+      type: object
+      additionalProperties: false
+      required: ["customFieldDefinitionId","entityType","entityId"]
+      properties:
+        customFieldDefinitionId: {"type":"string","format":"uuid"}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        entityId: {"type":"string","format":"uuid"}
+        valueText: {"type":"string","maxLength":100000,"nullable":true}
+        valueNumber: {"type":"string","pattern":"^-?\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        valueDate: {"type":"string","format":"date-time","nullable":true}
+        valueBoolean: {"type":"boolean","nullable":true}
+        valueJson: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+    UpdateCustomFieldValueData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        customFieldDefinitionId: {"type":"string","format":"uuid"}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        entityId: {"type":"string","format":"uuid"}
+        valueText: {"type":"string","maxLength":100000,"nullable":true}
+        valueNumber: {"type":"string","pattern":"^-?\\d{1,16}(\\.\\d{1,4})?$","description":"Decimal exacto PostgreSQL numeric(20,4), representado como string.","nullable":true}
+        valueDate: {"type":"string","format":"date-time","nullable":true}
+        valueBoolean: {"type":"boolean","nullable":true}
+        valueJson: {"description":"Valor JSON; profundidad máxima 20.","nullable":true}
+    CustomFieldValueItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/CustomFieldValue"}
+    CustomFieldValuesPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/CustomFieldValue"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    StatusDefinition:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","entityType","caseTypeId","name","code","category","sortOrder","isInitial","isTerminal","isActive"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        code: {"type":"string","maxLength":255,"minLength":1}
+        category: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isInitial: {"type":"boolean"}
+        isTerminal: {"type":"boolean"}
+        isActive: {"type":"boolean"}
+    CreateStatusDefinitionData:
+      type: object
+      additionalProperties: false
+      required: ["entityType","name","code","sortOrder","isInitial","isTerminal","isActive"]
+      properties:
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        code: {"type":"string","maxLength":255,"minLength":1}
+        category: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isInitial: {"type":"boolean"}
+        isTerminal: {"type":"boolean"}
+        isActive: {"type":"boolean"}
+    UpdateStatusDefinitionData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        entityType: {"type":"string","maxLength":255,"minLength":1}
+        caseTypeId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        code: {"type":"string","maxLength":255,"minLength":1}
+        category: {"type":"string","maxLength":255,"minLength":1,"nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isInitial: {"type":"boolean"}
+        isTerminal: {"type":"boolean"}
+        isActive: {"type":"boolean"}
+    StatusDefinitionItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/StatusDefinition"}
+    StatusDefinitionsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/StatusDefinition"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    Workflow:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","name","description","isActive"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        isActive: {"type":"boolean"}
+    CreateWorkflowData:
+      type: object
+      additionalProperties: false
+      required: ["name","isActive"]
+      properties:
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        isActive: {"type":"boolean"}
+    UpdateWorkflowData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        isActive: {"type":"boolean"}
+    WorkflowItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/Workflow"}
+    WorkflowsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/Workflow"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    WorkflowStep:
+      type: object
+      additionalProperties: false
+      required: ["id","createdAt","updatedAt","version","businessAccountId","workflowId","statusDefinitionId","name","description","sortOrder","isInitial","isTerminal"]
+      properties:
+        id: {"type":"string","format":"uuid","readOnly":true}
+        createdAt: {"type":"string","format":"date-time","readOnly":true}
+        updatedAt: {"type":"string","format":"date-time","readOnly":true}
+        version: {"type":"integer","minimum":1,"readOnly":true}
+        businessAccountId: {"type":"string","format":"uuid","readOnly":true}
+        workflowId: {"type":"string","format":"uuid"}
+        statusDefinitionId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isInitial: {"type":"boolean"}
+        isTerminal: {"type":"boolean"}
+    CreateWorkflowStepData:
+      type: object
+      additionalProperties: false
+      required: ["workflowId","name","sortOrder","isInitial","isTerminal"]
+      properties:
+        workflowId: {"type":"string","format":"uuid"}
+        statusDefinitionId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isInitial: {"type":"boolean"}
+        isTerminal: {"type":"boolean"}
+    UpdateWorkflowStepData:
+      type: object
+      additionalProperties: false
+      minProperties: 2
+      required: [version]
+      properties:
+        version: {"type":"integer","minimum":1,"maximum":2147483646}
+        workflowId: {"type":"string","format":"uuid"}
+        statusDefinitionId: {"type":"string","format":"uuid","nullable":true}
+        name: {"type":"string","maxLength":255,"minLength":1}
+        description: {"type":"string","maxLength":100000,"nullable":true}
+        sortOrder: {"type":"integer","format":"int32","minimum":0,"maximum":2147483647}
+        isInitial: {"type":"boolean"}
+        isTerminal: {"type":"boolean"}
+    WorkflowStepItemResponse:
+      type: object
+      additionalProperties: false
+      required: [item]
+      properties:
+        item: {"$ref":"#/components/schemas/WorkflowStep"}
+    WorkflowStepsPageResponse:
+      type: object
+      additionalProperties: false
+      required: [items, pagination]
+      properties:
+        items:
+          type: array
+          items: {"$ref":"#/components/schemas/WorkflowStep"}
+        pagination: {"$ref":"#/components/schemas/PageMetadata"}
+    PageMetadata:
+      type: object
+      additionalProperties: false
+      required: [pageNumber, pageSize, totalCount, totalPages, hasNextPage, hasPreviousPage]
+      properties:
+        pageNumber: {"type":"integer","minimum":1}
+        pageSize: {"type":"integer","minimum":1,"maximum":100}
+        totalCount: {"type":"integer","minimum":0}
+        totalPages: {"type":"integer","minimum":0}
+        hasNextPage: {"type":"boolean"}
+        hasPreviousPage: {"type":"boolean"}
+    DeleteResourceResponse:
+      type: object
+      additionalProperties: false
+      required: [id, deleted]
+      properties:
+        id: {"type":"string","format":"uuid"}
+        deleted: {"type":"boolean","enum":[true]}
     ProblemDetails:
       type: object
       additionalProperties: true

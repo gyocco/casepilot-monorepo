@@ -19,6 +19,7 @@ export const migratedHealthObject: HealthObjectFixture = {
 export interface ApiFixture {
   readonly database: DataSource;
   get(path: '/health' | '/health/database'): Promise<Response>;
+  request(path: string, method?: string, body?: object): Promise<Response>;
   resetHealthObjects(objects?: readonly HealthObjectFixture[]): Promise<void>;
   close(): Promise<void>;
 }
@@ -82,6 +83,10 @@ export async function startApiFixture(
     return {
       database: ownedDatabase,
       get: path => fetch(`${baseUrl}${path}`, { signal: AbortSignal.timeout(5000) }),
+      request: (path, method = 'GET', body) => fetch(`${baseUrl}${path}`, {
+        method, signal: AbortSignal.timeout(10000),
+        ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+      }),
       async resetHealthObjects(objects = [migratedHealthObject]): Promise<void> {
         await ownedDatabase.query('TRUNCATE TABLE "HealthCheckObject"');
         for (const object of objects) {

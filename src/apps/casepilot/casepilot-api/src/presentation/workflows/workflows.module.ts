@@ -1,0 +1,49 @@
+import { Module } from '@nestjs/common';
+import type { UnitOfWork } from '@casepilot/abstractions';
+import { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';
+import type { Workflow } from '../../domain/entities/workflow.js';
+import type { CrudScope } from '../../application/shared/crud-models.js';
+import { DatabaseConnection } from '../../infrastructure/database/database-connection.js';
+import { TypeOrmWorkflowRepository } from '../../infrastructure/persistence/repositories/typeorm-workflow.repository.js';
+import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { systemCrudRuntime } from '../../infrastructure/system-crud-runtime.js';
+import { CreateWorkflowHandler } from '../../application/workflows/create-workflow.handler.js';
+import { GetWorkflowHandler } from '../../application/workflows/get-workflow.handler.js';
+import { UpdateWorkflowHandler } from '../../application/workflows/update-workflow.handler.js';
+import { DeleteWorkflowHandler } from '../../application/workflows/delete-workflow.handler.js';
+import { ListWorkflowsHandler } from '../../application/workflows/list-workflows.handler.js';
+import { WorkflowsController } from './workflows.controller.js';
+const WORK = Symbol('Workflows_WORK');
+@Module({
+  controllers: [WorkflowsController],
+  providers: [
+    {
+      provide: WORK, inject: [DatabaseConnection],
+      useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Workflow>> =>
+        new TypeOrmUnitOfWork<CrudScope<Workflow>>(() => connection.getDataSource(), manager => ({
+          resource: new TypeOrmWorkflowRepository(manager), references: new TypeOrmReferenceRepository(manager),
+        })),
+    },
+    {
+      provide: CreateWorkflowHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Workflow>>): CreateWorkflowHandler => new CreateWorkflowHandler(work, systemCrudRuntime),
+    },
+    {
+      provide: GetWorkflowHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Workflow>>): GetWorkflowHandler => new GetWorkflowHandler(work),
+    },
+    {
+      provide: UpdateWorkflowHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Workflow>>): UpdateWorkflowHandler => new UpdateWorkflowHandler(work, systemCrudRuntime),
+    },
+    {
+      provide: DeleteWorkflowHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Workflow>>): DeleteWorkflowHandler => new DeleteWorkflowHandler(work),
+    },
+    {
+      provide: ListWorkflowsHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Workflow>>): ListWorkflowsHandler => new ListWorkflowsHandler(work),
+    },
+  ],
+})
+export class WorkflowsModule {}

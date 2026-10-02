@@ -1,0 +1,87 @@
+import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import { CreateTimeEntryHandler } from '../../application/time-entries/create-time-entry.handler.js';
+import { GetTimeEntryHandler } from '../../application/time-entries/get-time-entry.handler.js';
+import { UpdateTimeEntryHandler } from '../../application/time-entries/update-time-entry.handler.js';
+import { DeleteTimeEntryHandler } from '../../application/time-entries/delete-time-entry.handler.js';
+import { ListTimeEntriesHandler } from '../../application/time-entries/list-time-entries.handler.js';
+import { CreateTimeEntryRequest, GetTimeEntryRequest, UpdateTimeEntryRequest, DeleteTimeEntryRequest, ListTimeEntriesRequest } from '../../application/time-entries/time-entry.models.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { TimeEntryItemHttpResponse, TimeEntriesPageHttpResponse, DeleteTimeEntryHttpResponse, toTimeEntryHttpResponse } from './time-entry-http.response.js';
+
+@Controller('business-accounts/:businessAccountId/time-entries')
+export class TimeEntriesController {
+  constructor(
+    @Inject(CreateTimeEntryHandler) private readonly createHandler: CreateTimeEntryHandler,
+    @Inject(GetTimeEntryHandler) private readonly getHandler: GetTimeEntryHandler,
+    @Inject(UpdateTimeEntryHandler) private readonly updateHandler: UpdateTimeEntryHandler,
+    @Inject(DeleteTimeEntryHandler) private readonly deleteHandler: DeleteTimeEntryHandler,
+    @Inject(ListTimeEntriesHandler) private readonly listHandler: ListTimeEntriesHandler,
+  ) {}
+
+  @Post()
+  @Header('Cache-Control', 'no-store')
+  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<TimeEntryItemHttpResponse> {
+    const body = readBody(input, ['caseId', 'memberId', 'taskId', 'description', 'startedAt', 'endedAt', 'durationMinutes', 'billable', 'hourlyRate', 'currency', 'invoiceLineId']);
+    const response = await this.createHandler.execute(new CreateTimeEntryRequest(businessAccountId, {
+      caseId: stringValue(body, 'caseId'),
+      memberId: stringValue(body, 'memberId'),
+      taskId: nullableString(body, 'taskId'),
+      description: nullableString(body, 'description'),
+      startedAt: nullableString(body, 'startedAt'),
+      endedAt: nullableString(body, 'endedAt'),
+      durationMinutes: numberValue(body, 'durationMinutes'),
+      billable: booleanValue(body, 'billable'),
+      hourlyRate: nullableString(body, 'hourlyRate'),
+      currency: nullableString(body, 'currency'),
+      invoiceLineId: nullableString(body, 'invoiceLineId'),
+    }));
+    return new TimeEntryItemHttpResponse(toTimeEntryHttpResponse(response.item));
+  }
+
+  @Get()
+  @Header('Cache-Control', 'no-store')
+  async list(
+    @Param('businessAccountId') businessAccountId: string,
+    @Query('pageNumber') pageNumber: string | undefined,
+    @Query('pageSize') pageSize: string | undefined,
+    @Query('sortBy') sortBy: string | undefined,
+    @Query('sortDirection') sortDirection: string | undefined,
+  ): Promise<TimeEntriesPageHttpResponse> {
+    const response = await this.listHandler.execute(new ListTimeEntriesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    return new TimeEntriesPageHttpResponse(response.items.map(toTimeEntryHttpResponse), new PageMetadataHttpResponse(response.pagination));
+  }
+
+  @Get(':id')
+  @Header('Cache-Control', 'no-store')
+  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<TimeEntryItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetTimeEntryRequest(businessAccountId, id));
+    return new TimeEntryItemHttpResponse(toTimeEntryHttpResponse(response.item));
+  }
+
+  @Patch(':id')
+  @Header('Cache-Control', 'no-store')
+  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<TimeEntryItemHttpResponse> {
+    const body = readBody(input, ['version', 'caseId', 'memberId', 'taskId', 'description', 'startedAt', 'endedAt', 'durationMinutes', 'billable', 'hourlyRate', 'currency', 'invoiceLineId']);
+    const response = await this.updateHandler.execute(new UpdateTimeEntryRequest(businessAccountId, id, numberValue(body, 'version'), {
+      caseId: optionalString(body, 'caseId'),
+      memberId: optionalString(body, 'memberId'),
+      taskId: nullableString(body, 'taskId'),
+      description: nullableString(body, 'description'),
+      startedAt: nullableString(body, 'startedAt'),
+      endedAt: nullableString(body, 'endedAt'),
+      durationMinutes: optionalNumber(body, 'durationMinutes'),
+      billable: optionalBoolean(body, 'billable'),
+      hourlyRate: nullableString(body, 'hourlyRate'),
+      currency: nullableString(body, 'currency'),
+      invoiceLineId: nullableString(body, 'invoiceLineId'),
+    }));
+    return new TimeEntryItemHttpResponse(toTimeEntryHttpResponse(response.item));
+  }
+
+  @Delete(':id')
+  @Header('Cache-Control', 'no-store')
+  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteTimeEntryHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteTimeEntryRequest(businessAccountId, id, numberQuery(version)));
+    return new DeleteTimeEntryHttpResponse(response.id, response.deleted);
+  }
+}

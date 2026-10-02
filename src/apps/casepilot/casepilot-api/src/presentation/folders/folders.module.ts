@@ -1,0 +1,49 @@
+import { Module } from '@nestjs/common';
+import type { UnitOfWork } from '@casepilot/abstractions';
+import { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';
+import type { Folder } from '../../domain/entities/folder.js';
+import type { CrudScope } from '../../application/shared/crud-models.js';
+import { DatabaseConnection } from '../../infrastructure/database/database-connection.js';
+import { TypeOrmFolderRepository } from '../../infrastructure/persistence/repositories/typeorm-folder.repository.js';
+import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { systemCrudRuntime } from '../../infrastructure/system-crud-runtime.js';
+import { CreateFolderHandler } from '../../application/folders/create-folder.handler.js';
+import { GetFolderHandler } from '../../application/folders/get-folder.handler.js';
+import { UpdateFolderHandler } from '../../application/folders/update-folder.handler.js';
+import { DeleteFolderHandler } from '../../application/folders/delete-folder.handler.js';
+import { ListFoldersHandler } from '../../application/folders/list-folders.handler.js';
+import { FoldersController } from './folders.controller.js';
+const WORK = Symbol('Folders_WORK');
+@Module({
+  controllers: [FoldersController],
+  providers: [
+    {
+      provide: WORK, inject: [DatabaseConnection],
+      useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Folder>> =>
+        new TypeOrmUnitOfWork<CrudScope<Folder>>(() => connection.getDataSource(), manager => ({
+          resource: new TypeOrmFolderRepository(manager), references: new TypeOrmReferenceRepository(manager),
+        })),
+    },
+    {
+      provide: CreateFolderHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Folder>>): CreateFolderHandler => new CreateFolderHandler(work, systemCrudRuntime),
+    },
+    {
+      provide: GetFolderHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Folder>>): GetFolderHandler => new GetFolderHandler(work),
+    },
+    {
+      provide: UpdateFolderHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Folder>>): UpdateFolderHandler => new UpdateFolderHandler(work, systemCrudRuntime),
+    },
+    {
+      provide: DeleteFolderHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Folder>>): DeleteFolderHandler => new DeleteFolderHandler(work),
+    },
+    {
+      provide: ListFoldersHandler, inject: [WORK],
+      useFactory: (work: UnitOfWork<CrudScope<Folder>>): ListFoldersHandler => new ListFoldersHandler(work),
+    },
+  ],
+})
+export class FoldersModule {}

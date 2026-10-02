@@ -26,6 +26,9 @@ pnpm start:api
 
 ## Health checks y contrato
 
+Antes de las sondas, la API también implementa los **28 recursos de servicios profesionales** con POST, GET por ID, PATCH, DELETE y GET paginado. Los endpoints son públicos según la decisión del usuario; autenticación queda diferida. Las rutas, ejemplos, versiones, formatos y límites están en [CRUD de servicios profesionales](docs/professional-services-crud.md) y el contrato completo en [OpenAPI](../../../../contracts/openapi/casepilot-api.yaml). Solo se persisten datos y metadatos de documentos; no se accede a archivos ni servicios externos.
+
+
 | Endpoint | Respuesta | Recorrido |
 | --- | --- | --- |
 | `GET /health` | `200`, `{ "status": "ok" }` | Controller y respuesta técnica HTTP. No ejecuta Application ni inicializa PostgreSQL. |
@@ -70,7 +73,7 @@ src/
 
 Los modelos Request/Response de Application heredan de las bases correspondientes de [`@casepilot/cqrs`](../../../libs/backend/cqrs/README.md). Cada `<Operation>Handler`, en `.handler.ts`, implementa `Handler<OperationRequest, OperationResponse>` y devuelve una Promise; `Handler` se importa como tipo y las bases como valores por la entrada pública. El controller llama directamente a `handler.execute(request)`. Regla [CPA-002](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-002--contratos-cqrs-compartidos-e-invocacion-directa) y [ADR 0010](../../../../docs/adr/0010-shared-cqrs-contracts.md).
 
-Application se organiza por recurso o responsabilidad lógica según [CPA-001](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y el [ADR 0009](../../../../docs/adr/0009-resource-organized-application.md). Commands, queries y sus modelos conviven en `application/<recurso>/`, con subcarpetas opcionales por operación; no se crean carpetas `commands`/`queries` ni archivos sueltos en la raíz de Application. `users/`, `orders/` y `payments/` se crearán cuando tengan implementación.
+Application se organiza por recurso o responsabilidad lógica según [CPA-001](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y el [ADR 0009](../../../../docs/adr/0009-resource-organized-application.md). Commands, queries y sus modelos conviven en `application/<recurso>/`, con subcarpetas opcionales por operación; no se crean carpetas `commands`/`queries` ni archivos sueltos en la raíz de Application. `users/`, `cases/` y `payments/` contienen sus casos de uso de producto.
 
 La conexión se inicializa al primer acceso a datos, comparte la inicialización entre llamadas concurrentes y permite un nuevo intento después de un fallo. El arranque HTTP no necesita una conexión disponible. Esto no elimina la obligación de configurar correctamente las credenciales antes de arrancar. No se crean transacciones de casos de uso, escrituras, hooks ni cascadas en esta query.
 
@@ -119,6 +122,9 @@ La misma carga de configuración y fábrica de opciones se usan en runtime y CLI
 
 ## Esquema y migraciones
 
+La migración `1790899200000-create-professional-services.ts` agrega las 28 tablas de producto, índices y FKs compuestas por cuenta. Tiene down reversible, probado en PostgreSQL efímero. El mismo comando de migración aplica ambos pasos. Las escrituras de producto usan versiones optimistas y scopes transaccionales coordinados desde Application; los detalles están en [la guía CRUD](docs/professional-services-crud.md).
+
+
 La migración `1790726400000-create-health-check-object.ts` crea `"HealthCheckObject"` con `"Guid"` (`uuid`, PK, default `gen_random_uuid()`) y `"Value"` (`text`, NOT NULL). Incluye una fila técnica determinista: Guid `00000000-0000-4000-8000-000000000001`, Value `CasePilot API`. No necesita instalar extensiones en PostgreSQL 18.
 
 ```bash
@@ -164,4 +170,4 @@ El paquete API conserva sus exports de composición `@casepilot/casepilot-api/bo
 
 Versiones directas fijadas y lockfile pnpm: NestJS `12.1.2`, TypeORM `0.3.31`, `pg` `8.23.1`, TypeScript `5.9.3`. Se usa ESM nativo y decoradores compilados por TypeScript. TypeORM 0.3 permite el Node 22.12 disponible; la línea 1.x requiere actualizar ese runtime. Se eligió 0.3.31 tras revisar los avisos de seguridad de la rama. NestJS, TypeORM, pg y reflect-metadata utilizan MIT; RxJS, Apache-2.0.
 
-No se añaden bus CQRS, adaptadores TypeORM Nest, Swagger o validador de DTOs sin un consumidor o caso de uso que los necesite. Nest compone el repositorio propio sobre TypeORM. Health implementa Entity<string> (id adapta guid) y su contrato extiende Repository de abstractions; no cambia el esquema ni HTTP. CrudRepository es una interfaz pura, sin implementación universal ni opciones ORM. Transacciones futuras usan UnitOfWork y repositorios nuevos del scope. Decisiones: [ADR 0003](../../../../docs/adr/0003-base-api-and-health-checks.md) y [ADR 0011](../../../../docs/adr/0011-data-access-abstractions.md).
+No se añaden bus CQRS, adaptadores TypeORM Nest, Swagger o validador de DTOs sin un consumidor o caso de uso que los necesite. Nest compone el repositorio propio sobre TypeORM. Health implementa Entity<string> (id adapta guid) y su contrato extiende Repository de abstractions; no cambia el esquema ni HTTP. CrudRepository es una interfaz pura, sin implementación universal ni opciones ORM. Las transacciones del CRUD usan UnitOfWork y repositorios nuevos del scope. Decisiones: [ADR 0003](../../../../docs/adr/0003-base-api-and-health-checks.md) y [ADR 0011](../../../../docs/adr/0011-data-access-abstractions.md).
