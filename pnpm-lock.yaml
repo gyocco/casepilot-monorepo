@@ -10,6 +10,15 @@ importers:
 
   src/apps/casepilot/casepilot-api:
     dependencies:
+      '@casepilot/abstractions':
+        specifier: workspace:*
+        version: link:../../../libs/backend/abstractions
+      '@casepilot/cqrs':
+        specifier: workspace:*
+        version: link:../../../libs/backend/cqrs
+      '@casepilot/exception-handler':
+        specifier: workspace:*
+        version: link:../../../libs/backend/exception-handler
       '@nestjs/common':
         specifier: 12.1.2
         version: 12.1.2(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -59,6 +68,93 @@ importers:
       tsx:
         specifier: 4.23.15
         version: 4.23.15
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: 8.71.0
+        version: 8.71.0(eslint@9.39.5)(typescript@5.9.3)
+
+  src/libs/backend/abstractions:
+    devDependencies:
+      '@eslint/js':
+        specifier: 9.39.5
+        version: 9.39.5
+      '@testcontainers/postgresql':
+        specifier: 12.0.0
+        version: 12.0.0
+      '@types/node':
+        specifier: 22.12.0
+        version: 22.12.0
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
+      reflect-metadata:
+        specifier: 0.2.2
+        version: 0.2.2
+      testcontainers:
+        specifier: 12.0.0
+        version: 12.0.0
+      typeorm:
+        specifier: 0.3.31
+        version: 0.3.31(pg@8.23.1)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: 8.71.0
+        version: 8.71.0(eslint@9.39.5)(typescript@5.9.3)
+
+  src/libs/backend/cqrs:
+    devDependencies:
+      '@eslint/js':
+        specifier: 9.39.5
+        version: 9.39.5
+      '@types/node':
+        specifier: 22.12.0
+        version: 22.12.0
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: 8.71.0
+        version: 8.71.0(eslint@9.39.5)(typescript@5.9.3)
+
+  src/libs/backend/exception-handler:
+    devDependencies:
+      '@eslint/js':
+        specifier: 9.39.5
+        version: 9.39.5
+      '@nestjs/common':
+        specifier: 12.1.2
+        version: 12.1.2(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: 12.1.2
+        version: 12.1.2(@nestjs/common@12.1.2(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.1.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: 12.1.2
+        version: 12.1.2(@nestjs/common@12.1.2(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.1.2)
+      '@types/node':
+        specifier: 22.12.0
+        version: 22.12.0
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5
+      reflect-metadata:
+        specifier: 0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: 7.8.2
+        version: 7.8.2
       typescript:
         specifier: 5.9.3
         version: 5.9.3

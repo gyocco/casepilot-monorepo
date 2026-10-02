@@ -1,7 +1,7 @@
 # Reglas obligatorias de la arquitectura base backend
 
 - Estado: base normativa reutilizable; obligatoria en cada proyecto que la adopte explícitamente.
-- Revisión: 2026-10-01.
+- Revisión: 2026-10-02.
 - Fecha inicial: 2026-09-30.
 - Alcance: APIs, workers, schedulers, adaptadores y librerías backend de los proyectos que adopten esta base NestJS/TypeScript con TypeORM.
 - Diseño explicado: [Arquitectura base backend](backend-architecture-baseline.md).
@@ -106,7 +106,7 @@ Las reglas se identifican con `BCK-NNN`. Los identificadores no se reutilizan ni
 - NO contiene validaciones/políticas de negocio, lectura seguida de decisión y escritura, llamadas a otros repositorios, integraciones, eventos ni varias escrituras ocultas.
 - La composición de operaciones DEBE estar en Application. Una sola llamada a `save` u otra API del ORM no demuestra cumplimiento.
 - Si items y total requieren lecturas independientes, Application coordina ambas; una API compuesta como `findAndCount` NO demuestra que haya una única operación individual.
-- Lecturas de colecciones, filtros, joins propios y proyecciones estructurales son operaciones de obtención; NO pueden ampliar acceso a otro contexto ni decidir elegibilidad de negocio.
+- Lecturas de colecciones, filtros, joins de relaciones del dominio de la aplicación y proyecciones estructurales son operaciones de obtención; NO pueden ampliar el ámbito autorizado por Application ni decidir elegibilidad de negocio.
 - Los criterios autorizados los suministra Application. El repositorio devuelve datos/metadatos técnicos y NO interpreta el resultado como decisión del producto.
 
 **Verificación:** revisar cada operación, sus relaciones, SQL y efectos observables; el nombre del método no es evidencia suficiente de atomicidad.
@@ -152,15 +152,18 @@ Las reglas se identifican con `BCK-NNN`. Los identificadores no se reutilizan ni
 
 **Verificación:** revisar puertos invocados y efectos observables de cada query, incluidos sus adaptadores.
 
-## BCK-014 — Contextos con dueño y API pública
+## BCK-014 — Dominio y capas con una aplicación propietaria
 
-**Cada modelo, tabla, repositorio y caso de uso DEBE tener un contexto propietario; la comunicación entre contextos DEBE usar APIs públicas o contratos explícitos.**
+**Cada modelo, tabla, repositorio y caso de uso DEBE tener una aplicación/proyecto propietario, organizado con una única capa Application, Domain, Infrastructure y Presentation directamente bajo su raíz de fuentes.**
 
-- NO se importan ni usan repositorios, schemas, modelos ORM o tablas privadas de otro contexto.
-- Un join o base compartida NO autoriza romper esa frontera. La coordinación y los mapeos entre contextos son explícitos en Application.
-- Una nueva API o audiencia NO define automáticamente otro contexto ni permite duplicar reglas del contexto propietario.
+- NO se divide la aplicación en `contexts/<contexto>/` ni se repiten las cuatro capas por entidad, endpoint o feature. Las subcarpetas dentro de una capa organizan responsabilidades sin crear fronteras de bounded contexts.
+- Los modelos relacionados comparten Domain; Application puede coordinar sus contratos de repositorio y las relaciones explícitas de ese dominio respetando BCK-008 a BCK-013.
+- Los imports internos respetan las capas; NO requieren un `public.ts` por feature. Las fronteras entre proyectos/aplicaciones se comunican mediante APIs o contratos explícitos, sin acceso a persistencia privada ajena ni imports entre apps.
+- Bootstrap y composición pueden permanecer como archivos en la raíz de fuentes; configuración y otros mecanismos técnicos pertenecen a Infrastructure. Una audiencia nueva no divide automáticamente el dominio ni permite duplicar negocio.
 
-**Verificación:** revisar imports entre contextos, acceso a tablas y contratos exportados.
+**Verificación:** revisar la estructura de fuentes, propietario de tablas/modelos y dependencias entre capas y aplicaciones.
+
+**Evolución 2026-10-01:** conserva el ID y sustituye la propiedad por bounded context por propiedad de aplicación y capas únicas. La obligación anterior y su cambio se registran en el [ADR 0008](../adr/0008-application-wide-backend-layers.md).
 
 ## BCK-015 — Librerías generales sin negocio del producto
 
@@ -189,6 +192,7 @@ Las reglas se identifican con `BCK-NNN`. Los identificadores no se reutilizan ni
 
 - Entornos gestionados usan `synchronize: false`. Varias APIs NO mantienen historiales competidores para las mismas tablas ni ejecutan migraciones desde cada réplica al atender requests.
 - Runtime y CLI DEBEN usar definiciones compatibles de entidades/opciones; `autoLoadEntities` de Nest NO sustituye la configuración del CLI.
+- La conexión, DataSource, opciones y migraciones del proyecto DEBEN vivir en `infrastructure/database/`; los schemas y repositorios concretos también pertenecen a Infrastructure.
 - Credenciales y configuración sensible son server-side e inyectadas. Scripts que ejecutan negocio DEBEN invocar Application en lugar de reproducir reglas.
 
 **Verificación:** revisar DataSource, opciones, migraciones, scripts y procedimiento de ejecución autorizado.
@@ -222,6 +226,30 @@ Las reglas se identifican con `BCK-NNN`. Los identificadores no se reutilizan ni
 - Una incompatibilidad que requiera cambiar una decisión se presenta concretamente al responsable. Cuando ese cambio ya esté autorizado por el usuario, se documenta y sincroniza sin pedir la misma autorización de nuevo.
 
 **Verificación:** revisar el diff completo y registrar reglas relevantes, checks realizados y limitaciones reales. Cada proyecto documenta qué reglas están verificadas por lint/tests y cuáles requieren revisión normativa/manual. La documentación no implica enforcement automático completo.
+
+## BCK-021 — Firmas de repositorios limitadas a datos de persistencia
+
+**Los parámetros y retornos de toda operación pública de repositorio DEBEN limitarse a primitivos, entidades que hereden o implementen explícitamente el contrato Entity compartido, y modelos concretos de data access de la librería de abstracciones adoptada.**
+
+- Se permiten literales/enums primitivos, ausencia mediante `null`/`undefined`, arrays/readonly arrays de tipos permitidos y `Promise` de un retorno permitido. `void` solo representa el retorno de una escritura sin datos. Los genéricos DEBEN tener restricciones igualmente permitidas.
+- NO se permiten DTOs, requests/responses de casos de uso, clases custom sin Entity, objetos anónimos, interfaces de igual forma sin herencia explícita, `object`, `any`, `unknown`, funciones, tuplas, diccionarios, tipos utilitarios que formen objetos, intersecciones custom ni tipos ORM/driver. Las propiedades de una entidad no se convierten en parámetros independientes permitidos por estar dentro de ella.
+- Los modelos permitidos de paginación son PageRequest y PageResponse reales; los items de PageResponse DEBEN ser entidades. Un modelo local de igual nombre/forma o una subclase custom de PageRequest/PageResponse no sustituye estos modelos concretos.
+- Se revisan métodos declarados y heredados, sobrecargas y propiedades de función. Constructores de adaptadores reciben dependencias técnicas; no son operaciones de repositorio. Repositorios y Unit of Work NO son datos de entrada/salida de una operación de repositorio.
+- Cada proyecto concreta entrada pública, identidad de contratos y convenciones de selección verificables. Los contratos específicos y sus entidades siguen perteneciendo a su aplicación; el CRUD genérico es una interfaz técnica, no un wrapper de la superficie del ORM.
+
+**Verificación:** resolver símbolos, herencia y restricciones genéricas; probar tipos válidos e inválidos, aliases/reexports y entidades estructuralmente iguales sin contrato. Revisar casts y declaraciones ocultas fuera del ámbito analizado. Esta regla no demuestra una única operación SQL (BCK-009).
+
+## BCK-022 — Unit of Work tipado y coordinación mediante repositorios del scope
+
+**Las transacciones que agrupan operaciones de repositorios DEBEN ejecutarse mediante el contrato compartido UnitOfWork y un callback de Application que reciba exclusivamente repositorios vinculados a esa ejecución.**
+
+- Infrastructure implementa apertura, commit, rollback y liberación; el callback decide operaciones y construye el resultado. El resultado se entrega solo tras el commit, conforme a BCK-010/BCK-011.
+- El scope es un conjunto tipado de contratos de repositorio; NO contiene DataSource, EntityManager, QueryRunner, conexiones ni mecanismos para iniciar otra transacción. Los repositorios concretos se crean para cada ejecución con su manager transaccional, sin modificar singletons.
+- Dentro del callback se usan los repositorios recibidos del scope; NO repositorios globales o capturados de otra ejecución. Se esperan todas las operaciones. El scope no se conserva, retorna ni reutiliza después del callback y no se anidan Unit of Work para simular participación.
+- Un repositorio NO depende de UnitOfWork, no invoca otros repositorios y no define métodos transaccionales. La fábrica técnica de bindings no decide reglas ni operaciones del producto.
+- El aislamiento se expresa como un valor primitivo del contrato; Application determina su necesidad y el tratamiento de conflictos. No se prometen transacciones distribuidas ni rollback de efectos externos.
+
+**Verificación:** TypeScript comprueba el conjunto tipado, el análisis estático detecta contratos/símbolos y usos directos indebidos; integración con la base real acredita commit, rollback e independencia entre ejecuciones concurrentes. Revisar fábricas, escapes, llamadas indirectas, operaciones sin await, SQL y efectos externos.
 
 ## Incorporación de reglas futuras
 

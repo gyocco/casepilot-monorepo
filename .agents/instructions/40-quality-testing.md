@@ -11,9 +11,11 @@ Todo cambio de código debe pasar, como mínimo, las verificaciones relevantes:
 - pruebas e2e para flujos críticos de usuario;
 - revisión manual de viewport móvil, teclado, focus, estados de error y navegación.
 
-La API dispone de `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. Todas las pruebas de la API viven en su `test/`: unitarias e integración, con sus dependencias de desarrollo y checks del paquete API. Los full endpoint tests usan PostgreSQL efímero con Testcontainers; requieren Docker y nunca utilizan la base persistente de desarrollo. Consulta el [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md) y el [README de la API](../../src/apps/casepilot/casepilot-api/README.md). Web y librerías siguen como placeholders; sus scripts se ejecutan cuando existan manifests. Cada paquete documenta sus verificaciones.
+La API dispone de `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. Todas las pruebas de la API viven en su `test/`: unitarias e integración, con sus dependencias de desarrollo y checks del paquete API. Los full endpoint tests usan PostgreSQL efímero con Testcontainers; requieren Docker y nunca utilizan la base persistente de desarrollo. Consulta el [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md) y el [README de la API](../../src/apps/casepilot/casepilot-api/README.md). La [librería CQRS](../../src/libs/backend/cqrs/README.md) tiene `pnpm check:cqrs` y pruebas propias de tipos/ejecución en su `test/`. Web y las demás capacidades previstas tendrán scripts cuando existan sus manifests.
 
 Para cambios solo de documentación o configuración del scaffold, valida enlaces, rutas, manifests, workspace y diff. Deja constancia de que type-check, lint, build, tests de producto y revisión de viewport/accesibilidad no aplican o no están disponibles.
+
+La [librería abstractions](../../src/libs/backend/abstractions/README.md) tiene `pnpm check:abstractions` y pruebas propias de tipos/modelos. `pnpm test:abstractions:integration` acredita commit/rollback y scopes concurrentes con PostgreSQL efímero, requiere Docker y no utiliza la base persistente local. Los checks de consumidores API incorporan firmas de repositorios y uso de UnitOfWork; consulta su cobertura delimitada.
 
 ## Estrategia de pruebas
 

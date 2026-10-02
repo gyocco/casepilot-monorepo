@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 import { randomBytes } from 'node:crypto';
 import { createApp } from '../../../src/create-app.js';
-import type { BackendConfig } from '../../../src/config/backend-config.js';
-import { createDataSourceOptions } from '../../../src/database/create-data-source-options.js';
+import type { BackendConfig } from '../../../src/infrastructure/config/backend-config.js';
+import { createDataSourceOptions } from '../../../src/infrastructure/database/create-data-source-options.js';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { DataSource } from 'typeorm';
 
@@ -57,7 +57,7 @@ export async function startApiFixture(
   try {
     const config: BackendConfig = {
       environment: 'test',
-      http: { host: '127.0.0.1', port: 0, corsOrigins: [] },
+      http: { host: '127.0.0.1', port: 0, corsOrigins: [], exposeErrorDetails: true },
       database: {
         host: container.getHost(), port: container.getPort(),
         database: container.getDatabase(), username: container.getUsername(), password: container.getPassword(),

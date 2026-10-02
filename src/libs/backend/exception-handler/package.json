@@ -1,0 +1,34 @@
+{
+  "name": "@casepilot/exception-handler",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Transport-independent errors and configurable NestJS Problem Details handler",
+  "engines": { "node": ">=22.12.0" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./nestjs": { "types": "./dist/nestjs/index.d.ts", "import": "./dist/nestjs/index.js" }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test eslint.config.mjs --max-warnings 0",
+    "test": "tsc -p tsconfig.test.json && node --test build/test/test/unit/architecture.test.js build/test/test/unit/errors.test.js build/test/test/unit/problem-details.test.js build/test/test/integration/nestjs.test.js",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "peerDependencies": { "@nestjs/common": "12.1.2", "@nestjs/core": "12.1.2" },
+  "peerDependenciesMeta": { "@nestjs/common": { "optional": true }, "@nestjs/core": { "optional": true } },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/platform-express": "12.1.2",
+    "@types/node": "22.12.0",
+    "eslint": "9.39.5",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0"
+  }
+}

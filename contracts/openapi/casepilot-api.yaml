@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CasePilot API
-  version: 0.1.0
+  version: 0.2.0
   description: Sondas técnicas iniciales del backend REST de CasePilot.
 servers:
   - url: http://127.0.0.1:3000
@@ -25,6 +25,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiHealthResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
   /health/database:
     get:
       operationId: getDatabaseHealth
@@ -51,11 +53,83 @@ paths:
                 type: string
                 enum: [no-store]
           content:
-            application/json:
+            application/problem+json:
               schema:
-                $ref: '#/components/schemas/DatabaseUnavailableResponse'
+                allOf:
+                  - $ref: '#/components/schemas/ProblemDetails'
+                  - type: object
+                    properties:
+                      status:
+                        type: integer
+                        enum: [503]
+                      code:
+                        type: string
+                        enum: [DATABASE_UNAVAILABLE]
+        default:
+          $ref: '#/components/responses/ApiError'
 components:
+  responses:
+    ApiError:
+      description: Error HTTP según RFC 9457. Detalles opcionales según API_ERROR_DETAILS; errores técnicos desconocidos permanecen ocultos.
+      headers:
+        Cache-Control:
+          schema:
+            type: string
+            enum: [no-store]
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
   schemas:
+    ProblemDetails:
+      type: object
+      additionalProperties: true
+      required: [type, title, status, instance, code]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: about:blank
+        title:
+          type: string
+          example: Bad Request
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+          example: 400
+        instance:
+          type: string
+          format: uri
+          description: URN UUID opaca de esta ocurrencia, sin la URL del request.
+          example: urn:uuid:00000000-0000-4000-8000-000000000001
+        code:
+          type: string
+          description: Código estable para clientes; no interpretar detail.
+          example: VALIDATION_ERROR
+        detail:
+          type: string
+          description: Mensaje seleccionado; se omite con API_ERROR_DETAILS=false.
+        errors:
+          type: array
+          description: Detalles seleccionados de validación; se omiten cuando el detalle está oculto.
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+        stack:
+          type: string
+          description: Stack del error tipado, solo con detalle habilitado; nunca incluye su cause.
+    ErrorDetail:
+      type: object
+      additionalProperties: false
+      required: [message]
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+        pointer:
+          type: string
+          description: JSON Pointer al campo inválido, sin el valor enviado.
     ApiHealthResponse:
       type: object
       additionalProperties: false
@@ -88,11 +162,3 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HealthCheckObject'
-    DatabaseUnavailableResponse:
-      type: object
-      additionalProperties: false
-      required: [status]
-      properties:
-        status:
-          type: string
-          enum: [unavailable]

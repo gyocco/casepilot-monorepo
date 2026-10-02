@@ -24,7 +24,7 @@ Si ya cargaste esas fuentes vigentes en esta tarea, reutiliza su contexto. Las i
 ## Antes de diseñar o editar
 
 - Revisa `git status --short`, el `AGENTS.md` más cercano y los patrones existentes con `rg`.
-- Identifica contexto propietario, transportes, casos de uso, contratos, persistencia, librerías, consumidores y pruebas afectados. No crees capas o paquetes vacíos.
+- Identifica aplicación/proyecto propietario, transportes, casos de uso, contratos, persistencia, librerías, consumidores y pruebas afectados. Usa las capas compartidas de esa aplicación; no crees contextos, capas repetidas por feature ni paquetes vacíos.
 - Distingue decisiones del producto de mecanismos técnicos. En CasePilot el nombre Domain no permite ubicar allí comportamiento de negocio: la decisión explícita es Application como propietario exclusivo.
 - Para cada command/query afectado, define su única clase request, su única clase response y el handler; incluye todos los inputs, también identidad/contexto verificado, dentro del request.
 - Descompón la persistencia necesaria en operaciones individuales. Haz visible en Application cualquier secuencia, regla, escritura relacionada y límite transaccional.
@@ -47,7 +47,7 @@ Trabaja en el orden que requiera la tarea, conservando estos puntos de revisión
 | Repositorio/lectura | Una operación de I/O de su entidad/relaciones, sin políticas, otros repositorios, efectos externos o transacción propia. |
 | Scope transaccional | Operaciones coordinadas por Application y recursos vinculados al mismo scope sin mutar singletons. |
 | TypeORM y DDL | Revisar comportamiento real de save/remove, cascadas, huérfanos, listeners, subscribers, triggers, relaciones lazy y opciones transaccionales. |
-| Contextos/libs | Dueño explícito, API pública y mecanismo general separado de reglas del producto. |
+| Aplicaciones/libs | Dueño explícito, contratos entre proyectos y mecanismo general separado de reglas del producto. |
 
 Esta tabla señala lugares fáciles de pasar por alto; no reemplaza ninguna regla del documento vigente. Revisa también las reglas nuevas que se agreguen después.
 

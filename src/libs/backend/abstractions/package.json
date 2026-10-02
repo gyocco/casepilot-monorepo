@@ -1,0 +1,36 @@
+{
+  "name": "@casepilot/abstractions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared data access contracts, pagination models and transaction adapter",
+  "engines": { "node": ">=22.12.0" },
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./typeorm": { "types": "./dist/dataaccess/typeorm/index.d.ts", "import": "./dist/dataaccess/typeorm/index.js" }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test eslint.config.mjs --max-warnings 0",
+    "test": "tsc -p tsconfig.test.json && node --test build/test/test/unit/models.test.js build/test/test/unit/unit-of-work.test.js",
+    "test:integration": "tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "peerDependencies": { "typeorm": "0.3.31" },
+  "peerDependenciesMeta": { "typeorm": { "optional": true } },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@testcontainers/postgresql": "12.0.0",
+    "@types/node": "22.12.0",
+    "@types/pg": "8.23.1",
+    "eslint": "9.39.5",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "testcontainers": "12.0.0",
+    "typeorm": "0.3.31",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0"
+  }
+}

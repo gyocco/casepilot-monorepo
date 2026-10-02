@@ -52,6 +52,8 @@ La integración compila fuentes y pruebas con `tsconfig.test.json`. Los tests im
 | Tabla ausente | `503` sanitizado; `/health` continúa en `200`; reaplicar la migración recupera la lectura. |
 | PostgreSQL detenido antes del arranque HTTP | La API arranca; `/health` devuelve `200`; accesos repetidos a `/health/database` devuelven `503`. |
 
+Los 503 se verifican con `application/problem+json`, type/title/status/instance/code, código DATABASE_UNAVAILABLE y sin detail/stack/causas incluso cuando el detalle de ambiente está habilitado. La normalización global y ambos modos se prueban también sin Docker en [test/unit/error-handling.test.ts](../unit/error-handling.test.ts) y en la [integración NestJS de la librería](../../../../../libs/backend/exception-handler/test/integration/nestjs.test.ts). Contrato actualizado: [ADR 0012](../../../../../../docs/adr/0012-configurable-http-error-handler.md).
+
 Las credenciales efímeras no se imprimen ni se copian al repositorio. Las fixtures de objetos son datos sintéticos deterministas, nunca volcados ni datos personales.
 
 ## Docker local en Windows y CI

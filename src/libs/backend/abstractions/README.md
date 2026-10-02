@@ -1,0 +1,92 @@
+# Abstracciones backend de data access
+
+Paquete ESM privado `@casepilot/abstractions`. API y futuros workers comparten contratos de datos, repositorios y transacciones sin mover negocio a la librería. La entrada principal no carga TypeORM, Node, Nest ni proveedores. Las fuentes de paginación y Entity están en `src/dataaccess/models/`; las pruebas pertenecen a este paquete.
+
+Normativa: [BCK-009 a BCK-011 y BCK-021/BCK-022](../../../../docs/architecture/backend-architecture-baseline-rules.md), adopción [CPA-003](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-003--abstracciones-de-data-access-compartidas) y [ADR 0011](../../../../docs/adr/0011-data-access-abstractions.md).
+
+## API pública
+
+| Contrato | Comportamiento |
+| --- | --- |
+| `Entity<TId>` | Interfaz de datos con `readonly id`, implementada/heredada explícitamente. ID: string, number o bigint. Sin negocio. |
+| `Repository<TEntity>` | Base sin operaciones obligatorias. `readonly entityType?: TEntity` conserva el tipo de entidad; no requiere una propiedad de runtime. Los contratos especializados declaran sus operaciones. |
+| `CrudRepository<TEntity, TId>` | Extiende Repository. `getAll()` devuelve `Promise<readonly TEntity[]>`; `getById(id)` devuelve entidad o null; `add(entity)` devuelve void; `update(entity)`/`delete(id)` devuelven boolean (fila afectada); `count()` devuelve número; `getPaged(request)` devuelve PageResponse. |
+| `PageRequest` | Constructor `(pageNumber = 1, pageSize = 20, sortBy?, sortDirection = 'asc')`; offset calculado. Valida enteros positivos y offset seguro. El adaptador valida/traduce sortBy mediante una lista permitida, con orden estable. Application determina límites funcionales/tamaño máximo. |
+| `PageResponse<TEntity>` | Constructor `(request, items, totalCount)`; pageNumber, pageSize, items readonly, totalCount, totalPages, hasNextPage y hasPreviousPage. Copia/congela la colección, sin congelar las entidades. Total cero implica cero páginas; una página fuera del rango conserva el total, sin siguiente página. |
+| `UnitOfWork<TRepositories>` | `execute<TResult>(work, isolation?): Promise<TResult>`; el callback recibe el conjunto tipado de repositorios y el resultado se entrega después del commit. |
+| `TransactionIsolation` | Unión primitiva de READ UNCOMMITTED, READ COMMITTED, REPEATABLE READ y SERIALIZABLE; soporte efectivo depende del driver. |
+| `UnitOfWorkError` | Error técnico sanitizado de conexión, bindings o ciclo transaccional, sin SQL/causa del driver. Los errores del callback conservan su contrato. |
+
+Los modelos de página solo realizan validación/cálculos técnicos. Los modelos del producto, DTOs y requests/responses de casos de uso no pertenecen a la librería.
+
+```typescript
+import { PageRequest, type CrudRepository, type Entity, type UnitOfWork } from '@casepilot/abstractions';
+
+class Order implements Entity<string> {
+  constructor(public readonly id: string, public readonly customerId: string) {}
+}
+class Customer implements Entity<string> {
+  constructor(public readonly id: string, public readonly name: string) {}
+}
+interface OrderRepository extends CrudRepository<Order> {
+  getByCustomerId(customerId: string): Promise<readonly Order[]>;
+}
+interface CustomerRepository extends CrudRepository<Customer> {
+  getAll(): Promise<readonly Customer[]>;
+}
+interface Repositories {
+  readonly orders: OrderRepository;
+  readonly customers: CustomerRepository;
+}
+
+// Dentro de un handler de Application; el resultado real es su Response concreto.
+async function operations(uow: UnitOfWork<Repositories>): Promise<string> {
+  return uow.execute(async scope => {
+    await scope.customers.add(new Customer('customer', 'Name'));
+    await scope.orders.add(new Order('order', 'customer'));
+    const page = await scope.orders.getPaged(new PageRequest(1, 10));
+    return page.items[0]?.id ?? '';
+  }, 'READ COMMITTED');
+}
+```
+
+Las firmas de operaciones admiten primitivos, entidades reales, PageRequest/PageResponse, arrays de tipos permitidos y Promise en retornos. No admiten DTOs, objetos anónimos, Record, Partial, Date, callbacks, tipos ORM ni genéricos sin restricciones. Entity es estructural para TypeScript; el gate de la API exige además herencia/implementación explícita del símbolo real. No basta con tener una propiedad id. Esa restricción se aplica al tipo de cada parámetro/retorno, sin prohibir las relaciones o propiedades estructurales internas de una entidad.
+
+`getPaged` requiere una única operación de lectura que obtenga items y total, también para una página vacía/fuera de rango. La [prueba PostgreSQL](test/integration/unit-of-work.test.ts) muestra una sentencia con total y colección. Si el adaptador necesita dos consultas, Application coordina las lecturas y construye PageResponse; no usa findAndCount para ocultarlas. Las escrituras individuales usan insert/update/delete sin cascadas ni transacciones propias. No se proporciona una implementación CRUD universal que copie opciones del ORM.
+
+## Adaptador TypeORM
+
+`@casepilot/abstractions/typeorm` exporta `TypeOrmUnitOfWork`. Es una entrada separada solo para Infrastructure/composición. Requiere el peer opcional TypeORM **0.3.31** instalado por el consumidor. Su constructor recibe una fábrica asíncrona de DataSource y una fábrica de repositorios que recibe el EntityManager transaccional:
+
+```typescript
+import { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';
+
+// En composición/Infrastructure. Estos adaptadores y sus schemas son de la app.
+const uow = new TypeOrmUnitOfWork<Repositories>(
+  () => connection.getDataSource(),
+  manager => ({
+    orders: new TypeOrmOrderRepository(manager),
+    customers: new TypeOrmCustomerRepository(manager),
+  }),
+);
+```
+
+Cada fábrica crea adaptadores nuevos usando únicamente ese manager. Los adaptadores nunca guardan managers en un singleton ni usan repositorios globales dentro del callback. Se esperan todas las operaciones; los repositorios del scope no se retornan, capturan ni reutilizan después, y no se anidan Unit of Work. El mecanismo delega a DataSource.transaction: espera callback y commit, revierte al fallar y libera el QueryRunner. No reintenta conflictos ni traduce decisiones de negocio. Normaliza fallos técnicos de conexión/bindings/commit como UnitOfWorkError y conserva los errores del callback, que los repositorios deben normalizar en su propia frontera según BCK-016. Véase [implementación oficial fijada de EntityManager.transaction](https://github.com/typeorm/typeorm/blob/0.3.31/src/entity-manager/EntityManager.ts).
+
+No hay transacción de producto nueva en Health: su lectura solo adopta Entity/Repository. El primer consumidor de escritura registra su fábrica y puerto de UnitOfWork en la app. El mecanismo compartido está implementado y probado; una fábrica concreta sigue requiriendo pruebas/revisión de su vínculo al manager y SQL. Efectos externos y atomicidad distribuida requieren un diseño propio.
+
+## Verificación
+
+Desde la raíz:
+
+```bash
+pnpm check:abstractions
+pnpm test:abstractions:integration
+pnpm check:api:architecture
+pnpm test:api
+pnpm build:api
+```
+
+`check:abstractions` ejecuta tipos, lint, pruebas de modelos/tipos y build. La integración exige Docker y usa únicamente PostgreSQL 18 efímero de Testcontainers, con credenciales generadas, tablas propias, teardown y sin `.env`/base de desarrollo. Acredita commit de dos repositorios, rollback por callback/error SQL, fallo de commit diferido, scopes concurrentes y CRUD/paginación de una sentencia. El lanzador mantiene el fallback IPv4 de Docker Desktop Windows.
+
+El [gate estático de la API](../../../apps/casepilot/casepilot-api/docs/architecture-validation.md) verifica sus fuentes, incluidas declaraciones sin imports; no certifica automáticamente futuros workers u otras librerías. Esos consumidores deben incorporar el checker antes de declarar la misma cobertura. Imports privados a src/dist están prohibidos; solo se usan las dos entradas públicas descritas.

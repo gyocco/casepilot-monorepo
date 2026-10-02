@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
-import { BackendConfigurationError, loadBackendConfig } from '../../src/config/load-backend-config.js';
+import { BackendConfigurationError, loadBackendConfig } from '../../src/infrastructure/config/load-backend-config.js';
 
 function fixture(context: TestContext): string {
   const root = mkdtempSync(join(tmpdir(), 'casepilot-api-config-'));
@@ -69,12 +69,26 @@ void test('invalid configuration is rejected before opening a connection or HTTP
     { DATABASE_SCHEMA: 'public;DROP TABLE test' }, { DATABASE_SSL: 'yes' },
     { DATABASE_PASSWORD: 'REPLACE_WITH_PASSWORD' }, { CORS_ORIGINS: '*' },
     { CORS_ORIGINS: 'https://example.test/path' }, { APP_ENV: 'unknown' },
-    { DATABASE_SSL_CA_FILE: 'relative-ca.pem' },
+    { DATABASE_SSL_CA_FILE: 'relative-ca.pem' }, { API_ERROR_DETAILS: 'yes' }, { API_ERROR_DETAILS: 'TRUE' },
   ]) {
     assert.throws(() => loadBackendConfig({ ...remote, ...invalid }, app), BackendConfigurationError);
   }
   writeFileSync(join(app, '.env.staging'), 'APP_ENV=production');
   assert.throws(() => loadBackendConfig(remote, app), /cannot change/);
+});
+
+void test('error detail policy has environment defaults and honors explicit overrides and precedence', context => {
+  const app = fixture(context);
+  for (const APP_ENV of ['local', 'test', 'development', 'staging', 'production']) {
+    const variables = { ...remote, APP_ENV };
+    assert.equal(loadBackendConfig(variables, app).http.exposeErrorDetails, ['local', 'test', 'development'].includes(APP_ENV));
+    assert.equal(loadBackendConfig({ ...variables, API_ERROR_DETAILS: 'false' }, app).http.exposeErrorDetails, false);
+    assert.equal(loadBackendConfig({ ...variables, API_ERROR_DETAILS: 'true' }, app).http.exposeErrorDetails, true);
+  }
+  writeFileSync(join(app, '.env'), 'API_ERROR_DETAILS=true');
+  writeFileSync(join(app, '.env.staging'), 'API_ERROR_DETAILS=false');
+  assert.equal(loadBackendConfig(remote, app).http.exposeErrorDetails, false);
+  assert.equal(loadBackendConfig({ ...remote, API_ERROR_DETAILS: 'true' }, app).http.exposeErrorDetails, true);
 });
 
 void test('CORS accepts only the explicitly configured origins and custom CA keeps verification enabled', context => {

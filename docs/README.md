@@ -12,6 +12,14 @@
 - [README de CasePilot API](../src/apps/casepilot/casepilot-api/README.md): arranque NestJS/TypeORM, entornos, endpoints de salud, migraciones y verificaciones.
 - [Validación de arquitectura de CasePilot API](../src/apps/casepilot/casepilot-api/docs/architecture-validation.md): comandos ESLint/dependency-cruiser/ts-morph, cobertura BCK, pruebas y límites.
 - [ADR 0007 — Validación automatizada de la API](adr/0007-automated-api-architecture-validation.md): herramientas y convenciones verificables del paquete API.
+- [ADR 0008 — Dominio compartido y capas por aplicación](adr/0008-application-wide-backend-layers.md): elimina la división por contextos y ubica database/configuración en Infrastructure.
+- [ADR 0009 — Application por recurso](adr/0009-resource-organized-application.md): agrupa los casos de uso por recurso, con regla CPA-001 y validación de firmas en toda Application.
+- [ADR 0010 — Request, Response y Handler compartidos](adr/0010-shared-cqrs-contracts.md): librería CQRS, invocación directa y regla CPA-002 para modelos y handlers de Application.
+- [Librería CQRS](../src/libs/backend/cqrs/README.md): API pública, ejemplos, límites y comandos de `@casepilot/cqrs`.
+- [Librería de errores](../src/libs/backend/exception-handler/README.md): errores puros y filtro HTTP NestJS configurable con Problem Details.
+- [ADR 0012 — Manejo HTTP de errores](adr/0012-configurable-http-error-handler.md): contrato uniforme y control del detalle por ambiente.
+- [Librería de abstracciones](../src/libs/backend/abstractions/README.md): Entity, paginación, Repository/CrudRepository y UnitOfWork con adaptador transaccional TypeORM separado.
+- [ADR 0011 — Abstracciones de data access](adr/0011-data-access-abstractions.md): BCK-021/BCK-022, CPA-003, firmas acotadas y scopes transaccionales tipados.
 - [Contrato HTTP inicial](../contracts/openapi/casepilot-api.yaml): respuestas de las sondas simples y de PostgreSQL.
 - [Decisión de la API base y health checks](adr/0003-base-api-and-health-checks.md): composición pura, conexión diferida y configuración coordinada.
 - [Infraestructura](../infra/README.md): alcance de infraestructura y artefactos de runtime.

@@ -2,7 +2,7 @@
 
 - Estado: base reutilizable, disponible para adopción explícita por distintos productos y proyectos.
 - Fecha inicial: 2026-09-30.
-- Revisión: 2026-10-01.
+- Revisión: 2026-10-02.
 - Alcance: backend NestJS/TypeScript con TypeORM; independiente del nombre, rutas y despliegue de un producto.
 - Reglas normativas: [Reglas obligatorias de la arquitectura base backend](backend-architecture-baseline-rules.md).
 
@@ -10,23 +10,23 @@
 
 Esta base describe una arquitectura concreta y reutilizable. No pretende imponer una única arquitectura a todo backend ni adoptar automáticamente proyectos por estar en el mismo repositorio. Cada proyecto registra su adopción en un ADR y mantiene un documento de arquitectura particular que enlaza esta guía y el catálogo completo de reglas.
 
-La arquitectura particular define contextos reales, transportes, proveedores, entornos, estrategia de despliegue y verificaciones implementadas. Puede añadir restricciones compatibles; no admite excepciones locales a las reglas adoptadas. Un cambio incompatible requiere una decisión explícita y actualización coordinada de la normativa antes de implementarlo.
+La arquitectura particular define la aplicación propietaria, transportes, proveedores, entornos, estrategia de despliegue y verificaciones implementadas. Puede añadir restricciones compatibles; no admite excepciones locales a las reglas adoptadas. Un cambio incompatible requiere una decisión explícita y actualización coordinada de la normativa antes de implementarlo.
 
-El backend comienza como un monolito modular: una aplicación desplegable, organizada por contextos funcionales, con límites que permitan evolucionar hacia varias APIs o procesos cuando exista una necesidad real. NestJS resuelve el transporte y la composición; TypeORM implementa el acceso a persistencia.
+El backend comienza como una aplicación desplegable con un dominio compartido y cuatro capas para todo el proyecto: Application, Domain, Infrastructure y Presentation. No se divide por bounded contexts. NestJS resuelve el transporte y la composición; TypeORM implementa el acceso a persistencia.
 
 La decisión central de este backend es que **toda lógica de negocio y de casos de uso reside exclusivamente en Application**, dentro de commands, queries y sus colaboradores internos. Domain contiene modelos y contratos sin comportamiento de negocio. Esta es una elección explícita de esta base: no se adopta un dominio con entidades que ejecutan reglas, transiciones o validaciones de negocio.
 
 El documento de reglas es la fuente normativa. Este documento explica responsabilidades, flujos y alternativas compatibles; los ejemplos ilustran la arquitectura y no constituyen requisitos funcionales de un producto concreto.
 
-## 2. Organización por contexto y por capa
+## 2. Organización por aplicación y por capa
 
-La primera división es el contexto propietario de una capacidad del producto. Dentro de cada contexto se separan las capas. Un contexto puede contener varios casos de uso y entidades; no se crea un bounded context automáticamente por tabla, endpoint o cliente consumidor.
+La aplicación/proyecto es la unidad propietaria del dominio. Las cuatro capas se declaran una sola vez directamente bajo su raíz de fuentes, sin `contexts/` ni capas repetidas por feature. Productos, órdenes, categorías, usuarios y customers de un ecommerce hipotético pueden convivir y relacionarse en la misma capa Domain. Las subcarpetas de cada capa sirven para ordenar su contenido, sin exigir APIs públicas o modelos duplicados por entidad.
 
 | Área | Responsabilidad | Contenido típico |
 | --- | --- | --- |
-| Domain | Representación de datos y contratos internos del contexto | Entidades sin comportamiento, tipos, enums, constantes, estructuras de valores y contratos de repositorios. |
+| Domain | Representación de datos y contratos internos de la aplicación | Entidades sin comportamiento, tipos, enums, constantes, estructuras de valores y contratos de repositorios. |
 | Application | Todas las decisiones de negocio y la ejecución de casos de uso | Commands, queries, handlers, request/response models, políticas, validadores de negocio, mappers de aplicación y puertos de integración/transacciones. |
-| Infrastructure | Implementación de mecanismos técnicos | Repositorios TypeORM, consultas individuales, modelos/esquemas ORM, mappers de persistencia y adaptadores externos. |
+| Infrastructure | Implementación de mecanismos técnicos | Configuración, conexión/DataSource/migraciones en `database/`, repositorios TypeORM, consultas individuales, modelos/esquemas ORM, mappers de persistencia y adaptadores externos. |
 | Presentation/Web | Adaptación de transporte | Controllers, DTOs HTTP, pipes, guards técnicos, interceptors, filtros, consumidores de mensajes y adaptación de errores. |
 | Composición | Construcción y configuración del proceso | Bootstrap, módulos NestJS, registro de providers, bindings de puertos, configuración validada y health checks. |
 
@@ -34,35 +34,40 @@ La primera división es el contexto propietario de una capacidad del producto. D
 
 ### Organización conceptual del código backend
 
-Los nombres de contextos y operaciones son ilustrativos. Cada proyecto define su ubicación en la estructura de su repositorio y crea directorios cuando exista contenido real:
+Los nombres de operaciones son ilustrativos. Cada proyecto define su ubicación en la estructura de su repositorio y crea directorios cuando exista contenido real:
 
 ```text
 src/
 ├── main.ts / app.module.ts
-├── config/
-├── database/
-│   ├── data-source.ts
-│   └── migrations/
-└── contexts/<context>/
-    ├── domain/
-    │   ├── entities/
-    │   └── repositories/
-    ├── application/
-    │   ├── commands/<operation>/
-    │   │   ├── <operation>.request.ts
-    │   │   ├── <operation>.handler.ts
-    │   │   └── <operation>.response.ts
-    │   ├── queries/
-    │   └── ports/
-    ├── infrastructure/persistence/
-    │   ├── schemas/
-    │   ├── repositories/
-    │   └── mappers/
-    ├── presentation/
-    └── <context>.module.ts
+├── application/
+│   ├── orders/
+│   │   ├── create-order.command.ts
+│   │   ├── create-order.request.ts
+│   │   ├── create-order.response.ts
+│   │   └── get-order/             # agrupación opcional por operación
+│   │       ├── get-order.query.ts
+│   │       ├── get-order.request.ts
+│   │       └── get-order.response.ts
+│   ├── users/
+│   └── ports/
+├── domain/
+│   ├── entities/
+│   └── repositories/
+├── infrastructure/
+│   ├── config/
+│   ├── database/
+│   │   ├── data-source.ts
+│   │   └── migrations/
+│   └── persistence/
+│       ├── schemas/
+│       ├── repositories/
+│       └── mappers/
+└── presentation/
 ```
 
 Esta organización describe responsabilidades internas. Las carpetas globales del repositorio, la raíz de cada paquete y la ubicación física de sus pruebas pertenecen a la documentación de estructura del repositorio adoptante.
+
+El ejemplo agrupa Application por recurso. Commands y queries conservan sus contratos y diferencias de comportamiento dentro de cada recurso. La obligatoriedad de esta convención en CasePilot API se define en [CPA-001 de su arquitectura particular](casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso); BCK-014 permite organizar subcarpetas sin repetir capas.
 
 ## 3. Dependencias y composición con NestJS
 
@@ -83,13 +88,13 @@ Domain no importa Application, Infrastructure ni Presentation. Application impor
 
 El código de negocio de Application y los modelos de Domain no dependen de NestJS, TypeORM, HTTP, SDKs de proveedores o APIs del proceso. Los adaptadores y la composición resuelven esas dependencias. Los puertos necesarios para reloj, identificadores o servicios externos se incorporan cuando un caso de uso los requiera.
 
-Un módulo NestJS por contexto compone sus handlers, controllers y adaptadores. Las capas conceptuales no requieren un `DomainModule`, `ApplicationModule` o `DataModule` global ni un provider por entidad. Se separan submódulos únicamente cuando exista una responsabilidad real. Se exporta la API pública del contexto, no todos sus providers internos.
+El módulo raíz NestJS compone los handlers, controllers y adaptadores de la aplicación. Las capas conceptuales no requieren un `DomainModule`, `ApplicationModule` o `DataModule` global ni un provider por entidad. Se separan submódulos técnicos únicamente cuando exista una responsabilidad real; esos bindings no crean bounded contexts ni capas paralelas por feature.
 
 Las interfaces TypeScript necesitan un token de runtime para su resolución por Nest, o una clase abstracta usada como contrato. El binding token/implementación se realiza en composición, sin añadir decoradores del contenedor al núcleo de negocio. [Providers y tokens de NestJS](https://docs.nestjs.com/fundamentals/custom-providers).
 
 ## 4. Domain: modelos sin lógica de negocio
 
-Domain define qué datos y contratos entiende un contexto: identificadores, propiedades de entidades, relaciones, enums, constantes y firmas de repositorios. Puede representar una agrupación de entidades relacionada conceptualmente; esa agrupación no autoriza métodos de negocio ni escrituras compuestas en un repositorio.
+Domain define los datos y contratos compartidos por la aplicación: identificadores, propiedades de entidades, relaciones, enums, constantes y firmas de repositorios. Puede representar una agrupación de entidades relacionada conceptualmente; esa agrupación no autoriza métodos de negocio ni escrituras compuestas en un repositorio.
 
 Los constructores pueden asignar propiedades. No validan elegibilidad, permisos, importes, estados, fechas de negocio ni transiciones. Tampoco publican eventos, consultan datos o ejecutan integraciones. Si se usan estructuras de valores, siguen la misma restricción; un value object no es un lugar alternativo para esconder una regla.
 
@@ -120,6 +125,8 @@ Un command representa una intención que modifica estado; puede leer para tomar 
 
 La separación CQRS comienza con la misma base de datos. No obliga a adoptar event sourcing, bases separadas o un broker. `@nestjs/cqrs` es una opción de despacho, no una dependencia obligatoria del núcleo. [CQRS en NestJS](https://docs.nestjs.com/recipes/cqrs).
 
+Los handlers pueden implementar un contrato genérico puro y ejecutarse mediante invocación directa. Una librería técnica de contratos puede definir bases Request/Response y una firma Handler común; los modelos concretos y el negocio permanecen en Application de su proyecto. Las bases solo aportan estructura y tipos, sin validación ni comportamiento funcional. El mismo Handler puede ejecutar commands y queries; la ausencia de mutaciones se acredita revisando su comportamiento. CasePilot adopta `@casepilot/cqrs` e invocación directa conforme a [CPA-002](casepilot-backend-architecture.md#cpa-002--contratos-cqrs-compartidos-e-invocacion-directa) y al [ADR 0010](../adr/0010-shared-cqrs-contracts.md); esa elección no amplía las obligaciones de la base reutilizable.
+
 Si se usa el bus de Nest, sus mensajes y handlers adaptadores se resuelven en la frontera de composición/transporte. El adaptador delega al handler de Application con su único request. Un mensaje command/query envoltorio recibe únicamente ese request; no incorpora inputs paralelos. La API de Nest no modifica la firma del caso de uso ni introduce negocio en el adaptador.
 
 ### Mapeos y validación
@@ -148,16 +155,16 @@ Los contratos externos pueden evolucionar por consumidor o versión sin exponer 
 
 ## 7. Infrastructure/Data y repositorios TypeORM
 
-TypeORM ya ofrece `Repository<T>`, `EntityManager` y APIs de consulta/persistencia. Esta base no requiere reimplementar el CRUD del ORM. Un repositorio propio implementa un contrato pequeño del contexto y compone internamente el repositorio TypeORM. La integración Nest registra estos recursos en Infrastructure/composición. [Integración NestJS–TypeORM](https://docs.nestjs.com/data/typeorm).
+TypeORM ya ofrece `Repository<T>`, `EntityManager` y APIs de consulta/persistencia. Un repositorio propio implementa un contrato interno del dominio y compone el repositorio TypeORM, sin copiar opciones del ORM. BCK-021 acota sus firmas a primitivos, entidades con contrato explícito y modelos de data access compartidos. Un contrato CRUD genérico puro puede uniformar esas operaciones sin implementar negocio ni persistencia universal. La integración Nest registra recursos en Infrastructure/composición. CasePilot adopta las abstracciones del [ADR 0011](../adr/0011-data-access-abstractions.md). [Integración NestJS–TypeORM](https://docs.nestjs.com/data/typeorm).
 
 | Pieza | Ubicación |
 | --- | --- |
-| Contrato de entrada/salida de una entidad | `domain/repositories/` del contexto. |
-| Implementación TypeORM | `infrastructure/persistence/repositories/` del contexto. |
-| Configuración de tablas, columnas, relaciones e índices | `infrastructure/persistence/schemas/` o modelos ORM del contexto. |
-| Mapper modelo persistido/modelo interno | `infrastructure/persistence/mappers/` del contexto. |
+| Contrato de entrada/salida de una entidad | `domain/repositories/` de la aplicación. |
+| Implementación TypeORM | `infrastructure/persistence/repositories/` de la aplicación. |
+| Configuración de tablas, columnas, relaciones e índices | `infrastructure/persistence/schemas/` o modelos ORM de la aplicación. |
+| Mapper modelo persistido/modelo interno | `infrastructure/persistence/mappers/` de la aplicación. |
 | Puerto de lectura especializado, si aporta una frontera real | `application/ports/`; su implementación técnica permanece en Infrastructure. |
-| Composición de conexión y migraciones de la API | El área de persistencia/composición del proyecto propietario. |
+| Conexión, DataSource CLI, opciones y migraciones de la API | `infrastructure/database/` del proyecto propietario. |
 
 ### Una operación individual por método
 
@@ -177,13 +184,15 @@ Una lectura puede usar joins de relaciones propias y seleccionar únicamente los
 
 La escritura de una entidad relacionada o de una asociación persistida separada requiere su operación explícita. Un repositorio no persiste automáticamente un grafo completo. Application coordina las operaciones individuales y solicita una transacción cuando deben completarse conjuntamente.
 
-Las consultas de dashboards que combinan contextos o varias fuentes se orquestan en una query de Application usando APIs públicas y lecturas individuales. Un adaptador de lectura no constituye una excepción: obtiene datos, sin políticas, cálculos de negocio ni múltiples operaciones ocultas.
+Las consultas de dashboards que combinan entidades o varias fuentes se orquestan en una query de Application usando contratos internos y lecturas individuales. Dentro de la aplicación pueden usarse joins de relaciones explícitas de su dominio; fuentes de otras aplicaciones se consumen por APIs/contratos públicos. Un adaptador de lectura no constituye una excepción: obtiene datos, sin políticas, cálculos de negocio ni múltiples operaciones ocultas.
 
 ### Modelos ORM y configuración
 
 Se puede mapear un modelo de Domain mediante un `EntitySchema` externo, o mantener un modelo ORM separado con un mapper estructural. Se elige según la diferencia real entre representaciones; en ambos casos TypeORM permanece fuera de Domain y Application. [Definición externa de entidades](https://typeorm.io/docs/entity/separating-entity-definition/).
 
 Los contratos no exponen `Repository<T>`, `FindOptions`, `QueryBuilder`, `EntityManager`, `QueryRunner` ni modelos del driver. No se introduce un `BaseRepository<T>` que copie la superficie del ORM o permita eludir la frontera.
+
+Los contratos Entity y los modelos PageRequest/PageResponse tienen identidad compartida; un DTO o un objeto de igual forma no los sustituye. Las colecciones y Promise envuelven únicamente tipos permitidos. Los parámetros genéricos mantienen esas restricciones. La validación de límites numéricos y el cálculo de offset/totalPages son mecanismos técnicos, sin reglas del producto. BCK-021 delimita las firmas completas, sin impedir propiedades/relaciones estructurales de las entidades.
 
 Las escrituras usan mecanismos que mantengan explícita la operación. `save`/`remove` no se aceptan por defecto como garantía de esa propiedad: pueden activar transacciones y comportamiento auxiliar. Cuando su uso sea compatible, se deshabilita la creación automática de transacciones y se verifica que no exista lectura/escritura compuesta ni cascadas. Se evalúan operaciones explícitas como `insert`, `update` y `delete` para la intención correspondiente. [API de repositorios TypeORM](https://typeorm.io/docs/working-with-entity-manager/repository-api/).
 
@@ -194,6 +203,8 @@ No se habilitan cascadas de escritura, eliminación de huérfanos, cascadas de b
 Application es dueño del alcance transaccional: decide qué operaciones deben completarse juntas, su orden y el tratamiento de fallos. La política no vive en un repositorio.
 
 Se distingue esa responsabilidad del mecanismo del driver. Un puerto de ejecución transaccional de Application puede tener un adaptador técnico en Infrastructure que abra, confirme, revierta y libere la conexión según el resultado del callback. El adaptador no selecciona operaciones ni toma decisiones del producto. El cuerpo del callback pertenece a Application y recibe un scope con puertos/repositorios vinculados a esa transacción.
+
+BCK-022 concreta este puerto como UnitOfWork compartido, con un conjunto tipado de repositorios y callback de Application. Su implementación crea bindings nuevos por ejecución; los repositorios solo reciben el manager en Infrastructure. El resultado se entrega tras el commit; rollback y liberación se verifican con la base real. No se usan repositorios globales/capturados, no se conserva el scope y no se anidan Unit of Work. El aislamiento se solicita mediante un valor primitivo independiente del ORM. CasePilot implementa el adaptador técnico en la entrada separada `/typeorm` de su librería de abstracciones; el núcleo solo consume contratos puros.
 
 ```text
 Command handler de Application
@@ -216,7 +227,7 @@ Las llamadas a correo, storage o sistemas externos no se consideran revertidas p
 
 ## 9. Migraciones, scripts y configuración
 
-Cada tabla y configuración ORM tiene un contexto propietario. La app compone el registro de entidades y una secuencia coordinada de migraciones por base de datos. Varias APIs no mantienen historiales independientes que compitan sobre las mismas tablas.
+Cada tabla y configuración ORM tiene una aplicación/proyecto propietario. Su `infrastructure/database/` contiene la conexión, DataSource, opciones y secuencia coordinada de migraciones por base de datos. Varias APIs no mantienen historiales independientes que compitan sobre las mismas tablas.
 
 La configuración de runtime y la del CLI de migraciones se construyen con la misma fuente de entidades/opciones. `autoLoadEntities` de Nest no sustituye el registro explícito del `DataSource` que usa el CLI fuera del proceso Nest. La definición contiene nombres de variables y referencias seguras; las credenciales se inyectan en backend.
 
@@ -228,20 +239,20 @@ Las transacciones técnicas de migraciones DDL son parte del mecanismo de evoluc
 
 Los paquetes backend de propósito general contienen mecanismos técnicos configurables, con consumidores reales o claramente planificados: conexión a base de datos, logging, autenticación técnica, middleware configurable, correo, PDF, mensajería, storage y clientes de servicios externos.
 
-| Capacidad técnica general | Responsabilidad específica en el contexto propietario |
+| Capacidad técnica general | Responsabilidad específica en la aplicación propietaria |
 | --- | --- |
 | Cliente de correo y adaptador del proveedor | Application decide destinatarios, condición y secuencia de una notificación. |
 | Generador PDF | Application determina datos, reglas y contenido de un informe del producto. |
 | Cliente Azure Storage | Application decide ámbito, autorización y estrategia de almacenamiento del documento. |
 | Cliente de mensajería | Application decide qué evento del producto emitir y cuándo. |
 | Autenticación técnica | Application decide permisos sobre recursos y acciones del producto. |
-| Conexión, telemetría y mecanismo transaccional general | Application define el alcance; el contexto conserva esquemas y repositorios concretos. |
+| Conexión, telemetría y mecanismo transaccional general | Application define el alcance; la aplicación conserva esquemas y repositorios concretos. |
 
 Las librerías no importan desde apps, no contienen entidades/repositorios específicos ni políticas del producto, y no llegan a bundles web/mobile. Infrastructure adapta sus APIs técnicas a los puertos que necesita Application.
 
 ## 11. Evolución hacia varias APIs
 
-Una nueva audiencia no implica un nuevo bounded context. Web y mobile pueden usar los mismos commands y queries con contratos HTTP diferentes.
+Una nueva audiencia utiliza el mismo dominio de la aplicación. Web y mobile pueden usar los mismos commands y queries con contratos HTTP diferentes.
 
 | Necesidad | Evolución compatible |
 | --- | --- |
@@ -255,17 +266,19 @@ Un BFF puede adaptar representación y protocolo. Si se necesita una nueva decis
 
 Si varios hosts necesitan ejecutar los mismos casos de uso, se decide y documenta una frontera de paquetes específica del producto mediante ADR y actualización de su estructura. No se importan apps entre sí ni se coloca ese negocio en paquetes técnicos generales para evitar esa decisión.
 
-## 12. Evolución hacia varios bounded contexts
+## 12. Dominio compartido y evolución de fronteras
 
-Cada contexto mantiene vocabulario, modelos de datos, casos de uso, persistencia y API pública propios. Un concepto como cliente puede tener representaciones distintas en contextos diferentes; no se impone una entidad global para evitar mapeos.
+Las entidades y relaciones de una aplicación comparten Domain. Application usa sus contratos internos y coordina las operaciones que involucren varias entidades. No existe una frontera privada entre productos, órdenes o usuarios de la misma aplicación: siguen vigentes la dirección de dependencias, autorización, operaciones individuales y transacciones explícitas.
 
-En el monolito, la comunicación usa interfaces públicas de Application o contratos explícitos. Un contexto no importa repositorios, schemas o modelos ORM privados de otro. Puede compartir la base PostgreSQL inicialmente, manteniendo dueño por tabla y sin escrituras ni joins a datos privados de otro contexto.
+No se introduce división por bounded contexts en la arquitectura vigente. Si una necesidad futura requiere separar dominios o proyectos, debe autorizarse y registrarse una nueva decisión, con normativa y verificaciones sincronizadas antes de implementar esa división.
 
-Si varios contextos deben actuar, Application hace explícita la coordinación mediante sus APIs públicas. La consistencia entre procesos se diseña al separarlos; una transacción local no proporciona atomicidad distribuida. No se adopta un broker, saga o microservicio antes de existir una necesidad concreta.
+Las aplicaciones independientes se comunican por APIs/contratos explícitos y conservan propietario de persistencia. Una transacción local no proporciona atomicidad distribuida. No se adopta un broker, saga o microservicio antes de existir una necesidad concreta.
 
 ## 13. Errores, observabilidad y verificación
 
 Infrastructure devuelve resultados técnicos y traduce errores del proveedor sin tomar decisiones del producto. Application interpreta esos resultados y produce responses o errores tipados independientes de HTTP. Presentation asigna status codes y contratos externos sin revelar SQL, credenciales o detalles internos.
+
+Un vocabulario técnico de errores puede compartirse en una entrada pura de librería, conservando en Application la decisión funcional de emitirlos. El adaptador de transporte se expone por separado y configura status, contrato externo y política de detalle sin ser dependencia del núcleo. CasePilot implementa este mecanismo en [exception-handler](../../src/libs/backend/exception-handler/README.md) y adopta Problem Details conforme al [ADR 0012](../adr/0012-configurable-http-error-handler.md), sin ampliar el catálogo normativo.
 
 Logging, correlación, métricas y tracing se implementan mediante mecanismos técnicos. Las decisiones de auditoría del producto y la emisión de sus eventos son explícitas en Application. Los modelos de evento son estructuras; su creación con significado de negocio y su secuencia pertenecen al caso de uso.
 

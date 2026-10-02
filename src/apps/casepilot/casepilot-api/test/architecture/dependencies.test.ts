@@ -17,7 +17,7 @@ function cruise(files: Readonly<Record<string, string>>): { status: number | nul
   mkdirSync(directory, { recursive: true });
   try {
     writeFileSync(join(directory, 'package.json'), JSON.stringify({ type: 'module', dependencies: { typeorm: '0.3.31' }, devDependencies: { 'ts-morph': '27.0.2' } }));
-    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/contexts/cases/infrastructure/*'] } } }));
+    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/typeorm': ['../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts'] } } }));
     for (const [path, text] of Object.entries(files)) {
       const target = join(directory, path);
       const ownedPath = relative(fixture, target);
@@ -37,23 +37,81 @@ function cruise(files: Readonly<Record<string, string>>): { status: number | nul
   }
 }
 
-void test('dependency-cruiser accepts directed layers and imports through another context public API', () => {
+void test('CPA-003 permits public abstractions entries and rejects private modules', () => {
+  const library = '../../../libs/backend/abstractions/src/';
+  const files = {
+    [library + 'index.ts']: "export type { Entity } from './dataaccess/models/entity.js';",
+    [library + 'dataaccess/models/entity.ts']: 'export interface Entity { readonly id: string }',
+    [library + 'dataaccess/typeorm/index.ts']: "export { TypeOrmUnitOfWork } from './adapter.js';",
+    [library + 'dataaccess/typeorm/adapter.ts']: 'export class TypeOrmUnitOfWork {}',
+  };
+  const permitted = cruise({
+    ...files,
+    'src/domain/model.ts': "export type { Entity } from '@casepilot/abstractions';",
+    'src/infrastructure/transactions.ts': "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';",
+  });
+  assert.equal(permitted.status, 0, permitted.output);
+  const privateImport = cruise({
+    ...files,
+    'src/domain/model.ts': "export type { Entity } from '../../../../../libs/backend/abstractions/src/dataaccess/models/entity.js';",
+  });
+  assert.notEqual(privateImport.status, 0);
+  assert.match(privateImport.output, /CPA-003-abstractions-public-entry/);
+  assert.doesNotMatch(privateImport.output, /BCK-019-resolvable-imports/);
+});
+
+void test('BCK-008 rejects the abstractions TypeORM adapter through a core barrel', () => {
   const result = cruise({
-    'src/contexts/cases/domain/model.ts': 'export interface Model { id: string }',
-    'src/contexts/cases/application/query.ts': "export type { Model } from '../domain/model.js'; export type { Customer } from '../../customers/public.js';",
-    'src/contexts/cases/presentation/controller.ts': "export type { Model } from '../application/query.js';",
-    'src/contexts/cases/infrastructure/adapter.ts': "export type { Model } from '../domain/model.js';",
-    'src/contexts/customers/public.ts': "export type { Customer } from './domain/customer.js';",
-    'src/contexts/customers/domain/customer.ts': 'export interface Customer { id: string }',
+    'src/application/orders/run.ts': "export { TypeOrmUnitOfWork } from './bridge.js';",
+    'src/application/orders/bridge.ts': "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';",
+    '../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts': 'export class TypeOrmUnitOfWork {}',
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.output, /BCK-008-abstractions-core-no-typeorm/);
+  assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
+});
+
+void test('BCK-008 permits pure errors and rejects the NestJS adapter through a core barrel', () => {
+  const errors = '../../../libs/backend/exception-handler/src/';
+  const files = {
+    [errors + 'index.ts']: "export { ValidationError } from './errors.js';",
+    [errors + 'errors.ts']: 'export class ValidationError extends Error {}',
+    [errors + 'nestjs/index.ts']: 'export class ExceptionHandlerModule {}',
+  };
+  const allowed = cruise({
+    ...files,
+    'src/application/users/errors.ts': "export { ValidationError } from '../../../../../../libs/backend/exception-handler/src/index.js';",
+    'src/app.module.ts': "export { ExceptionHandlerModule } from '../../../../libs/backend/exception-handler/src/nestjs/index.js';",
+  });
+  assert.equal(allowed.status, 0, allowed.output);
+  const rejected = cruise({
+    ...files,
+    'src/application/users/errors.ts': "export { ExceptionHandlerModule } from './bridge.js';",
+    'src/application/users/bridge.ts': "export { ExceptionHandlerModule } from '../../../../../../libs/backend/exception-handler/src/nestjs/index.js';",
+  });
+  assert.notEqual(rejected.status, 0);
+  assert.match(rejected.output, /BCK-008-errors-core-no-nestjs/);
+  assert.doesNotMatch(rejected.output, /BCK-019-resolvable-imports/);
+});
+
+void test('dependency-cruiser accepts shared domain relationships and directed application layers', () => {
+  const result = cruise({
+    'src/domain/model.ts': "import type { Customer } from './customer.js'; export interface Model { id: string; customer: Customer }",
+    'src/application/orders/query.ts': "export type { Model } from '../../domain/model.js'; export type { Customer } from '../../domain/customer.js';",
+    'src/presentation/controller.ts': "export type { Model } from '../application/orders/query.js';",
+    'src/infrastructure/adapter.ts': "export type { Model } from '../domain/model.js';",
+    'src/domain/customer.ts': 'export interface Customer { id: string }',
+    'src/infrastructure/database/options.ts': "export type { Model } from '../persistence/schema.js';",
+    'src/infrastructure/persistence/schema.ts': "export type { Model } from '../../domain/model.js';",
   });
   assert.equal(result.status, 0, result.output);
 });
 
 void test('dependency-cruiser resolves .js specifiers, type-only imports and aliases before checking boundaries', () => {
-  for (const specifier of ['../infrastructure/adapter.js', '@infra/adapter']) {
+  for (const specifier of ['../../infrastructure/adapter.js', '@infra/adapter']) {
     const result = cruise({
-      'src/contexts/cases/application/query.ts': `export type { Adapter } from '${specifier}';`,
-      'src/contexts/cases/infrastructure/adapter.ts': 'export interface Adapter {}',
+      'src/application/orders/query.ts': `export type { Adapter } from '${specifier}';`,
+      'src/infrastructure/adapter.ts': 'export interface Adapter {}',
     });
     assert.notEqual(result.status, 0);
     assert.match(result.output, /BCK-008-application-layers/);
@@ -63,27 +121,43 @@ void test('dependency-cruiser resolves .js specifiers, type-only imports and ali
 
 void test('a barrel cannot conceal an Application dependency on Infrastructure', () => {
   const result = cruise({
-    'src/contexts/cases/application/query.ts': "export { Adapter } from '../bridge.js';",
-    'src/contexts/cases/bridge.ts': "export { Adapter } from './infrastructure/adapter.js';",
-    'src/contexts/cases/infrastructure/adapter.ts': 'export class Adapter {}',
+    'src/application/orders/query.ts': "export { Adapter } from './bridge.js';",
+    'src/application/orders/bridge.ts': "export { Adapter } from '../../infrastructure/adapter.js';",
+    'src/infrastructure/adapter.ts': 'export class Adapter {}',
   });
   assert.notEqual(result.status, 0);
   assert.match(result.output, /BCK-008-application-layers/);
 });
 
-void test('private cross-context imports and dependency cycles fail', () => {
-  const crossContext = cruise({
-    'src/contexts/cases/application/query.ts': "export type { Customer } from '../../customers/domain/customer.js';",
-    'src/contexts/customers/domain/customer.ts': 'export interface Customer {}',
-  });
-  assert.notEqual(crossContext.status, 0);
-  assert.match(crossContext.output, /BCK-014-context-public-api/);
+void test('dependency cycles in the shared Application layer fail', () => {
   const cycle = cruise({
-    'src/contexts/cases/application/one.ts': "export { two } from './two.js'; export const one = 1;",
-    'src/contexts/cases/application/two.ts': "export { one } from './one.js'; export const two = 2;",
+    'src/application/orders/one.ts': "export { two } from '../payments/two.js'; export const one = 1;",
+    'src/application/payments/two.ts': "export { one } from '../orders/one.js'; export const two = 2;",
   });
   assert.notEqual(cycle.status, 0);
   assert.match(cycle.output, /BCK-008-no-cycles/);
+});
+
+void test('shared layers retain Domain, Presentation, Infrastructure and database boundaries', () => {
+  for (const [source, target, rule] of [
+    ['src/domain/model.ts', 'src/application/orders/query.ts', 'BCK-008-domain-layers'],
+    ['src/domain/model.ts', 'src/app.module.ts', 'BCK-008-domain-layers'],
+    ['src/application/orders/query.ts', 'src/infrastructure/database/connection.ts', 'BCK-008-application-layers'],
+    ['src/application/orders/query.ts', 'src/infrastructure/config/config.ts', 'BCK-008-application-layers'],
+    ['src/application/orders/query.ts', 'src/app.module.ts', 'BCK-008-application-layers'],
+    ['src/presentation/controller.ts', 'src/domain/model.ts', 'BCK-003-presentation-delegates-to-application'],
+    ['src/presentation/controller.ts', 'src/infrastructure/database/connection.ts', 'BCK-003-presentation-delegates-to-application'],
+    ['src/infrastructure/database/connection.ts', 'src/presentation/controller.ts', 'BCK-008-infrastructure-no-presentation'],
+  ] as const) {
+    const specifier = relative(dirname(source), target).replaceAll('\\', '/').replace(/\.ts$/, '.js');
+    const result = cruise({
+      [source]: `export type { Target } from '${specifier.startsWith('.') ? specifier : './' + specifier}';`,
+      [target]: 'export interface Target {}',
+    });
+    assert.notEqual(result.status, 0, `${source} -> ${target}`);
+    assert.ok(result.output.includes(rule), result.output);
+    assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
+  }
 });
 
 void test('runtime cannot depend on dev tools, test files or unresolved modules', () => {
@@ -103,7 +177,7 @@ void test('core cannot import drivers or Node APIs, even with a bare Node specif
     ["export type { EntityManager } from 'typeorm';", 'BCK-008-core-frameworks-and-providers'],
     ["export type { Stats } from 'fs';", 'BCK-008-core-node-apis'],
   ] as const) {
-    const result = cruise({ 'src/contexts/cases/application/query.ts': source });
+    const result = cruise({ 'src/application/users/query.ts': source });
     assert.notEqual(result.status, 0);
     assert.ok(result.output.includes(rule), result.output);
   }
@@ -124,4 +198,23 @@ void test('API can consume backend libraries and contracts, but cannot import an
   assert.notEqual(forbidden.status, 0);
   assert.match(forbidden.output, /BCK-015-no-other-apps/);
   assert.match(forbidden.output, /BCK-015-backend-no-client-libs/);
+});
+
+void test('CPA-002 permits the CQRS public entry and rejects direct private modules', () => {
+  const contracts = {
+    '../../../libs/backend/cqrs/src/index.ts': "export type { Handler } from './handler.js';",
+    '../../../libs/backend/cqrs/src/handler.ts': 'export interface Handler { execute(request: object): Promise<object> }',
+  };
+  const allowed = cruise({
+    ...contracts,
+    'src/application/orders/query.ts': "export type { Handler } from '@casepilot/cqrs';",
+  });
+  assert.equal(allowed.status, 0, allowed.output);
+  const forbidden = cruise({
+    ...contracts,
+    'src/application/orders/query.ts': "export type { Handler } from '../../../../../../libs/backend/cqrs/src/handler.js';",
+  });
+  assert.notEqual(forbidden.status, 0);
+  assert.match(forbidden.output, /CPA-002-cqrs-public-entry/);
+  assert.doesNotMatch(forbidden.output, /BCK-019-resolvable-imports/);
 });

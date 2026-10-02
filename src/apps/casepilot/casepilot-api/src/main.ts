@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { loadBackendConfig } from './config/load-backend-config.js';
+import { loadBackendConfig } from './infrastructure/config/load-backend-config.js';
 import { createApp } from './create-app.js';
 
 async function bootstrap(): Promise<void> {

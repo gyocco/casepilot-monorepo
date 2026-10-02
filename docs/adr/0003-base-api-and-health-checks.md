@@ -6,6 +6,8 @@
 
 ## Contexto
 
+Evolución del contrato: el [ADR 0012](0012-configurable-http-error-handler.md) reemplaza el body 503 inicial por Problem Details y un filtro global configurable; el status y el recorrido de Health se conservan.
+
 La API deja de ser un placeholder. Se solicita un backend REST con TypeORM, configuración local/futura y dos sondas: respuesta HTTP sin acceso a datos y lectura completa de una tabla técnica `HealthCheckObject(Guid, Value)`. La separación y todas las [reglas backend](../architecture/backend-architecture-baseline-rules.md) continúan vigentes.
 
 ## Decisión

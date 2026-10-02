@@ -1,6 +1,6 @@
 # 0002 — Arquitectura backend y lógica exclusiva en Application
 
-- Estado: aceptada.
+- Estado: aceptada; organización por contextos sustituida por el [ADR 0008](0008-application-wide-backend-layers.md). Las decisiones restantes continúan vigentes.
 - Fecha: 2026-09-30.
 - Alcance: backend NestJS/TypeScript de CasePilot con TypeORM.
 - Evolución documental: [ADR 0006](0006-reusable-backend-baseline.md), base reutilizable y adopción particular desde 2026-10-01; la decisión de negocio sigue vigente.

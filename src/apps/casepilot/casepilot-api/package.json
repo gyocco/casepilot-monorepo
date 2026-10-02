@@ -13,32 +13,36 @@
       "import": "./dist/create-app.js"
     },
     "./database": {
-      "types": "./dist/database/create-data-source-options.d.ts",
-      "import": "./dist/database/create-data-source-options.js"
+      "types": "./dist/infrastructure/database/create-data-source-options.d.ts",
+      "import": "./dist/infrastructure/database/create-data-source-options.js"
     },
     "./config": {
-      "types": "./dist/config/backend-config.d.ts",
-      "import": "./dist/config/backend-config.js"
+      "types": "./dist/infrastructure/config/backend-config.d.ts",
+      "import": "./dist/infrastructure/config/backend-config.js"
     }
   },
   "scripts": {
-    "dev": "tsx watch src/main.ts",
+    "dev": "pnpm build:contracts && tsx watch src/main.ts",
     "start": "node dist/main.js",
-    "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.test.json --noEmit",
-    "lint": "eslint src test tools eslint.config.mjs dependency-cruiser.config.mjs --max-warnings 0",
-    "check:dependencies": "depcruise --config dependency-cruiser.config.mjs --output-type err-long src",
-    "check:structure": "tsx tools/architecture/check-structure.ts",
+    "build:contracts": "pnpm --filter @casepilot/cqrs --filter @casepilot/abstractions --filter @casepilot/exception-handler build",
+    "build": "pnpm build:contracts && tsc -p tsconfig.json",
+    "typecheck": "pnpm build:contracts && tsc -p tsconfig.test.json --noEmit",
+    "lint": "pnpm build:contracts && eslint src test tools eslint.config.mjs dependency-cruiser.config.mjs --max-warnings 0",
+    "check:dependencies": "pnpm build:contracts && depcruise --config dependency-cruiser.config.mjs --output-type err-long src",
+    "check:structure": "pnpm build:contracts && tsx tools/architecture/check-structure.ts",
     "check:architecture": "pnpm typecheck && pnpm lint && pnpm check:dependencies && pnpm check:structure",
-    "test:architecture": "tsx --test test/architecture/dependencies.test.ts test/architecture/eslint.test.ts test/architecture/structure.test.ts",
-    "test": "tsc -p tsconfig.test.json && node --test build/test/test/unit/configuration.test.js build/test/test/unit/health.test.js && pnpm test:architecture",
-    "test:integration": "tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
-    "migration:run": "pnpm build && typeorm migration:run -d dist/database/data-source.js",
-    "migration:show": "pnpm build && typeorm migration:show -d dist/database/data-source.js",
-    "migration:revert": "pnpm build && typeorm migration:revert -d dist/database/data-source.js",
-    "migration:generate": "pnpm build && typeorm migration:generate -d dist/database/data-source.js"
+    "test:architecture": "pnpm build:contracts && tsx --test test/architecture/dependencies.test.ts test/architecture/eslint.test.ts test/architecture/structure.test.ts test/architecture/data-access.test.ts",
+    "test": "pnpm build:contracts && tsc -p tsconfig.test.json && node --test build/test/test/unit/configuration.test.js build/test/test/unit/health.test.js build/test/test/unit/error-handling.test.js && pnpm test:architecture",
+    "test:integration": "pnpm build:contracts && tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
+    "migration:run": "pnpm build && typeorm migration:run -d dist/infrastructure/database/data-source.js",
+    "migration:show": "pnpm build && typeorm migration:show -d dist/infrastructure/database/data-source.js",
+    "migration:revert": "pnpm build && typeorm migration:revert -d dist/infrastructure/database/data-source.js",
+    "migration:generate": "pnpm build && typeorm migration:generate -d dist/infrastructure/database/data-source.js"
   },
   "dependencies": {
+    "@casepilot/abstractions": "workspace:*",
+    "@casepilot/cqrs": "workspace:*",
+    "@casepilot/exception-handler": "workspace:*",
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",
     "@nestjs/platform-express": "12.1.2",

@@ -32,11 +32,20 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/contexts/**/domain/**/*.ts', 'src/contexts/**/application/**/*.ts'],
+    files: ['src/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!typeorm$)|.*libs\\/backend\\/abstractions\\/)/]",
+        message: 'CPA-003: Use the public @casepilot/abstractions entry or its Infrastructure-only /typeorm adapter.',
+      }],
+    },
+  },
+  {
+    files: ['src/domain/**/*.ts', 'src/application/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', 'typeorm', 'typeorm/*', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-008: Domain/Application depend on internal models and ports, not runtime adapters.',
         }],
       }],
@@ -47,7 +56,30 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/contexts/**/presentation/**/*.ts'],
+    files: ['src/application/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': ['error',
+        {
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!typeorm$)|.*libs\\/backend\\/abstractions\\/)/]",
+          message: 'CPA-003: Use the public abstractions entry point.',
+        },
+        {
+          selector: "ImportDeclaration[source.value='@casepilot/cqrs'][importKind!='type'] > ImportSpecifier[importKind!='type']:matches([imported.name='Handler'], [imported.value='Handler'])",
+          message: 'CPA-002: Import Handler as a type; Request and Response are runtime bases.',
+        },
+        {
+          selector: "ExportNamedDeclaration[source.value='@casepilot/cqrs'][exportKind!='type'] > ExportSpecifier[exportKind!='type'][local.name='Handler']",
+          message: 'CPA-002: Reexport Handler as a type.',
+        },
+        {
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/cqrs\\/|.*libs\\/backend\\/cqrs\\/)/]",
+          message: 'CPA-002: Consume CQRS contracts through the public @casepilot/cqrs entry point.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/presentation/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
@@ -58,20 +90,24 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/contexts/**/domain/**/*.ts'],
+    files: ['src/domain/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', 'typeorm', 'typeorm/*', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-002/BCK-008: Domain contains data/contracts and cannot depend on other layers.',
         }],
       }],
     },
   },
   {
-    files: ['src/contexts/**/infrastructure/**/repositories/**/*.ts'],
+    files: ['src/infrastructure/**/repositories/**/*.ts', 'src/infrastructure/**/*.repository.ts'],
     rules: {
       'no-restricted-syntax': ['error',
+        {
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!typeorm$)|.*libs\\/backend\\/abstractions\\/)/]",
+          message: 'CPA-003: Use the public abstractions entry point.',
+        },
         {
           selector: "CallExpression > MemberExpression.callee > Identifier.property[name=/^(transaction|startTransaction|commitTransaction|rollbackTransaction)$/]",
           message: 'BCK-010: Repositories participate in a received scope; they cannot manage transactions.',
@@ -84,11 +120,15 @@ export default tseslint.config(
           selector: "CallExpression > MemberExpression.callee > Identifier.property[name=/^findAndCount(By)?$/]",
           message: 'BCK-009: Application coordinates the item and count reads explicitly.',
         },
+        {
+          selector: "CallExpression > MemberExpression.callee > Literal.property[value=/^findAndCount(By)?$/]",
+          message: 'BCK-009: Application coordinates item and count reads, including computed members.',
+        },
       ],
     },
   },
   {
-    files: ['src/contexts/**/infrastructure/persistence/schemas/**/*.ts', 'src/contexts/**/infrastructure/persistence/entities/**/*.ts', 'src/contexts/**/infrastructure/persistence/models/**/*.ts'],
+    files: ['src/infrastructure/persistence/schemas/**/*.ts', 'src/infrastructure/persistence/entities/**/*.ts', 'src/infrastructure/persistence/models/**/*.ts'],
     rules: {
       'no-restricted-syntax': ['error',
         {
@@ -111,7 +151,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/database/**/*.ts'],
+    files: ['src/infrastructure/database/**/*.ts'],
     rules: {
       'no-restricted-syntax': ['error', {
         selector: "Property:matches([key.name='synchronize'], [key.value='synchronize'])[value.value=true]",

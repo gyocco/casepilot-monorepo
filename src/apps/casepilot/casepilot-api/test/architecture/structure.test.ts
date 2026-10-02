@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { Project, ts } from 'ts-morph';
 import { validateUseCases, type ArchitectureFinding } from '../../tools/architecture/use-case-rules.js';
+import { validateSourceLayout } from '../../tools/architecture/source-layout-rules.js';
 
 const apiDirectory = resolve('build/structure-fixture');
-const application = 'src/contexts/cases/application/queries/';
+const application = 'src/application/cases/';
 
 function fixture(method: string, models = 'export class ReadCaseRequest { id = "case"; }\nexport class ReadCaseResponse { found = true; }'): Project {
   const project = new Project({
@@ -20,7 +23,36 @@ function fixture(method: string, models = 'export class ReadCaseRequest { id = "
   return project;
 }
 
-function check(project: Project): ArchitectureFinding[] { return validateUseCases(project, apiDirectory); }
+// Isolate the reusable BCK contract, which permits synchronous responses.
+function check(project: Project): ArchitectureFinding[] {
+  return validateUseCases(project, apiDirectory).filter(finding => finding.rule !== 'CPA-002');
+}
+
+function cqrsFixture(): Project {
+  const project = fixture('execute(request: ReadCaseRequest): Promise<ReadCaseResponse> { return Promise.resolve(new ReadCaseResponse()); }');
+  const cqrsDirectory = resolve(apiDirectory, '../../../libs/backend/cqrs/src');
+  const actualApiDirectory = fileURLToPath(new URL('../../', import.meta.url));
+  for (const file of ['index.ts', 'handler.ts', 'request.ts', 'response.ts']) {
+    project.createSourceFile(resolve(cqrsDirectory, file), readFileSync(resolve(actualApiDirectory, '../../../libs/backend/cqrs/src', file), 'utf8'));
+  }
+  project.compilerOptions.set({ baseUrl: apiDirectory, paths: { '@casepilot/cqrs': [resolve(cqrsDirectory, 'index.ts')] } });
+  project.getSourceFileOrThrow('models.ts').replaceWithText(`
+    import { Request, Response } from '@casepilot/cqrs';
+    export class ReadCaseRequest extends Request { id = "case"; }
+    export class ReadCaseResponse extends Response { found = true; }
+  `);
+  const handler = project.getSourceFileOrThrow('read-case.query.ts');
+  handler.insertStatements(0, "import type { Handler } from '@casepilot/cqrs';");
+  handler.getClassOrThrow('ReadCaseQuery').addImplements('Handler<ReadCaseRequest, ReadCaseResponse>');
+  handler.getClassOrThrow('ReadCaseQuery').rename('ReadCaseHandler');
+  handler.move(resolve(apiDirectory, application, 'read-case.handler.ts'));
+  project.resolveSourceFileDependencies();
+  return project;
+}
+
+function checkContracts(project: Project): ArchitectureFinding[] {
+  return validateUseCases(project, apiDirectory).filter(finding => finding.rule === 'CPA-002');
+}
 
 void test('accepts synchronous/asynchronous handlers, aliases and returns inside mapping callbacks', () => {
   for (const method of [
@@ -36,8 +68,8 @@ void test('accepts synchronous/asynchronous handlers, aliases and returns inside
     export class ReadCaseQuery { execute(request: Input): Output { return new Output(); } }
   `);
   project.createSourceFile(resolve(apiDirectory, 'src/consumer.ts'), `
-    import { ReadCaseQuery } from './contexts/cases/application/queries/read-case.query.js';
-    import { ReadCaseRequest } from './contexts/cases/application/queries/models.js';
+    import { ReadCaseQuery } from './application/cases/read-case.query.js';
+    import { ReadCaseRequest } from './application/cases/models.js';
     new ReadCaseQuery().execute(new ReadCaseRequest());
   `);
   assert.deepEqual(check(project), []);
@@ -102,8 +134,8 @@ void test('BCK-004 checks direct call sites, including missing, extra and struct
   for (const argumentsText of ['', 'new ReadCaseRequest(), "extra"', '{}']) {
     const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
     project.createSourceFile(resolve(apiDirectory, 'src/consumer.ts'), `
-      import { ReadCaseQuery } from './contexts/cases/application/queries/read-case.query.js';
-      import { ReadCaseRequest } from './contexts/cases/application/queries/models.js';
+      import { ReadCaseQuery } from './application/cases/read-case.query.js';
+      import { ReadCaseRequest } from './application/cases/models.js';
       new ReadCaseQuery().execute(${argumentsText});
     `);
     assert.ok(check(project).some(finding => finding.rule === 'BCK-004' && finding.file === 'src/consumer.ts'), argumentsText);
@@ -114,4 +146,223 @@ void test('a function-only handler file cannot silently escape class-based check
   const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
   project.getSourceFileOrThrow('read-case.query.ts').replaceWithText('export function execute(): void {}');
   assert.ok(check(project).some(finding => finding.rule === 'BCK-004'));
+});
+
+void test('BCK-004/BCK-005 scan commands, queries and handlers across resources and nested operations', () => {
+  for (const [path, suffix] of [
+    ['src/application/users/read-case.command.ts', 'Command'],
+    ['src/application/orders/read-case.handler.ts', 'Handler'],
+    ['src/application/payments/read-case.query.ts', 'Query'],
+    ['src/application/orders/read-case/read-case.query.ts', 'Query'],
+  ] as const) {
+    const project = fixture('execute(): string { return "invalid"; }');
+    const handler = project.getSourceFileOrThrow('read-case.query.ts');
+    handler.getClassOrThrow('ReadCaseQuery').rename(`ReadCase${suffix}`);
+    handler.move(resolve(apiDirectory, path));
+    project.getSourceFileOrThrow('models.ts').move(resolve(apiDirectory, 'src/application/shared/read-case.models.ts'));
+    assert.deepEqual(project.getPreEmitDiagnostics(), [], path);
+    assert.ok(check(project).some(finding => finding.rule === 'BCK-004' && finding.file === path), path);
+    assert.ok(check(project).some(finding => finding.rule === 'BCK-005' && finding.file === path), path);
+    const execute = handler.getClassOrThrow(`ReadCase${suffix}`).getMethodOrThrow('execute');
+    execute.addParameter({ name: 'request', type: 'ReadCaseRequest' });
+    execute.setReturnType('ReadCaseResponse');
+    execute.setBodyText('return new ReadCaseResponse();');
+    assert.deepEqual(check(project), [], path);
+    assert.deepEqual(validateSourceLayout(project, apiDirectory), [], path);
+  }
+});
+
+void test('request and response models outside Application cannot bypass the layer contract', () => {
+  const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+  project.getSourceFileOrThrow('models.ts').move(resolve(apiDirectory, 'src/domain/models.ts'));
+  assert.ok(check(project).some(finding => finding.rule === 'BCK-004'));
+  assert.ok(check(project).some(finding => finding.rule === 'BCK-005'));
+});
+
+void test('source layout accepts shared layers, technical database/config and bootstrap', () => {
+  const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+  for (const path of [
+    'src/application/users/models.ts', 'src/application/orders/create-order/models.ts',
+    'src/application/payments/models.ts', 'src/application/ports/clock.ts', 'src/application/shared/policy.ts',
+    'src/domain/entities/customer.ts', 'src/domain/entities/order.ts',
+    'src/infrastructure/database/migrations/create-order.ts', 'src/infrastructure/config/options.ts',
+    'src/infrastructure/persistence/schemas/order.ts', 'src/presentation/http/order.ts', 'src/app.module.ts',
+    'test/integration/fixture.ts',
+  ]) project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+  assert.deepEqual(validateSourceLayout(project, apiDirectory), []);
+});
+
+void test('CPA-001 rejects technical grouping and ungrouped Application files, even without imports', () => {
+  for (const path of [
+    'src/application/commands/operation.ts', 'src/application/queries/operation.ts',
+    'src/application/commands/orders/operation.ts', 'src/application/queries/users/operation.ts',
+    'src/application/orders/commands/operation.ts', 'src/application/users/queries/operation.ts',
+    'src/application/payments/refund/commands/operation.ts', 'src/application/orders/Queries/operation.ts',
+    'src/application/operation.ts',
+  ]) {
+    const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+    project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+    assert.deepEqual(project.getPreEmitDiagnostics(), [], path);
+    const findings = validateSourceLayout(project, apiDirectory);
+    assert.equal(findings.length, 1, path);
+    assert.equal(findings[0]?.rule, 'CPA-001', path);
+    assert.equal(findings[0]?.file, path);
+    assert.match(findings[0]?.message ?? '', /src\/application\/<resource>\/.*without commands\/queries/);
+  }
+});
+
+void test('CPA-001 is scoped to Application sources of this API', () => {
+  const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+  for (const path of [
+    'src/domain/queries/model.ts', 'src/infrastructure/commands/adapter.ts',
+    'src/presentation/queries/transport.ts', 'test/application/queries/fixture.ts',
+    '../another-api/src/application/queries/operation.ts',
+  ]) project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+  assert.deepEqual(validateSourceLayout(project, apiDirectory), []);
+});
+
+void test('source layout rejects contexts, feature layers and misplaced database without requiring imports', () => {
+  for (const [path, rule] of [
+    ['src/contexts/health/domain/model.ts', 'BCK-014'],
+    ['src/features/orders/domain/model.ts', 'BCK-014'],
+    ['src/domain/orders/domain/model.ts', 'BCK-014'],
+    ['src/domain/contexts/orders/model.ts', 'BCK-014'],
+    ['src/config/options.ts', 'BCK-014'],
+    ['src/database/data-source.ts', 'BCK-017'],
+    ['src/infrastructure/persistence/database/data-source.ts', 'BCK-017'],
+  ] as const) {
+    const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+    project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+    assert.ok(validateSourceLayout(project, apiDirectory).some(finding => finding.file === path && finding.rule === rule), path);
+  }
+});
+
+void test('the real API sources include the relocated Health handler and its architecture checks', () => {
+  const directory = fileURLToPath(new URL('../../', import.meta.url));
+  const project = new Project({ tsConfigFilePath: resolve(directory, 'tsconfig.json') });
+  const handler = project.getSourceFileOrThrow(resolve(directory, 'src/application/health/get-health-check-objects.handler.ts'));
+  assert.deepEqual(validateSourceLayout(project, directory), []);
+  assert.deepEqual(validateUseCases(project, directory), []);
+  const health = handler.getClassOrThrow('GetHealthCheckObjectsHandler');
+  health.removeImplements(0);
+  assert.ok(validateUseCases(project, directory).some(finding => finding.rule === 'CPA-002'));
+  health.addImplements('Handler<GetHealthCheckObjectsRequest, GetHealthCheckObjectsResponse>');
+  handler.getClassOrThrow('GetHealthCheckObjectsHandler').getMethodOrThrow('execute').getParameters()[0]?.remove();
+  assert.ok(validateUseCases(project, directory).some(finding => finding.rule === 'BCK-004' && finding.file.endsWith('get-health-check-objects.handler.ts')));
+  handler.move(resolve(directory, 'src/application/queries/get-health-check-objects.handler.ts'));
+  assert.ok(validateSourceLayout(project, directory).some(finding => finding.rule === 'CPA-001'
+    && finding.file === 'src/application/queries/get-health-check-objects.handler.ts'));
+});
+
+void test('CPA-002 accepts shared Handler, import aliases, namespace types and reexports', () => {
+  for (const [importText, clause] of [
+    ["import type { Handler } from '@casepilot/cqrs';", 'Handler'],
+    ["import type { Handler as UseCase } from '@casepilot/cqrs';", 'UseCase'],
+    ["import type * as Cqrs from '@casepilot/cqrs';", 'Cqrs.Handler'],
+    ["import type { UseCase } from './bridge.js';", 'UseCase'],
+  ]) {
+    const project = cqrsFixture();
+    project.createSourceFile(resolve(apiDirectory, application, 'bridge.ts'), "export type { Handler as UseCase } from '@casepilot/cqrs';");
+    const file = project.getSourceFileOrThrow('read-case.handler.ts');
+    file.getImportDeclarations().find(declaration => declaration.getModuleSpecifierValue() === '@casepilot/cqrs')?.replaceWithText(importText);
+    file.getClassOrThrow('ReadCaseHandler').getImplements()[0]?.replaceWithText(`${clause}<ReadCaseRequest, ReadCaseResponse>`);
+    assert.deepEqual(project.getPreEmitDiagnostics(), []);
+    assert.deepEqual(validateUseCases(project, apiDirectory), []);
+  }
+});
+
+void test('CPA-002 accepts one Handler contract across resources and nested operations', () => {
+  for (const path of ['src/application/orders/read-case.handler.ts', 'src/application/users/read-case/read-case.handler.ts']) {
+    const project = cqrsFixture();
+    project.getSourceFileOrThrow('read-case.handler.ts').move(resolve(apiDirectory, path));
+    assert.deepEqual(project.getPreEmitDiagnostics(), []);
+    assert.deepEqual(validateUseCases(project, apiDirectory), []);
+  }
+});
+
+void test('CPA-002 rejects absent, counterfeit, inherited and locally aliased Handler declarations', () => {
+  for (const scenario of ['missing', 'counterfeit', 'inherited', 'local-alias']) {
+    const project = cqrsFixture();
+    const file = project.getSourceFileOrThrow('read-case.handler.ts');
+    const handler = file.getClassOrThrow('ReadCaseHandler');
+    handler.removeImplements(0);
+    if (scenario === 'counterfeit') {
+      file.getImportDeclarations().find(declaration => declaration.getModuleSpecifierValue() === '@casepilot/cqrs')?.remove();
+      file.insertStatements(0, 'interface Handler<TRequest, TResponse> { execute(request: TRequest): Promise<TResponse> }');
+      handler.addImplements('Handler<ReadCaseRequest, ReadCaseResponse>');
+    }
+    if (scenario === 'inherited') {
+      file.insertStatements(2, 'class Base implements Handler<ReadCaseRequest, ReadCaseResponse> { execute(request: ReadCaseRequest): Promise<ReadCaseResponse> { return Promise.resolve(new ReadCaseResponse()); } }');
+      handler.setExtends('Base');
+    }
+    if (scenario === 'local-alias') {
+      file.insertStatements(2, 'type Local = Handler<ReadCaseRequest, ReadCaseResponse>;');
+      handler.addImplements('Local');
+    }
+    assert.deepEqual(project.getPreEmitDiagnostics(), [], scenario);
+    assert.ok(checkContracts(project).some(finding => finding.file.endsWith('read-case.handler.ts')), scenario);
+  }
+});
+
+void test('CPA-002 compares concrete Handler models by symbol, even with identical shapes', () => {
+  for (const argumentsText of ['OtherRequest, ReadCaseResponse', 'ReadCaseRequest, OtherResponse', 'any, ReadCaseResponse']) {
+    const project = cqrsFixture();
+    const file = project.getSourceFileOrThrow('read-case.handler.ts');
+    file.insertStatements(2, 'class OtherRequest extends ReadCaseRequest {} class OtherResponse extends ReadCaseResponse {}');
+    file.getClassOrThrow('ReadCaseHandler').getImplements()[0]?.replaceWithText(`Handler<${argumentsText}>`);
+    assert.deepEqual(project.getPreEmitDiagnostics(), []);
+    assert.ok(checkContracts(project).some(finding => finding.file.endsWith('read-case.handler.ts')), argumentsText);
+  }
+});
+
+void test('CPA-002 accepts indirect inheritance and rejects models lacking the shared Request/Response bases', () => {
+  const inherited = cqrsFixture();
+  inherited.getSourceFileOrThrow('models.ts').replaceWithText(`
+    import { Request as Input, Response as Output } from '@casepilot/cqrs';
+    abstract class CommonRequest extends Input {}
+    abstract class CommonResponse extends Output {}
+    export class ReadCaseRequest extends CommonRequest { id = "case"; }
+    export class ReadCaseResponse extends CommonResponse { found = true; }
+  `);
+  assert.deepEqual(inherited.getPreEmitDiagnostics(), []);
+  assert.deepEqual(validateUseCases(inherited, apiDirectory), []);
+  for (const kind of ['Request', 'Response']) {
+    const project = cqrsFixture();
+    project.getSourceFileOrThrow('models.ts').addClass({ name: 'Detached' + kind, isExported: true });
+    assert.deepEqual(project.getPreEmitDiagnostics(), []);
+    assert.ok(checkContracts(project).some(finding => finding.file.endsWith('models.ts') && finding.message.includes(kind)), kind);
+  }
+  const counterfeit = cqrsFixture();
+  counterfeit.getSourceFileOrThrow('models.ts').replaceWithText(`
+    class Request {} class Response {}
+    export class ReadCaseRequest extends Request { id = "case"; }
+    export class ReadCaseResponse extends Response { found = true; }
+  `);
+  assert.equal(checkContracts(counterfeit).filter(finding => finding.file.endsWith('models.ts')).length, 4);
+});
+
+void test('CPA-002 requires OperationHandler names and .handler.ts files without compiler failures', () => {
+  const oldName = cqrsFixture();
+  oldName.getSourceFileOrThrow('read-case.handler.ts').getClassOrThrow('ReadCaseHandler').rename('ReadCaseQuery');
+  assert.deepEqual(oldName.getPreEmitDiagnostics(), []);
+  assert.ok(checkContracts(oldName).length > 0);
+  const oldFile = cqrsFixture();
+  oldFile.getSourceFileOrThrow('read-case.handler.ts').move(resolve(apiDirectory, application, 'read-case.query.ts'));
+  assert.deepEqual(oldFile.getPreEmitDiagnostics(), []);
+  assert.ok(checkContracts(oldFile).length > 0);
+  const mismatchedFile = cqrsFixture();
+  mismatchedFile.getSourceFileOrThrow('read-case.handler.ts').move(resolve(apiDirectory, application, 'another-name.handler.ts'));
+  assert.deepEqual(mismatchedFile.getPreEmitDiagnostics(), []);
+  assert.ok(checkContracts(mismatchedFile).length > 0);
+});
+
+void test('CPA-002 rejects synchronous execution and stays scoped to this API Application', () => {
+  const synchronous = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+  assert.deepEqual(synchronous.getPreEmitDiagnostics(), []);
+  assert.ok(checkContracts(synchronous).length > 0);
+  const project = cqrsFixture();
+  for (const path of ['src/infrastructure/read.handler.ts', 'test/read.handler.ts', '../other-api/src/application/users/read.handler.ts']) {
+    project.createSourceFile(resolve(apiDirectory, path), 'export class ReadHandler { execute(): void {} }');
+  }
+  assert.deepEqual(checkContracts(project), []);
 });

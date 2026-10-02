@@ -36,7 +36,7 @@ Para cada regla afectada determina:
 
 - Identidad: ID BCK vigente, o documento/sección canónica para una regla propia del monorepo o de CasePilot.
 - Semántica: obligación, prohibiciones, alcance, ejemplo permitido y ejemplo rechazado; diferencia observable respecto de la versión anterior.
-- Impacto: capas, contextos, proyectos, consumidores, patrones existentes y proyectos que hayan adoptado explícitamente la base.
+- Impacto: capas, aplicaciones/proyectos propietarios, consumidores, patrones existentes y proyectos que hayan adoptado explícitamente la base.
 - Evidencia: qué puede comprobarse estáticamente y qué requiere una prueba de comportamiento o revisión.
 
 Comprueba compatibilidad con todas las reglas activas y las instrucciones superiores. La solicitud explícita del usuario de cambiar una decisión ya constituye autorización dentro de su alcance: registra esa decisión sin pedir la misma autorización otra vez. Si hay una incompatibilidad no autorizada, concreta el conflicto y una alternativa compatible antes de solicitar la decisión necesaria; continúa el trabajo independiente que sí esté autorizado.
@@ -59,8 +59,8 @@ Elige un mecanismo principal según la propiedad verificable. Revisa siempre los
 | Mecanismo y archivo actual de la API | Usar para |
 | --- | --- |
 | [ESLint](../../../src/apps/casepilot/casepilot-api/eslint.config.mjs) | Restricciones locales de sintaxis, imports y uso de APIs; usa información de tipos si la propiedad la necesita. |
-| [dependency-cruiser](../../../src/apps/casepilot/casepilot-api/dependency-cruiser.config.mjs) | Grafo de dependencias, ciclos, capas, contextos, runtimes, paquetes y reexports alcanzables. |
-| [ts-morph](../../../src/apps/casepilot/casepilot-api/tools/architecture/use-case-rules.ts) y [lanzador](../../../src/apps/casepilot/casepilot-api/tools/architecture/check-structure.ts) | Declaraciones, firmas, clases concretas, símbolos, relaciones entre tipos y llamadas resolubles. |
+| [dependency-cruiser](../../../src/apps/casepilot/casepilot-api/dependency-cruiser.config.mjs) | Grafo de dependencias, ciclos, capas, aplicaciones, runtimes, paquetes y reexports alcanzables. |
+| [ts-morph de casos de uso](../../../src/apps/casepilot/casepilot-api/tools/architecture/use-case-rules.ts), [estructura](../../../src/apps/casepilot/casepilot-api/tools/architecture/source-layout-rules.ts) y [lanzador](../../../src/apps/casepilot/casepilot-api/tools/architecture/check-structure.ts) | Ubicación de capas/database, declaraciones, firmas, clases concretas, símbolos, relaciones entre tipos y llamadas resolubles. |
 
 Incluye la identidad normativa en nombres/mensajes de los checks arquitectónicos y una explicación corregible. Delimita carpetas, fuentes, extensiones, resolución de imports, exclusiones e indirectas soportadas. No añadas prohibiciones más amplias que la obligación sin una decisión documentada, ni uses regex de texto para una propiedad que necesita símbolos o un grafo.
 

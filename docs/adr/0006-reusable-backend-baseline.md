@@ -3,6 +3,7 @@
 - Estado: aceptada e implementada.
 - Fecha: 2026-10-01.
 - Relacionadas: [ADR 0002](0002-backend-application-owned-business-logic.md), [ADR 0003](0003-base-api-and-health-checks.md) y [ADR 0005](0005-project-owned-tests.md).
+- Evolución: el [ADR 0008](0008-application-wide-backend-layers.md) modifica BCK-009/BCK-014/BCK-017 y la organización por aplicación; la adopción de la base reutilizable sigue vigente.
 
 ## Contexto
 

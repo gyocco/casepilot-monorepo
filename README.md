@@ -4,9 +4,19 @@ Monorepo de CasePilot. `src/apps/` agrupa las aplicaciones ejecutables y despleg
 
 ## Estado actual
 
-La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health checks. Web, mobile y las librerías continúan como placeholders. La web prevista usará React, Vite, Ionic React y Tailwind CSS; mobile se empaquetará con Ionic/Capacitor.
+La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health checks. La librería [CQRS](src/libs/backend/cqrs/README.md) proporciona bases Request/Response y Handler; [abstractions](src/libs/backend/abstractions/README.md) proporciona Entity, paginación, repositorios genéricos y UnitOfWork con adaptador TypeORM separado. Web, mobile y las demás capacidades previstas siguen sin implementación. La web prevista usará React, Vite, Ionic React y Tailwind CSS; mobile se empaquetará con Ionic/Capacitor.
+
+El backend usa un dominio compartido por aplicación y las capas `application/`, `domain/`, `infrastructure/` y `presentation/` directamente bajo su `src/`. La conexión, DataSource y migraciones viven en `infrastructure/database/`. Decisión: [ADR 0008](docs/adr/0008-application-wide-backend-layers.md).
+
+Application de la API agrupa sus casos de uso por recurso, actualmente `application/health/`, conforme a [CPA-001](docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y al [ADR 0009](docs/adr/0009-resource-organized-application.md).
+
+Los casos de uso implementan `Handler<Request, Response>` de `@casepilot/cqrs`, con modelos que heredan de sus bases y ejecución directa. Regla [CPA-002](docs/architecture/casepilot-backend-architecture.md#cpa-002--contratos-cqrs-compartidos-e-invocacion-directa) y [ADR 0010](docs/adr/0010-shared-cqrs-contracts.md).
+
+Los repositorios usan `@casepilot/abstractions` con firmas acotadas a primitivos, entidades y modelos de data access. Application coordina transacciones mediante UnitOfWork y repositorios del scope conforme a [BCK-021/BCK-022](docs/architecture/backend-architecture-baseline-rules.md), [CPA-003](docs/architecture/casepilot-backend-architecture.md#cpa-003--abstracciones-de-data-access-compartidas) y [ADR 0011](docs/adr/0011-data-access-abstractions.md).
 
 ## Estructura
+
+La [librería exception-handler](src/libs/backend/exception-handler/README.md) aporta errores puros y manejo HTTP global NestJS con Problem Details y detalle configurable por ambiente. CasePilot API integra el filtro según el [ADR 0012](docs/adr/0012-configurable-http-error-handler.md).
 
 ```text
 .
@@ -19,13 +29,9 @@ La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health c
 │   │       └── casepilot-web/       # aplicación React/Vite/Ionic
 │   └── libs/
 │       ├── backend/                 # capacidades server-side compartidas
-│       │   ├── auth/
-│       │   ├── database/
-│       │   ├── email/
-│       │   ├── exception-handler/
-│       │   ├── logging/
-│       │   ├── pdf/
-│       │   └── security/
+│       │   ├── abstractions/       # modelos, repositorios y UnitOfWork
+│       │   ├── cqrs/               # Request, Response y Handler reutilizables
+│       │   └── exception-handler/  # errores puros y filtro HTTP NestJS
 │       ├── frontend/
 │       │   └── pilot-ui-kit/        # UI reusable
 │       └── mobile/                  # adaptadores y capacidades mobile
@@ -59,7 +65,7 @@ La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health c
 
 ## Workspace y comandos
 
-`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*`, librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`. Cada proyecto tiene su propio manifest cuando se implementa, fuentes y pruebas; Testcontainers pertenece a devDependencies del paquete API. `tests/` global no es un paquete activo por ahora.
+`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*`, librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`. Cada proyecto tiene su propio manifest cuando se implementa, fuentes y pruebas; Testcontainers pertenece a devDependencies de API y abstractions para sus suites propias. `tests/` global no es un paquete activo por ahora.
 
 Para ejecutar la API local desde la raíz:
 
@@ -82,7 +88,13 @@ pnpm build:web
 
 Estos comandos web estarán disponibles cuando esa app tenga un `package.json` con scripts `dev`, `lint` y `build`. La API ya dispone de `lint:api`, `typecheck:api`, `build:api`, `test:api` y `test:api:integration`.
 
+`pnpm check:cqrs` verifica tipos, lint, pruebas y build de CQRS; `pnpm build:cqrs` y `pnpm test:cqrs` permiten ejecutar pasos separados. Los scripts de verificaciones/tests/build de la API compilan primero sus declaraciones, también desde la carpeta API.
+
+`pnpm check:abstractions` verifica tipos, lint, modelos y build; `pnpm build:abstractions`/`pnpm test:abstractions` ejecutan pasos separados. `pnpm test:abstractions:integration` usa PostgreSQL efímero y requiere Docker para comprobar transacciones entre repositorios, rollback/commit y scopes concurrentes. La API construye ambas librerías antes de consumir sus declaraciones.
+
 `pnpm check:api:architecture` ejecuta TypeScript, ESLint, dependency-cruiser y ts-morph. `pnpm test:api:architecture` prueba sus validadores y forma parte de `test:api`. Cobertura y límites: [guía de validación de la API](src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
+
+`pnpm check:exception-handler` verifica tipos, lint, unitarias, HTTP NestJS y build de la librería de errores, sin Docker. `pnpm build:exception-handler` y `pnpm test:exception-handler` ejecutan pasos separados. La API también construye esta librería antes de sus verificaciones.
 
 `pnpm test:api:integration` delega en `casepilot-api/test/integration/`, junto a las unitarias de ese proyecto, con PostgreSQL efímero creado por Testcontainers. Requiere Docker, sin arrancar Compose ni usar la base persistente local. Comandos y aislamiento: [README de integración](src/apps/casepilot/casepilot-api/test/integration/README.md). `tests/` global se reserva para suites de varios proyectos; la guía de estructura define esa convención.
 

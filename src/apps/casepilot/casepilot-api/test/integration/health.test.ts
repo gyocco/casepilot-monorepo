@@ -8,6 +8,19 @@ function assertJsonResponse(response: Response, status: number): void {
   assert.equal(response.headers.get('cache-control'), 'no-store');
 }
 
+async function assertUnavailableResponse(response: Response): Promise<void> {
+  assert.equal(response.status, 503);
+  assert.match(response.headers.get('content-type') ?? '', /^application\/problem\+json\b/);
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+  const body: unknown = await response.json();
+  assert.ok(body && typeof body === 'object' && 'instance' in body && typeof body.instance === 'string');
+  assert.match(body.instance, /^urn:uuid:/);
+  assert.deepEqual(body, {
+    type: 'about:blank', title: 'Service Unavailable', status: 503,
+    code: 'DATABASE_UNAVAILABLE', instance: body.instance,
+  });
+}
+
 void describe('CasePilot API health endpoints with isolated PostgreSQL', { concurrency: false }, () => {
   let fixture: ApiFixture;
 
@@ -61,8 +74,7 @@ void describe('CasePilot API health endpoints with isolated PostgreSQL', { concu
     await fixture.database.undoLastMigration({ transaction: 'all' });
     try {
       const unavailable = await fixture.get('/health/database');
-      assertJsonResponse(unavailable, 503);
-      assert.deepEqual(await unavailable.json(), { status: 'unavailable' });
+      await assertUnavailableResponse(unavailable);
       const live = await fixture.get('/health');
       assertJsonResponse(live, 200);
       assert.deepEqual(await live.json(), { status: 'ok' });
@@ -85,8 +97,7 @@ void test('the API starts with its PostgreSQL container stopped: liveness is 200
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const unavailable = await fixture.get('/health/database');
-    assertJsonResponse(unavailable, 503);
-    assert.deepEqual(await unavailable.json(), { status: 'unavailable' });
+    await assertUnavailableResponse(unavailable);
   }
   const stillLive = await fixture.get('/health');
   assertJsonResponse(stillLive, 200);
