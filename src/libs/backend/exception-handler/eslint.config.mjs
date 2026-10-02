@@ -15,10 +15,14 @@ export default tseslint.config(
     rules: { 'no-undef': 'off', '@typescript-eslint/consistent-type-imports': 'error' },
   },
   {
+    files: ['src/**/*.ts'],
+    languageOptions: { parserOptions: { project: false, projectService: true } },
+  },
+  {
     files: ['src/**/*.ts'], ignores: ['src/nestjs/**/*.ts'],
     rules: { 'no-restricted-imports': ['error', { patterns: [{
-      regex: '^(?![.]{1,2}/)|/nestjs/',
-      message: 'BCK-008/BCK-015: The main error entry contains only pure local error contracts.',
+      regex: '^(?![.]{1,2}/|@casepilot/abstractions$)|/nestjs/',
+      message: 'BCK-008/BCK-015: The main error entry depends only on pure local contracts and public abstractions.',
     }] }] },
   },
   {

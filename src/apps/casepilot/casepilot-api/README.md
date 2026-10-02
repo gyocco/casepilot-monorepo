@@ -30,7 +30,7 @@ pnpm start:api
 | --- | --- | --- |
 | `GET /health` | `200`, `{ "status": "ok" }` | Controller y respuesta técnica HTTP. No ejecuta Application ni inicializa PostgreSQL. |
 | `GET /health/database` | `200`, `{ "status": "ok", "objects": [{ "guid": "…", "value": "…" }] }` | Controller → query Application → contrato de repositorio Domain → implementación Infrastructure → SELECT TypeORM/PostgreSQL. |
-| `GET /health/database` con persistencia inaccesible | `503`, Problem Details con `code: "DATABASE_UNAVAILABLE"` | Error técnico normalizado → error Application → filtro global; sin credenciales, SQL ni detalles del driver. |
+| `GET /health/database` con persistencia inaccesible | `500`, Problem Details con `code: "UNEXPECTED_ERROR"` | Error técnico normalizado → UnexpectedError compartido → filtro global; sin credenciales, SQL ni detalles del driver. |
 
 Ambos endpoints devuelven `Cache-Control: no-store`. Una tabla vacía produce `200` con `objects: []`; el endpoint profundo comprueba que la tabla es consultable. Es una sonda técnica pública, sin autenticación ni reglas de producto. El simple sirve para liveness; el profundo puede utilizarse para readiness. No comprueban proveedores que todavía no existen.
 
@@ -41,6 +41,7 @@ El contrato externo versionado vive en [contracts/openapi/casepilot-api.yaml](..
 ```text
 src/
 ├── main.ts / create-app.ts / app.module.ts
+├── api.module.ts                   # registro de módulos de composición por recurso
 ├── application/
 │   └── health/                     # GetHealthCheckObjectsRequest/Handler/Response
 ├── domain/
@@ -52,16 +53,20 @@ src/
 │   └── persistence/
 │       ├── schemas/                # EntitySchema TypeORM separado de Domain
 │       └── repositories/           # implementación: un SELECT, sin transacción
-└── presentation/http/              # controller y modelos HTTP exitosos
+└── presentation/
+    └── health/
+        ├── health.module.ts        # controller y bindings de Health
+        ├── health.controller.ts    # rutas y delegación a Application
+        └── health-http.response.ts # modelos HTTP exitosos
 ```
 
 `GetHealthCheckObjectsHandler.execute(request)` recibe exactamente un request, incluso sin campos, y devuelve un response concreto. Application elige y mapea los datos de salida. Domain/Application no importan NestJS, TypeORM ni APIs del proceso. Los factories de composición inyectan dependencias sin decoradores en esas capas.
 
 ## Manejo global de errores
 
-`AppModule` registra [`@casepilot/exception-handler/nestjs`](../../../libs/backend/exception-handler/README.md) con su política de ambiente y el mapeo de Health a 503. El filtro global captura errores del ciclo HTTP y devuelve `application/problem+json` según [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html), con type/title/status/instance/code. Instance es una URN UUID por ocurrencia; no contiene URL ni query string. UnexpectedError/ValidationError/NotFoundError/ForbiddenError/UnauthorizedError se traducen a 500/400/404/403/401. La entrada pura `@casepilot/exception-handler` se puede usar desde Application; el adaptador `/nestjs` pertenece a transporte/composición.
+`AppModule` registra [`@casepilot/exception-handler/nestjs`](../../../libs/backend/exception-handler/README.md) con su política de ambiente. Health usa UnexpectedError de [`@casepilot/abstractions`](../../../libs/backend/abstractions/README.md) y el mapeo estándar a 500, sin error ni mapping propios. El filtro global captura errores del ciclo HTTP y devuelve `application/problem+json` según [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html), con type/title/status/instance/code. Instance es una URN UUID por ocurrencia; no contiene URL ni query string. UnexpectedError/ValidationError/NotFoundError/ForbiddenError/UnauthorizedError se traducen a 500/400/404/403/401. Application consume el vocabulario puro desde abstractions; exception-handler lo reexporta por compatibilidad y el adaptador `/nestjs` pertenece a transporte/composición.
 
-`API_ERROR_DETAILS=false` omite detail, stack y errors. Con true se exponen mensajes, stack y detalles explícitos de errores tipados y mensajes seleccionados de 4xx de Nest. Las causas de proveedor, errores desconocidos, 5xx de Nest y Health siguen sanitizados. No colocar secretos ni SQL en mensajes/detalles seleccionados. Configuración y ejemplos del paquete: su README; evolución del body Health: [ADR 0012](../../../../docs/adr/0012-configurable-http-error-handler.md). Se conserva el status 503 y cambia el body anterior `{ "status": "unavailable" }` al contrato uniforme OpenAPI 0.2.0.
+`API_ERROR_DETAILS=false` omite detail, stack y errors. Con true se exponen mensajes, stack y detalles explícitos de errores tipados y mensajes seleccionados de 4xx de Nest. Health expone únicamente el mensaje genérico de UnexpectedError y su stack; nunca datos del driver. Las causas de proveedor, errores desconocidos y 5xx de Nest siguen sanitizados. No colocar secretos ni SQL en mensajes/detalles seleccionados. Configuración y ejemplos del paquete: su README; evolución del contrato Health: [ADR 0012](../../../../docs/adr/0012-configurable-http-error-handler.md). OpenAPI 0.3.0 reemplaza el 503/DATABASE_UNAVAILABLE anterior por 500/UNEXPECTED_ERROR.
 
 Los modelos Request/Response de Application heredan de las bases correspondientes de [`@casepilot/cqrs`](../../../libs/backend/cqrs/README.md). Cada `<Operation>Handler`, en `.handler.ts`, implementa `Handler<OperationRequest, OperationResponse>` y devuelve una Promise; `Handler` se importa como tipo y las bases como valores por la entrada pública. El controller llama directamente a `handler.execute(request)`. Regla [CPA-002](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-002--contratos-cqrs-compartidos-e-invocacion-directa) y [ADR 0010](../../../../docs/adr/0010-shared-cqrs-contracts.md).
 
@@ -69,7 +74,18 @@ Application se organiza por recurso o responsabilidad lógica según [CPA-001](.
 
 La conexión se inicializa al primer acceso a datos, comparte la inicialización entre llamadas concurrentes y permite un nuevo intento después de un fallo. El arranque HTTP no necesita una conexión disponible. Esto no elimina la obligación de configurar correctamente las credenciales antes de arrancar. No se crean transacciones de casos de uso, escrituras, hooks ni cascadas en esta query.
 
-Los helpers de conexión/configuración tienen un único consumidor y permanecen en Infrastructure de esta API; no se llena `libs/backend` con código específico de CasePilot. Los nuevos modelos y operaciones se incorporan a las mismas cuatro capas, sin crear contextos ni repetir capas por feature. `AppModule` registra controllers, filtro y bindings; `DatabaseModule` compone únicamente el mecanismo técnico de conexión. Decisión: [ADR 0008](../../../../docs/adr/0008-application-wide-backend-layers.md).
+Los helpers de conexión/configuración tienen un único consumidor y permanecen en Infrastructure de esta API; no se llena `libs/backend` con código específico de CasePilot. Los nuevos modelos y operaciones se incorporan a las mismas cuatro capas, sin crear contextos ni repetir capas por feature. `DatabaseModule` compone únicamente el mecanismo técnico de conexión, registrado una vez como global por `AppModule`. Las capas compartidas se conservan según el [ADR 0008](../../../../docs/adr/0008-application-wide-backend-layers.md); la composición por recurso evoluciona según el [ADR 0013](../../../../docs/adr/0013-resource-module-composition.md).
+
+## Agregar endpoints sin modificar AppModule
+
+`AppModule` configura la conexión y el filtro global de errores, e importa `ApiModule`. `ApiModule` es el registro explícito de módulos de composición. `HealthModule`, su controller y sus responses HTTP conviven en `presentation/health/`, según [CPA-004](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-004--presentation-organizada-por-modulo-de-recurso) y el [ADR 0014](../../../../docs/adr/0014-resource-organized-presentation.md). El módulo reúne las factories de repositorio/handler; esos detalles ya no pertenecen a la raíz.
+
+1. Para una operación de un recurso existente, agrega su Request/Handler/Response en `application/<recurso>/`, la ruta en su controller y los bindings nuevos en el módulo de ese recurso. No cambia `AppModule` ni `ApiModule`.
+2. Si agregas otro controller del mismo recurso, inclúyelo en `controllers` de ese módulo.
+3. Para un recurso nuevo, crea `presentation/<recurso>/<recurso>.module.ts` y coloca sus controllers/modelos HTTP en esa carpeta. Registra el módulo una sola vez en `imports` de `api.module.ts`. Por ejemplo, Cases tendrá `presentation/cases/cases.module.ts` y el registro será `imports: [HealthModule, CasesModule]`. Sus siguientes endpoints solo afectan a Cases.
+4. Si otro módulo necesita un handler, expórtalo desde su módulo propietario e importa ese módulo en el consumidor; no dupliques sus providers. Los contratos internos siguen compartidos por la aplicación.
+
+Los módulos agrupan composición, sin mover ni repetir Application/Domain/Infrastructure/Presentation. Solo el archivo de módulo importa Domain/Infrastructure para los bindings; controllers y modelos HTTP mantienen sus restricciones y no importan módulos de composición. Los bindings usan factories porque los handlers son clases puras y las interfaces TypeScript no existen en runtime; no se añaden decoradores Nest al núcleo para reducir líneas. El registro usa imports estáticos, sin escaneo de archivos ni registro automático por nombres. Los schemas/migraciones nuevos siguen registrándose en `infrastructure/database/create-data-source-options.ts`, compartido por runtime y CLI.
 
 ## Configuración por entorno
 
@@ -135,6 +151,8 @@ pnpm test:api:integration
 ```
 
 Los scripts `dev`, `build`, `typecheck`, `lint`, `test`, `test:integration`, `test:architecture`, `check:dependencies` y `check:structure` coordinan `build:contracts` antes de consumir CQRS, abstractions y exception-handler. Se usan declaraciones/ESM construidas del workspace, sin paths a fuentes externas ni imports privados. Para verificar los paquetes: `pnpm check:cqrs`, `pnpm check:abstractions` y `pnpm check:exception-handler` desde la raíz. La [librería abstractions](../../../libs/backend/abstractions/README.md) tiene integración propia mediante `pnpm test:abstractions:integration`, con Docker/PostgreSQL efímero.
+
+VS Code consume esas mismas declaraciones, pero no ejecuta `build:contracts` automáticamente. Desde la raíz, `pnpm build:contracts` las prepara y `pnpm watch:contracts` las actualiza al editar las librerías. Fuentes de API/librerías usan `projectService` con el mismo `tsconfig.json` del editor; tests y herramientas conservan el proyecto explícito `tsconfig.test.json`. Configuración del editor, pruebas de lint con tipos y recuperación de diagnósticos desactualizados: [VS Code y lint con tipos](docs/architecture-validation.md#vs-code-y-lint-con-tipos).
 
 Las pruebas usan el runner nativo de Node. Las unitarias de esta app cubren configuración con archivos temporales sintéticos, query, responses vacíos y errores. Los full endpoint tests viven en [test/integration/](test/integration/README.md), junto a `test/unit/`: Testcontainers crea PostgreSQL efímero y la API escucha en un puerto dinámico. Aplican las migraciones reales y cubren HTTP, datos, concurrencia, dependencia caída y recuperación. No cargan configuración local ni utilizan la base/volumen de desarrollo; no requieren `infra:up` ni `APP_ENV=local`.
 

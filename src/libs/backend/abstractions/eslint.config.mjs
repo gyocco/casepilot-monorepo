@@ -15,6 +15,10 @@ export default tseslint.config(
     rules: { 'no-undef': 'off', '@typescript-eslint/consistent-type-imports': 'error' },
   },
   {
+    files: ['src/**/*.ts'],
+    languageOptions: { parserOptions: { project: false, projectService: true } },
+  },
+  {
     files: ['src/**/*.ts'], ignores: ['src/dataaccess/typeorm/**/*.ts'],
     rules: { 'no-restricted-imports': ['error', { patterns: [{
       regex: '^(?![.]{1,2}/)|typeorm',

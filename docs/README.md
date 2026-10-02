@@ -16,9 +16,11 @@
 - [ADR 0009 — Application por recurso](adr/0009-resource-organized-application.md): agrupa los casos de uso por recurso, con regla CPA-001 y validación de firmas en toda Application.
 - [ADR 0010 — Request, Response y Handler compartidos](adr/0010-shared-cqrs-contracts.md): librería CQRS, invocación directa y regla CPA-002 para modelos y handlers de Application.
 - [Librería CQRS](../src/libs/backend/cqrs/README.md): API pública, ejemplos, límites y comandos de `@casepilot/cqrs`.
-- [Librería de errores](../src/libs/backend/exception-handler/README.md): errores puros y filtro HTTP NestJS configurable con Problem Details.
+- [Manejo HTTP de errores](../src/libs/backend/exception-handler/README.md): filtro HTTP NestJS configurable con Problem Details.
 - [ADR 0012 — Manejo HTTP de errores](adr/0012-configurable-http-error-handler.md): contrato uniforme y control del detalle por ambiente.
-- [Librería de abstracciones](../src/libs/backend/abstractions/README.md): Entity, paginación, Repository/CrudRepository y UnitOfWork con adaptador transaccional TypeORM separado.
+- [ADR 0013 — Composición por módulos de recurso](adr/0013-resource-module-composition.md): raíz estable, registro explícito en ApiModule y bindings junto a cada recurso.
+- [ADR 0014 — Presentation por módulo de recurso](adr/0014-resource-organized-presentation.md): CPA-004, módulo/controller/responses juntos y fronteras verificadas de composición y transporte.
+- [Librería de abstracciones](../src/libs/backend/abstractions/README.md): errores puros, Entity, paginación, Repository/CrudRepository y UnitOfWork con adaptador transaccional TypeORM separado.
 - [ADR 0011 — Abstracciones de data access](adr/0011-data-access-abstractions.md): BCK-021/BCK-022, CPA-003, firmas acotadas y scopes transaccionales tipados.
 - [Contrato HTTP inicial](../contracts/openapi/casepilot-api.yaml): respuestas de las sondas simples y de PostgreSQL.
 - [Decisión de la API base y health checks](adr/0003-base-api-and-health-checks.md): composición pura, conexión diferida y configuración coordinada.

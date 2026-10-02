@@ -1,6 +1,6 @@
-# Abstracciones backend de data access
+# Abstracciones backend
 
-Paquete ESM privado `@casepilot/abstractions`. API y futuros workers comparten contratos de datos, repositorios y transacciones sin mover negocio a la librería. La entrada principal no carga TypeORM, Node, Nest ni proveedores. Las fuentes de paginación y Entity están en `src/dataaccess/models/`; las pruebas pertenecen a este paquete.
+Paquete ESM privado `@casepilot/abstractions`. API y futuros workers comparten errores puros, contratos de datos, repositorios y transacciones sin mover negocio a la librería. La entrada principal no carga TypeORM, Node, Nest ni proveedores. Los errores viven en `src/errors.ts`; las fuentes de paginación y Entity están en `src/dataaccess/models/`. Las pruebas pertenecen a este paquete.
 
 Normativa: [BCK-009 a BCK-011 y BCK-021/BCK-022](../../../../docs/architecture/backend-architecture-baseline-rules.md), adopción [CPA-003](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-003--abstracciones-de-data-access-compartidas) y [ADR 0011](../../../../docs/adr/0011-data-access-abstractions.md).
 
@@ -8,6 +8,9 @@ Normativa: [BCK-009 a BCK-011 y BCK-021/BCK-022](../../../../docs/architecture/b
 
 | Contrato | Comportamiento |
 | --- | --- |
+| `ApplicationError` | Base de errores tipados con code, mensaje, cause opcional y detalles explícitos; sin status HTTP ni dependencia de transporte. |
+| `UnexpectedError`, `ValidationError`, `NotFoundError`, `ForbiddenError`, `UnauthorizedError` | Vocabulario compartido para Application. Sus códigos son UNEXPECTED_ERROR, VALIDATION_ERROR, NOT_FOUND_ERROR, FORBIDDEN_ERROR y UNAUTHORIZED_ERROR. UnauthroizedError es alias de UnauthorizedError. |
+| `ApplicationErrorOptions`, `ErrorDetail` | Opciones de cause y detalles seleccionados con message, code y pointer opcionales; nunca copiar datos privados del proveedor. |
 | `Entity<TId>` | Interfaz de datos con `readonly id`, implementada/heredada explícitamente. ID: string, number o bigint. Sin negocio. |
 | `Repository<TEntity>` | Base sin operaciones obligatorias. `readonly entityType?: TEntity` conserva el tipo de entidad; no requiere una propiedad de runtime. Los contratos especializados declaran sus operaciones. |
 | `CrudRepository<TEntity, TId>` | Extiende Repository. `getAll()` devuelve `Promise<readonly TEntity[]>`; `getById(id)` devuelve entidad o null; `add(entity)` devuelve void; `update(entity)`/`delete(id)` devuelven boolean (fila afectada); `count()` devuelve número; `getPaged(request)` devuelve PageResponse. |
@@ -18,6 +21,8 @@ Normativa: [BCK-009 a BCK-011 y BCK-021/BCK-022](../../../../docs/architecture/b
 | `UnitOfWorkError` | Error técnico sanitizado de conexión, bindings o ciclo transaccional, sin SQL/causa del driver. Los errores del callback conservan su contrato. |
 
 Los modelos de página solo realizan validación/cálculos técnicos. Los modelos del producto, DTOs y requests/responses de casos de uso no pertenecen a la librería.
+
+Application decide cuándo emitir los errores compartidos. Por ejemplo, Health normaliza la indisponibilidad de persistencia con `new UnexpectedError()` y su mensaje genérico. El [adaptador exception-handler](../exception-handler/README.md) los traduce a HTTP y controla la exposición del detalle por ambiente; su entrada pura reexporta los mismos constructores por compatibilidad. Esta librería no depende del adaptador. Decisión: [ADR 0012](../../../../docs/adr/0012-configurable-http-error-handler.md).
 
 ```typescript
 import { PageRequest, type CrudRepository, type Entity, type UnitOfWork } from '@casepilot/abstractions';
@@ -87,6 +92,6 @@ pnpm test:api
 pnpm build:api
 ```
 
-`check:abstractions` ejecuta tipos, lint, pruebas de modelos/tipos y build. La integración exige Docker y usa únicamente PostgreSQL 18 efímero de Testcontainers, con credenciales generadas, tablas propias, teardown y sin `.env`/base de desarrollo. Acredita commit de dos repositorios, rollback por callback/error SQL, fallo de commit diferido, scopes concurrentes y CRUD/paginación de una sentencia. El lanzador mantiene el fallback IPv4 de Docker Desktop Windows.
+`check:abstractions` ejecuta tipos, lint, pruebas de modelos/tipos, [errores compartidos](test/unit/errors.test.ts) y build. La integración exige Docker y usa únicamente PostgreSQL 18 efímero de Testcontainers, con credenciales generadas, tablas propias, teardown y sin `.env`/base de desarrollo. Acredita commit de dos repositorios, rollback por callback/error SQL, fallo de commit diferido, scopes concurrentes y CRUD/paginación de una sentencia. El lanzador mantiene el fallback IPv4 de Docker Desktop Windows.
 
 El [gate estático de la API](../../../apps/casepilot/casepilot-api/docs/architecture-validation.md) verifica sus fuentes, incluidas declaraciones sin imports; no certifica automáticamente futuros workers u otras librerías. Esos consumidores deben incorporar el checker antes de declarar la misma cobertura. Imports privados a src/dist están prohibidos; solo se usan las dos entradas públicas descritas.

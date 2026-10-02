@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "packageManager": "pnpm@10.13.1",
   "scripts": {
+    "build:contracts": "pnpm --dir src/apps/casepilot/casepilot-api build:contracts",
+    "watch:contracts": "pnpm build:contracts && pnpm --parallel --filter @casepilot/cqrs --filter @casepilot/abstractions --filter @casepilot/exception-handler exec tsc -p tsconfig.json --watch --preserveWatchOutput",
     "build:exception-handler": "pnpm --dir src/libs/backend/exception-handler build",
     "check:exception-handler": "pnpm --dir src/libs/backend/exception-handler check",
     "test:exception-handler": "pnpm --dir src/libs/backend/exception-handler test",

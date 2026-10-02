@@ -11,7 +11,7 @@ export interface ApplicationErrorOptions {
   readonly details?: readonly ErrorDetail[];
 }
 
-/** Technical error vocabulary. Application decides when and why to throw it. */
+/** Shared error vocabulary. Application decides when and why to throw it. */
 export abstract class ApplicationError extends Error {
   public readonly details: readonly ErrorDetail[];
 

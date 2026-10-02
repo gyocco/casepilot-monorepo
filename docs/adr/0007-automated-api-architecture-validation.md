@@ -22,6 +22,8 @@ El [ADR 0010](0010-shared-cqrs-contracts.md) añade CPA-002: Request/Response co
 
 La [documentación local de validación](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md) es la fuente canónica de comandos, versiones, cobertura por ID, límites y mantenimiento. El catálogo BCK permanece sin modificaciones.
 
+El [ADR 0014](0014-resource-organized-presentation.md) añade CPA-004: Presentation por módulo de recurso y separación de imports de composición/transporte. ts-morph verifica ubicación y módulo propietario; ESLint y dependency-cruiser conservan las restricciones de adaptadores y detectan acceso a módulos de composición por barrels.
+
 ## Alternativas
 
 Mantener solamente revisión manual dificulta detectar regresiones estructurales. Concentrar todo en reglas ESLint propias es viable, pero añade complejidad para el grafo y los contratos entre declaraciones. Duplicar cada check en las tres herramientas aumenta mantenimiento; se asigna una responsabilidad principal a cada mecanismo, conservando las restricciones locales de imports existentes para feedback inmediato.

@@ -1,0 +1,10 @@
+{
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [
+    { "pattern": "./src/apps/*/*/" },
+    { "pattern": "./src/libs/backend/*/" }
+  ],
+  "typescript.tsdk": "src/apps/casepilot/casepilot-api/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "js/ts.tsdk.path": "src/apps/casepilot/casepilot-api/node_modules/typescript/lib"
+}

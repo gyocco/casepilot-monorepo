@@ -21,6 +21,16 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        // Use the same source project as the editor. Tests/tools retain tsconfig.test.json.
+        project: false,
+        projectService: true,
+      },
+    },
+  },
+  {
     files: ['test/integration/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
@@ -80,11 +90,12 @@ export default tseslint.config(
   },
   {
     files: ['src/presentation/**/*.ts'],
+    ignores: ['src/presentation/*/*.module.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['typeorm', 'typeorm/*', 'pg', '**/domain/**', '**/infrastructure/**', '**/database/**'],
-          message: 'BCK-003/BCK-008: HTTP delegates to Application and cannot access persistence or Domain directly.',
+          group: ['typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
+          message: 'BCK-003/BCK-008/CPA-004: Transport delegates to Application and cannot import persistence, Domain or composition modules.',
         }],
       }],
     },

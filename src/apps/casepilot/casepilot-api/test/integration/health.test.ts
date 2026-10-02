@@ -9,16 +9,20 @@ function assertJsonResponse(response: Response, status: number): void {
 }
 
 async function assertUnavailableResponse(response: Response): Promise<void> {
-  assert.equal(response.status, 503);
+  assert.equal(response.status, 500);
   assert.match(response.headers.get('content-type') ?? '', /^application\/problem\+json\b/);
   assert.equal(response.headers.get('cache-control'), 'no-store');
   const body: unknown = await response.json();
   assert.ok(body && typeof body === 'object' && 'instance' in body && typeof body.instance === 'string');
   assert.match(body.instance, /^urn:uuid:/);
+  assert.ok('stack' in body && typeof body.stack === 'string');
+  assert.match(body.stack, /^UnexpectedError: An unexpected error occurred\./);
   assert.deepEqual(body, {
-    type: 'about:blank', title: 'Service Unavailable', status: 503,
-    code: 'DATABASE_UNAVAILABLE', instance: body.instance,
+    type: 'about:blank', title: 'Internal Server Error', status: 500,
+    code: 'UNEXPECTED_ERROR', instance: body.instance,
+    detail: 'An unexpected error occurred.', stack: body.stack,
   });
+  assert.doesNotMatch(JSON.stringify(body), /QueryFailedError|SELECT|ECONNREFUSED|password|does not exist/i);
 }
 
 void describe('CasePilot API health endpoints with isolated PostgreSQL', { concurrency: false }, () => {
@@ -70,7 +74,7 @@ void describe('CasePilot API health endpoints with isolated PostgreSQL', { concu
     }
   });
 
-  void it('a missing table returns a sanitized 503, keeps liveness available and recovers after migration', { timeout: 15_000 }, async () => {
+  void it('a missing table returns the standard UnexpectedError 500, keeps liveness available and recovers after migration', { timeout: 15_000 }, async () => {
     await fixture.database.undoLastMigration({ transaction: 'all' });
     try {
       const unavailable = await fixture.get('/health/database');
@@ -87,7 +91,7 @@ void describe('CasePilot API health endpoints with isolated PostgreSQL', { concu
   });
 });
 
-void test('the API starts with its PostgreSQL container stopped: liveness is 200 and database checks are 503', { timeout: 180_000 }, async context => {
+void test('the API starts with its PostgreSQL container stopped: liveness is 200 and database checks are 500', { timeout: 180_000 }, async context => {
   const fixture = await startApiFixture({ stopDatabaseBeforeApiStart: true });
   context.after(() => fixture.close(), { timeout: 60_000 });
 

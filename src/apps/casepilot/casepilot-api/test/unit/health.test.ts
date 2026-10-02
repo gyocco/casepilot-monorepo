@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { GetHealthCheckObjectsHandler, HealthDatabaseUnavailableError } from '../../src/application/health/get-health-check-objects.handler.js';
+import { UnexpectedError } from '@casepilot/abstractions';
+import { GetHealthCheckObjectsHandler } from '../../src/application/health/get-health-check-objects.handler.js';
 import { GetHealthCheckObjectsRequest } from '../../src/application/health/get-health-check-objects.request.js';
 import { GetHealthCheckObjectsResponse } from '../../src/application/health/get-health-check-objects.response.js';
 import { HealthCheckObject } from '../../src/domain/entities/health-check-object.js';
@@ -25,11 +26,17 @@ void test('an empty table returns a response with an empty collection', async ()
   assert.deepEqual(response.objects, []);
 });
 
-void test('Application translates persistence unavailability but does not hide unexpected errors', async () => {
+void test('Application translates persistence unavailability to shared UnexpectedError and preserves other failures', async () => {
   const unavailable = new GetHealthCheckObjectsHandler({
     getAll: () => Promise.reject(new HealthCheckObjectRepositoryUnavailableError('driver failure')),
   });
-  await assert.rejects(unavailable.execute(new GetHealthCheckObjectsRequest()), HealthDatabaseUnavailableError);
+  await assert.rejects(unavailable.execute(new GetHealthCheckObjectsRequest()), (error: unknown) => {
+    assert.ok(error instanceof UnexpectedError);
+    assert.equal(error.code, 'UNEXPECTED_ERROR');
+    assert.equal(error.message, 'An unexpected error occurred.');
+    assert.equal(error.cause, undefined);
+    return true;
+  });
   const unexpected = new Error('unexpected');
   const faulty = new GetHealthCheckObjectsHandler({ getAll: () => Promise.reject(unexpected) });
   await assert.rejects(faulty.execute(new GetHealthCheckObjectsRequest()), error => error === unexpected);

@@ -5,7 +5,7 @@
 
 La API ya implementa una base NestJS/TypeORM, con configuración por entorno, health checks y migración PostgreSQL. La librería `src/libs/backend/cqrs/` implementa Request, Response y Handler; web, mobile y las demás capacidades previstas siguen sin implementación. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`; los comandos de la API, en su [README](../../src/apps/casepilot/casepilot-api/README.md).
 
-`src/libs/backend/abstractions/` implementa contratos de data access, modelos genéricos y UnitOfWork. Su [README](../../src/libs/backend/abstractions/README.md) define API, pruebas y límites; las entidades/repositorios del producto permanecen en la app propietaria.
+`src/libs/backend/abstractions/` implementa errores puros, contratos de data access, modelos genéricos y UnitOfWork. Su [README](../../src/libs/backend/abstractions/README.md) define API, pruebas y límites; las entidades/repositorios del producto permanecen en la app propietaria.
 
 Esta es la fuente canónica de las convenciones globales de carpetas, propiedad de proyectos y ubicación de pruebas. La [arquitectura particular del backend de CasePilot](casepilot-backend-architecture.md) documenta su adopción de la base backend reutilizable; las reglas internas de un backend no se definen aquí.
 
@@ -49,9 +49,9 @@ La decisión y sus alternativas se registran en el [ADR 0005](../adr/0005-projec
 │   │       └── casepilot-web/       # aplicación web React/Vite/Ionic
 │   └── libs/
 │       ├── backend/                 # capacidades server-side compartidas
-│       │   ├── abstractions/       # dataaccess/models, repositorios y UnitOfWork
+│       │   ├── abstractions/       # errores, dataaccess/models, repositorios y UnitOfWork
 │       │   ├── cqrs/               # bases y contratos puros
-│       │   └── exception-handler/  # errores puros y adaptador HTTP NestJS
+│       │   └── exception-handler/  # adaptador HTTP NestJS de errores compartidos
 │       ├── frontend/                # capacidades compartidas de interfaz web
 │       └── mobile/                  # adaptadores y capacidades mobile compartidas
 ├── contracts/                       # contratos entre aplicaciones, servicios y procesos
@@ -168,6 +168,8 @@ casepilot-api/
 │   │   ├── database/
 │   │   └── persistence/
 │   ├── presentation/
+│   │   └── health/                 # módulo, controller y modelos HTTP del recurso
+│   ├── api.module.ts               # registro de módulos de recurso
 │   └── main.ts / create-app.ts / app.module.ts
 ├── test/
 │   ├── architecture/
@@ -180,6 +182,8 @@ casepilot-api/
 `test/unit/` y `test/integration/` tienen el mismo propietario. Un proyecto puede añadir otras suites propias cuando existan; no necesita carpetas vacías. `dist/`, `build/` y otros artefactos de compilación se generan según su configuración y permanecen ignorados por Git.
 
 Application de la API agrupa su contenido por recurso o responsabilidad lógica conforme a [CPA-001](casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y al [ADR 0009](../adr/0009-resource-organized-application.md). `health/` contiene la implementación actual; futuros `users/`, `orders/` o `payments/` se incorporan cuando tengan contenido.
+
+Presentation agrupa módulos de composición, controllers y modelos de transporte en `presentation/<recurso>/`, con `<recurso>.module.ts` directamente en esa carpeta, conforme a [CPA-004](casepilot-backend-architecture.md#cpa-004--presentation-organizada-por-modulo-de-recurso) y al [ADR 0014](../adr/0014-resource-organized-presentation.md). La raíz conserva AppModule/ApiModule; módulos técnicos como DatabaseModule permanecen en Infrastructure. Esto ordena composición y transporte dentro de la API, sin repetir capas por recurso.
 
 ## Organización de `src/libs/`
 
@@ -198,9 +202,9 @@ Cada librería nueva debe documentar en su README local:
 
 Capacidades server-side compartidas por APIs, workers u otros procesos backend. El paquete implementado [`cqrs/`](../../src/libs/backend/cqrs/README.md) exporta Request, Response y Handler sin negocio ni dependencias de runtime. Sus fuentes, pruebas y configuración pertenecen a ese paquete; modelos concretos y casos de uso permanecen en la app consumidora. La entrada pública es `@casepilot/cqrs`, enlazada con `workspace:*`; los consumidores construyen primero sus declaraciones/ESM. Adopción en la API: [ADR 0010](../adr/0010-shared-cqrs-contracts.md).
 
-El paquete [`abstractions/`](../../src/libs/backend/abstractions/README.md) contiene `src/dataaccess/models/` para Entity, PageRequest y PageResponse, contratos Repository/CrudRepository/UnitOfWork en `src/dataaccess/` y el adaptador técnico en `src/dataaccess/typeorm/`. Solo expone `@casepilot/abstractions` (puro) y `@casepilot/abstractions/typeorm` (Infrastructure/composición). Las pruebas de modelos/tipos e integración PostgreSQL viven en su propio `test/`; los validadores de consumidores API permanecen en la API. Los futuros workers deben integrar checks propios antes de declarar cobertura. Decisión: [ADR 0011](../adr/0011-data-access-abstractions.md).
+El paquete [`abstractions/`](../../src/libs/backend/abstractions/README.md) contiene errores puros en `src/errors.ts`, `src/dataaccess/models/` para Entity, PageRequest y PageResponse, contratos Repository/CrudRepository/UnitOfWork en `src/dataaccess/` y el adaptador técnico en `src/dataaccess/typeorm/`. Solo expone `@casepilot/abstractions` (puro) y `@casepilot/abstractions/typeorm` (Infrastructure/composición). Las pruebas de errores/modelos/tipos e integración PostgreSQL viven en su propio `test/`; los validadores de consumidores API permanecen en la API. Los futuros workers deben integrar checks propios antes de declarar cobertura. Decisiones: [ADR 0011](../adr/0011-data-access-abstractions.md) y [ADR 0012](../adr/0012-configurable-http-error-handler.md).
 
-El paquete [`exception-handler/`](../../src/libs/backend/exception-handler/README.md) implementa errores puros en `@casepilot/exception-handler` y filtro HTTP global/configuración en `@casepilot/exception-handler/nestjs`. Application puede usar los errores; el adaptador pertenece a transporte/composición. Tiene tests y checks propios, con CasePilot API como consumidor inicial. Decisión y contrato Problem Details: [ADR 0012](../adr/0012-configurable-http-error-handler.md).
+El paquete [`exception-handler/`](../../src/libs/backend/exception-handler/README.md) implementa filtro HTTP global/configuración en `@casepilot/exception-handler/nestjs` y reexporta los errores puros de abstractions en `@casepilot/exception-handler` por compatibilidad. Depende de abstractions, sin dependencia inversa. Application consume el vocabulario puro; el adaptador pertenece a transporte/composición. Tiene tests y checks propios, con CasePilot API como consumidor inicial. Decisión y contrato Problem Details: [ADR 0012](../adr/0012-configurable-http-error-handler.md).
 
 Capacidades adicionales previstas:
 

@@ -4,7 +4,7 @@ Monorepo de CasePilot. `src/apps/` agrupa las aplicaciones ejecutables y despleg
 
 ## Estado actual
 
-La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health checks. La librería [CQRS](src/libs/backend/cqrs/README.md) proporciona bases Request/Response y Handler; [abstractions](src/libs/backend/abstractions/README.md) proporciona Entity, paginación, repositorios genéricos y UnitOfWork con adaptador TypeORM separado. Web, mobile y las demás capacidades previstas siguen sin implementación. La web prevista usará React, Vite, Ionic React y Tailwind CSS; mobile se empaquetará con Ionic/Capacitor.
+La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health checks. La librería [CQRS](src/libs/backend/cqrs/README.md) proporciona bases Request/Response y Handler; [abstractions](src/libs/backend/abstractions/README.md) proporciona errores puros, Entity, paginación, repositorios genéricos y UnitOfWork con adaptador TypeORM separado. Web, mobile y las demás capacidades previstas siguen sin implementación. La web prevista usará React, Vite, Ionic React y Tailwind CSS; mobile se empaquetará con Ionic/Capacitor.
 
 El backend usa un dominio compartido por aplicación y las capas `application/`, `domain/`, `infrastructure/` y `presentation/` directamente bajo su `src/`. La conexión, DataSource y migraciones viven en `infrastructure/database/`. Decisión: [ADR 0008](docs/adr/0008-application-wide-backend-layers.md).
 
@@ -16,7 +16,7 @@ Los repositorios usan `@casepilot/abstractions` con firmas acotadas a primitivos
 
 ## Estructura
 
-La [librería exception-handler](src/libs/backend/exception-handler/README.md) aporta errores puros y manejo HTTP global NestJS con Problem Details y detalle configurable por ambiente. CasePilot API integra el filtro según el [ADR 0012](docs/adr/0012-configurable-http-error-handler.md).
+La [librería exception-handler](src/libs/backend/exception-handler/README.md) aporta manejo HTTP global NestJS con Problem Details y detalle configurable por ambiente sobre los errores puros de abstractions. CasePilot API integra el filtro según el [ADR 0012](docs/adr/0012-configurable-http-error-handler.md).
 
 ```text
 .
@@ -29,9 +29,9 @@ La [librería exception-handler](src/libs/backend/exception-handler/README.md) a
 │   │       └── casepilot-web/       # aplicación React/Vite/Ionic
 │   └── libs/
 │       ├── backend/                 # capacidades server-side compartidas
-│       │   ├── abstractions/       # modelos, repositorios y UnitOfWork
+│       │   ├── abstractions/       # errores, modelos, repositorios y UnitOfWork
 │       │   ├── cqrs/               # Request, Response y Handler reutilizables
-│       │   └── exception-handler/  # errores puros y filtro HTTP NestJS
+│       │   └── exception-handler/  # filtro HTTP NestJS de errores compartidos
 │       ├── frontend/
 │       │   └── pilot-ui-kit/        # UI reusable
 │       └── mobile/                  # adaptadores y capacidades mobile
@@ -90,11 +90,13 @@ Estos comandos web estarán disponibles cuando esa app tenga un `package.json` c
 
 `pnpm check:cqrs` verifica tipos, lint, pruebas y build de CQRS; `pnpm build:cqrs` y `pnpm test:cqrs` permiten ejecutar pasos separados. Los scripts de verificaciones/tests/build de la API compilan primero sus declaraciones, también desde la carpeta API.
 
-`pnpm check:abstractions` verifica tipos, lint, modelos y build; `pnpm build:abstractions`/`pnpm test:abstractions` ejecutan pasos separados. `pnpm test:abstractions:integration` usa PostgreSQL efímero y requiere Docker para comprobar transacciones entre repositorios, rollback/commit y scopes concurrentes. La API construye ambas librerías antes de consumir sus declaraciones.
+`pnpm check:abstractions` verifica tipos, lint, errores, modelos y build; `pnpm build:abstractions`/`pnpm test:abstractions` ejecutan pasos separados. `pnpm test:abstractions:integration` usa PostgreSQL efímero y requiere Docker para comprobar transacciones entre repositorios, rollback/commit y scopes concurrentes. La API construye las librerías antes de consumir sus declaraciones.
 
 `pnpm check:api:architecture` ejecuta TypeScript, ESLint, dependency-cruiser y ts-morph. `pnpm test:api:architecture` prueba sus validadores y forma parte de `test:api`. Cobertura y límites: [guía de validación de la API](src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
 
 `pnpm check:exception-handler` verifica tipos, lint, unitarias, HTTP NestJS y build de la librería de errores, sin Docker. `pnpm build:exception-handler` y `pnpm test:exception-handler` ejecutan pasos separados. La API también construye esta librería antes de sus verificaciones.
+
+Para preparar las declaraciones compartidas que consume el editor, usa `pnpm build:contracts` después de instalar dependencias. Si editas las librerías, `pnpm watch:contracts` construye primero los tres paquetes y mantiene sus declaraciones actualizadas. La configuración versionada de VS Code selecciona el directorio ESLint de cada paquete y ofrece TypeScript 5.9.3 del workspace. Procedimiento y diagnóstico de `no-unsafe-*`: [guía de validación](src/apps/casepilot/casepilot-api/docs/architecture-validation.md#vs-code-y-lint-con-tipos).
 
 `pnpm test:api:integration` delega en `casepilot-api/test/integration/`, junto a las unitarias de ese proyecto, con PostgreSQL efímero creado por Testcontainers. Requiere Docker, sin arrancar Compose ni usar la base persistente local. Comandos y aislamiento: [README de integración](src/apps/casepilot/casepilot-api/test/integration/README.md). `tests/` global se reserva para suites de varios proyectos; la guía de estructura define esa convención.
 

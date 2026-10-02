@@ -186,7 +186,8 @@ void test('source layout accepts shared layers, technical database/config and bo
     'src/application/payments/models.ts', 'src/application/ports/clock.ts', 'src/application/shared/policy.ts',
     'src/domain/entities/customer.ts', 'src/domain/entities/order.ts',
     'src/infrastructure/database/migrations/create-order.ts', 'src/infrastructure/config/options.ts',
-    'src/infrastructure/persistence/schemas/order.ts', 'src/presentation/http/order.ts', 'src/app.module.ts',
+    'src/infrastructure/persistence/schemas/order.ts', 'src/presentation/orders/orders.module.ts',
+    'src/presentation/orders/order.ts', 'src/app.module.ts',
     'test/integration/fixture.ts',
   ]) project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
   assert.deepEqual(validateSourceLayout(project, apiDirectory), []);
@@ -215,10 +216,64 @@ void test('CPA-001 is scoped to Application sources of this API', () => {
   const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
   for (const path of [
     'src/domain/queries/model.ts', 'src/infrastructure/commands/adapter.ts',
-    'src/presentation/queries/transport.ts', 'test/application/queries/fixture.ts',
+    'src/presentation/health/health.module.ts', 'src/presentation/health/transport.ts', 'test/application/queries/fixture.ts',
     '../another-api/src/application/queries/operation.ts',
   ]) project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
   assert.deepEqual(validateSourceLayout(project, apiDirectory), []);
+});
+
+void test('CPA-004 accepts resource composition, controllers, transport models and technical modules', () => {
+  const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+  for (const path of [
+    'src/app.module.ts', 'src/api.module.ts', 'src/infrastructure/database/database.module.ts',
+    'src/presentation/health/health.module.ts', 'src/presentation/health/health.controller.ts',
+    'src/presentation/health/health-http.response.ts', 'src/presentation/health/read/http.response.ts',
+    'src/presentation/cases/cases.module.ts', 'src/presentation/cases/cases.controller.ts',
+    'test/presentation/fixture.ts', '../another-api/src/health.module.ts',
+  ]) project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+  assert.deepEqual(project.getPreEmitDiagnostics(), []);
+  assert.deepEqual(validateSourceLayout(project, apiDirectory), []);
+});
+
+void test('CPA-004 rejects displaced modules and Presentation files without their resource owner', () => {
+  for (const path of [
+    'src/health.module.ts', 'src/health.controller.ts', 'src/presentation/health.module.ts',
+    'src/presentation/health.controller.ts', 'src/presentation/health-http.response.ts',
+    'src/presentation/http/health.controller.ts', 'src/presentation/health/health.controller.ts',
+    'src/presentation/health/other.module.ts', 'src/presentation/health/nested/health.module.ts',
+    'src/application/health/health.module.ts',
+  ]) {
+    const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+    project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+    assert.deepEqual(project.getPreEmitDiagnostics(), [], path);
+    assert.ok(validateSourceLayout(project, apiDirectory).some(finding => finding.rule === 'CPA-004' && finding.file === path), path);
+  }
+});
+
+void test('CPA-004 keeps requiring the resource module name and direct placement even when an owner exists', () => {
+  for (const path of ['src/presentation/health/other.module.ts', 'src/presentation/health/nested/health.module.ts']) {
+    const project = fixture('execute(request: ReadCaseRequest): ReadCaseResponse { return new ReadCaseResponse(); }');
+    project.createSourceFile(resolve(apiDirectory, 'src/presentation/health/health.module.ts'), 'export const value = 1;');
+    project.createSourceFile(resolve(apiDirectory, path), 'export const value = 1;');
+    const findings = validateSourceLayout(project, apiDirectory);
+    assert.equal(findings.length, 1, path);
+    assert.equal(findings[0]?.rule, 'CPA-004');
+    assert.equal(findings[0]?.file, path);
+  }
+});
+
+void test('CPA-004 selects the real Health presentation files and rejects their previous placement', () => {
+  const directory = fileURLToPath(new URL('../../', import.meta.url));
+  const project = new Project({ tsConfigFilePath: resolve(directory, 'tsconfig.json') });
+  for (const name of ['health.module.ts', 'health.controller.ts', 'health-http.response.ts']) {
+    project.getSourceFileOrThrow(resolve(directory, 'src/presentation/health', name));
+  }
+  assert.deepEqual(validateSourceLayout(project, directory), []);
+  project.getSourceFileOrThrow(resolve(directory, 'src/presentation/health/health.module.ts')).move(resolve(directory, 'src/health.module.ts'));
+  const findings = validateSourceLayout(project, directory).filter(finding => finding.rule === 'CPA-004');
+  for (const path of ['src/health.module.ts', 'src/presentation/health/health.controller.ts', 'src/presentation/health/health-http.response.ts']) {
+    assert.ok(findings.some(finding => finding.file === path), path);
+  }
 });
 
 void test('source layout rejects contexts, feature layers and misplaced database without requiring imports', () => {

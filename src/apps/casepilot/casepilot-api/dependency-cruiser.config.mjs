@@ -1,3 +1,6 @@
+// Composition is restricted further by the CPA-004 source-layout gate.
+const resourceModule = '^src/presentation/([^/]+)/\\1\\.module\\.ts$';
+
 /** @type {import('dependency-cruiser').IConfiguration} */
 const configuration = {
   forbidden: [
@@ -68,13 +71,19 @@ const configuration = {
     {
       name: 'BCK-003-presentation-delegates-to-application', severity: 'error',
       comment: 'Presentation invokes Application; it cannot directly consume Domain, persistence or Infrastructure.',
-      from: { path: '^src/presentation/' },
+      from: { path: '^src/presentation/', pathNot: resourceModule },
       to: { path: '^src/(domain/|infrastructure/)' },
+    },
+    {
+      name: 'CPA-004-transport-no-composition', severity: 'error',
+      comment: 'Transport cannot reach composition modules, including through Presentation barrels.',
+      from: { path: '^src/presentation/', pathNot: resourceModule },
+      to: { path: '^src/.*\\.module\\.ts$', reachable: true },
     },
     {
       name: 'BCK-003-presentation-no-drivers', severity: 'error',
       comment: 'HTTP and other input adapters cannot directly import database drivers or ORM.',
-      from: { path: '^src/presentation/' },
+      from: { path: '^src/presentation/', pathNot: resourceModule },
       to: { path: '(^|/)node_modules/(typeorm|pg)/' },
     },
     {

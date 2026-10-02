@@ -74,13 +74,15 @@ void test('BCK-008 rejects the abstractions TypeORM adapter through a core barre
 void test('BCK-008 permits pure errors and rejects the NestJS adapter through a core barrel', () => {
   const errors = '../../../libs/backend/exception-handler/src/';
   const files = {
-    [errors + 'index.ts']: "export { ValidationError } from './errors.js';",
-    [errors + 'errors.ts']: 'export class ValidationError extends Error {}',
+    [errors + 'index.ts']: "export { ValidationError } from '@casepilot/abstractions';",
+    '../../../libs/backend/abstractions/src/index.ts': "export { ValidationError } from './errors.js';",
+    '../../../libs/backend/abstractions/src/errors.ts': 'export class ValidationError extends Error {}',
     [errors + 'nestjs/index.ts']: 'export class ExceptionHandlerModule {}',
   };
   const allowed = cruise({
     ...files,
     'src/application/users/errors.ts': "export { ValidationError } from '../../../../../../libs/backend/exception-handler/src/index.js';",
+    'src/application/health/errors.ts': "export { ValidationError } from '@casepilot/abstractions';",
     'src/app.module.ts': "export { ExceptionHandlerModule } from '../../../../libs/backend/exception-handler/src/nestjs/index.js';",
   });
   assert.equal(allowed.status, 0, allowed.output);
@@ -105,6 +107,49 @@ void test('dependency-cruiser accepts shared domain relationships and directed a
     'src/infrastructure/persistence/schema.ts': "export type { Model } from '../../domain/model.js';",
   });
   assert.equal(result.status, 0, result.output);
+});
+
+void test('CPA-004 permits resource module bindings and Application delegation from transport', () => {
+  const result = cruise({
+    'src/api.module.ts': "export { HealthModule } from './presentation/health/health.module.js';",
+    'src/presentation/health/health.module.ts': "export { HealthController } from './health.controller.js'; export { Adapter } from '@infra/adapter'; export type { Model } from '../../domain/model.js'; export class HealthModule {}",
+    'src/presentation/health/health.controller.ts': "export type { Model } from '../../application/health/query.js';",
+    'src/application/health/query.ts': "export type { Model } from '../../domain/model.js';",
+    'src/domain/model.ts': 'export interface Model { id: string }',
+    'src/infrastructure/adapter.ts': "export type { Model } from '../domain/model.js'; export class Adapter {}",
+  });
+  assert.equal(result.status, 0, result.output);
+});
+
+void test('CPA-004 blocks composition from transport directly and through Presentation barrels', () => {
+  for (const throughBarrel of [false, true]) {
+    const result = cruise({
+      'src/presentation/health/health.controller.ts': `export { HealthModule } from '${throughBarrel ? './bridge.js' : './health.module.js'}';`,
+      'src/presentation/health/bridge.ts': "export { HealthModule } from './health.module.js';",
+      'src/presentation/health/health.module.ts': 'export class HealthModule {}',
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.output, /CPA-004-transport-no-composition/);
+    assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
+  }
+});
+
+void test('CPA-004 keeps persistence and core boundaries around resource composition', () => {
+  for (const [source, target, rule] of [
+    ['src/presentation/health/health.controller.ts', 'src/infrastructure/adapter.ts', 'BCK-003-presentation-delegates-to-application'],
+    ['src/presentation/health/health-http.response.ts', 'src/domain/model.ts', 'BCK-003-presentation-delegates-to-application'],
+    ['src/presentation/health/other.module.ts', 'src/infrastructure/adapter.ts', 'BCK-003-presentation-delegates-to-application'],
+    ['src/presentation/health/nested/health.module.ts', 'src/infrastructure/adapter.ts', 'BCK-003-presentation-delegates-to-application'],
+    ['src/application/health/query.ts', 'src/presentation/health/health.module.ts', 'BCK-008-application-layers'],
+    ['src/domain/model.ts', 'src/presentation/health/health.module.ts', 'BCK-008-domain-layers'],
+    ['src/infrastructure/adapter.ts', 'src/presentation/health/health.module.ts', 'BCK-008-infrastructure-no-presentation'],
+  ] as const) {
+    const specifier = relative(dirname(source), target).replaceAll('\\', '/').replace(/\.ts$/, '.js');
+    const result = cruise({ [source]: `export type { Target } from '${specifier}';`, [target]: 'export interface Target {}' });
+    assert.notEqual(result.status, 0, `${source} -> ${target}`);
+    assert.ok(result.output.includes(rule), result.output);
+    assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
+  }
 });
 
 void test('dependency-cruiser resolves .js specifiers, type-only imports and aliases before checking boundaries', () => {

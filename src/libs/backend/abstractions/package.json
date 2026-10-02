@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Shared data access contracts, pagination models and transaction adapter",
+  "description": "Shared error and data access abstractions, pagination models and transaction adapter",
   "engines": { "node": ">=22.12.0" },
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
@@ -14,7 +14,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint src test eslint.config.mjs --max-warnings 0",
-    "test": "tsc -p tsconfig.test.json && node --test build/test/test/unit/models.test.js build/test/test/unit/unit-of-work.test.js",
+    "test": "tsc -p tsconfig.test.json && node --test build/test/test/unit/models.test.js build/test/test/unit/unit-of-work.test.js build/test/test/unit/errors.test.js",
     "test:integration": "tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
   },

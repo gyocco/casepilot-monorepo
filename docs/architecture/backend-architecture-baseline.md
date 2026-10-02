@@ -90,6 +90,8 @@ El código de negocio de Application y los modelos de Domain no dependen de Nest
 
 El módulo raíz NestJS compone los handlers, controllers y adaptadores de la aplicación. Las capas conceptuales no requieren un `DomainModule`, `ApplicationModule` o `DataModule` global ni un provider por entidad. Se separan submódulos técnicos únicamente cuando exista una responsabilidad real; esos bindings no crean bounded contexts ni capas paralelas por feature.
 
+Un proyecto puede ubicar los módulos de composición por recurso junto a sus adaptadores de entrada dentro de Presentation, conservando su responsabilidad de composición. Esos archivos enlazan contratos e implementaciones; sus controllers siguen delegando a Application sin importar persistencia ni composición. CasePilot concreta ubicación y fronteras en [CPA-004](casepilot-backend-architecture.md#cpa-004--presentation-organizada-por-modulo-de-recurso), sin modificar el catálogo BCK.
+
 Las interfaces TypeScript necesitan un token de runtime para su resolución por Nest, o una clase abstracta usada como contrato. El binding token/implementación se realiza en composición, sin añadir decoradores del contenedor al núcleo de negocio. [Providers y tokens de NestJS](https://docs.nestjs.com/fundamentals/custom-providers).
 
 ## 4. Domain: modelos sin lógica de negocio
@@ -278,7 +280,7 @@ Las aplicaciones independientes se comunican por APIs/contratos explícitos y co
 
 Infrastructure devuelve resultados técnicos y traduce errores del proveedor sin tomar decisiones del producto. Application interpreta esos resultados y produce responses o errores tipados independientes de HTTP. Presentation asigna status codes y contratos externos sin revelar SQL, credenciales o detalles internos.
 
-Un vocabulario técnico de errores puede compartirse en una entrada pura de librería, conservando en Application la decisión funcional de emitirlos. El adaptador de transporte se expone por separado y configura status, contrato externo y política de detalle sin ser dependencia del núcleo. CasePilot implementa este mecanismo en [exception-handler](../../src/libs/backend/exception-handler/README.md) y adopta Problem Details conforme al [ADR 0012](../adr/0012-configurable-http-error-handler.md), sin ampliar el catálogo normativo.
+Un vocabulario técnico de errores puede compartirse en una entrada pura de librería, conservando en Application la decisión funcional de emitirlos. El adaptador de transporte se expone por separado y configura status, contrato externo y política de detalle sin ser dependencia del núcleo. CasePilot ubica los errores en [abstractions](../../src/libs/backend/abstractions/README.md) y el adaptador HTTP en [exception-handler](../../src/libs/backend/exception-handler/README.md); adopta Problem Details conforme al [ADR 0012](../adr/0012-configurable-http-error-handler.md), sin ampliar el catálogo normativo.
 
 Logging, correlación, métricas y tracing se implementan mediante mecanismos técnicos. Las decisiones de auditoría del producto y la emisión de sus eventos son explícitas en Application. Los modelos de evento son estructuras; su creación con significado de negocio y su secuencia pertenecen al caso de uso.
 

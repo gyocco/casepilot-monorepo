@@ -20,5 +20,5 @@ for (const finding of findings) {
 if (findings.length > 0) {
   process.exitCode = 1;
 } else {
-  process.stdout.write(`CasePilot API structure: BCK-004/BCK-005/BCK-009/BCK-014/BCK-017/BCK-021/BCK-022/CPA-001/CPA-002/CPA-003 checks passed (${project.getSourceFiles().length} source files).\n`);
+  process.stdout.write(`CasePilot API structure: BCK-004/BCK-005/BCK-009/BCK-014/BCK-017/BCK-021/BCK-022/CPA-001/CPA-002/CPA-003/CPA-004 checks passed (${project.getSourceFiles().length} source files).\n`);
 }

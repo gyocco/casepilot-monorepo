@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CasePilot API
-  version: 0.2.0
+  version: 0.3.0
   description: Sondas técnicas iniciales del backend REST de CasePilot.
 servers:
   - url: http://127.0.0.1:3000
@@ -45,7 +45,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DatabaseHealthResponse'
-        '503':
+        '500':
           description: No es posible consultar la tabla técnica
           headers:
             Cache-Control:
@@ -61,10 +61,10 @@ paths:
                     properties:
                       status:
                         type: integer
-                        enum: [503]
+                        enum: [500]
                       code:
                         type: string
-                        enum: [DATABASE_UNAVAILABLE]
+                        enum: [UNEXPECTED_ERROR]
         default:
           $ref: '#/components/responses/ApiError'
 components:

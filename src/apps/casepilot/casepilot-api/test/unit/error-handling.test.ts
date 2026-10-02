@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { UnexpectedError } from '@casepilot/abstractions';
 import type { ProblemDetails } from '@casepilot/exception-handler/nestjs';
 import { createApp } from '../../src/create-app.js';
-import { GetHealthCheckObjectsHandler, HealthDatabaseUnavailableError } from '../../src/application/health/get-health-check-objects.handler.js';
+import { GetHealthCheckObjectsHandler } from '../../src/application/health/get-health-check-objects.handler.js';
+import { HealthModule } from '../../src/presentation/health/health.module.js';
 import type { BackendConfig } from '../../src/infrastructure/config/backend-config.js';
 
 for (const exposeErrorDetails of [false, true]) {
-  void test(`API composition uses the global handler and keeps Health 503 sanitized (details=${exposeErrorDetails})`, async context => {
+  void test(`API composition maps shared UnexpectedError to Health 500 with environment details (details=${exposeErrorDetails})`, async context => {
     const config: BackendConfig = {
       environment: 'test',
       http: { host: '127.0.0.1', port: 0, corsOrigins: [], exposeErrorDetails },
@@ -16,11 +18,13 @@ for (const exposeErrorDetails of [false, true]) {
     const app = await createApp(config, false);
     context.after(() => app.close());
     // Replace only the operation under test; no database connection or local config is accessed.
-    app.get(GetHealthCheckObjectsHandler).execute = () => Promise.reject(new HealthDatabaseUnavailableError('private provider failure'));
+    app.select(HealthModule).get(GetHealthCheckObjectsHandler, { strict: true }).execute = () => Promise.reject(new UnexpectedError(undefined, {
+      cause: new Error('private provider failure'),
+    }));
     await app.listen(0, '127.0.0.1');
     const url = await app.getUrl();
     for (const [path, status, code] of [
-      ['/health/database', 503, 'DATABASE_UNAVAILABLE'], ['/missing', 404, 'NOT_FOUND_ERROR'],
+      ['/health/database', 500, 'UNEXPECTED_ERROR'], ['/missing', 404, 'NOT_FOUND_ERROR'],
     ] as const) {
       const response = await fetch(`${url}${path}`, { signal: AbortSignal.timeout(5000) });
       assert.equal(response.status, status);
@@ -31,7 +35,14 @@ for (const exposeErrorDetails of [false, true]) {
       assert.equal(body.code, code);
       assert.equal(body.type, 'about:blank');
       assert.match(body.instance, /^urn:uuid:/);
-      if (status === 503 || !exposeErrorDetails) assert.equal(body.detail, undefined);
+      if (!exposeErrorDetails) {
+        assert.equal(body.detail, undefined);
+        assert.equal(body.stack, undefined);
+        assert.equal(body.errors, undefined);
+      } else if (status === 500) {
+        assert.equal(body.detail, 'An unexpected error occurred.');
+        assert.match(body.stack ?? '', /^UnexpectedError:/);
+      }
       assert.doesNotMatch(JSON.stringify(body), /private|provider/);
     }
     const live = await fetch(`${url}/health`, { signal: AbortSignal.timeout(5000) });

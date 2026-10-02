@@ -15,12 +15,14 @@ void test('BCK-008 keeps the root error entry pure and permits NestJS only in th
     "export { HttpException } from '@nestjs/common';",
     "export { randomUUID } from 'node:crypto';",
     "export { ExceptionHandlerModule } from './nestjs/index.js';",
+    "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';",
+    "export { UnexpectedError } from '@casepilot/abstractions/dist/errors.js';",
   ]) {
     const results = await eslint.lintText(source, { filePath: join(directory, 'src/index.ts') });
     assert.ok(results.flatMap(result => result.messages).some(message => message.message.includes('BCK-008')));
   }
   for (const [path, source] of [
-    ['src/index.ts', "export { ValidationError } from './errors.js';"],
+    ['src/index.ts', "export { ValidationError } from '@casepilot/abstractions';"],
     ['src/nestjs/example.ts', "export { HttpException } from '@nestjs/common';"],
   ]) {
     const results = await eslint.lintText(source, { filePath: join(directory, path) });

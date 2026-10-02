@@ -14,7 +14,7 @@ function fixture(methods = ''): Project {
     strict: true, target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
   } });
   const library = resolve(apiDirectory, '../../../libs/backend/abstractions/src');
-  for (const file of ['index.ts', 'dataaccess/models/entity.ts', 'dataaccess/models/page-request.ts', 'dataaccess/models/page-response.ts', 'dataaccess/repository.ts', 'dataaccess/crud-repository.ts', 'dataaccess/unit-of-work.ts', 'dataaccess/unit-of-work-error.ts']) {
+  for (const file of ['index.ts', 'errors.ts', 'dataaccess/models/entity.ts', 'dataaccess/models/page-request.ts', 'dataaccess/models/page-response.ts', 'dataaccess/repository.ts', 'dataaccess/crud-repository.ts', 'dataaccess/unit-of-work.ts', 'dataaccess/unit-of-work-error.ts']) {
     project.createSourceFile(resolve(library, file), readFileSync(resolve(actualApiDirectory, '../../../libs/backend/abstractions/src', file), 'utf8'));
   }
   project.compilerOptions.set({ baseUrl: apiDirectory, paths: { '@casepilot/abstractions': [resolve(library, 'index.ts')] } });

@@ -4,7 +4,7 @@
 - Fecha: 2026-10-01.
 - Revisión: 2026-10-02.
 - Alcance: todo backend de CasePilot, incluidos APIs, workers, schedulers, adaptadores y librerías backend.
-- Decisiones: [ADR 0002](../adr/0002-backend-application-owned-business-logic.md), [ADR 0003](../adr/0003-base-api-and-health-checks.md), [ADR 0006](../adr/0006-reusable-backend-baseline.md), [ADR 0008](../adr/0008-application-wide-backend-layers.md), [ADR 0009](../adr/0009-resource-organized-application.md) y [ADR 0010](../adr/0010-shared-cqrs-contracts.md).
+- Decisiones: [ADR 0002](../adr/0002-backend-application-owned-business-logic.md), [ADR 0003](../adr/0003-base-api-and-health-checks.md), [ADR 0006](../adr/0006-reusable-backend-baseline.md), [ADR 0008](../adr/0008-application-wide-backend-layers.md), [ADR 0009](../adr/0009-resource-organized-application.md), [ADR 0010](../adr/0010-shared-cqrs-contracts.md), [ADR 0013](../adr/0013-resource-module-composition.md) y [ADR 0014](../adr/0014-resource-organized-presentation.md).
 
 ## Adopción de la arquitectura base
 
@@ -16,18 +16,18 @@ La [skill backend](../../.agents/skills/backend-architecture/SKILL.md) aplica es
 
 ## Propietarios y composición actuales
 
-El host inicial es [CasePilot API](../../src/apps/casepilot/casepilot-api/README.md), una aplicación con composición NestJS y TypeORM como adaptador de persistencia. Mantiene una única `application/`, `domain/`, `infrastructure/` y `presentation/` bajo `src/`, sin división por contextos. Domain/Application mantienen contratos y modelos independientes del framework. `AppModule` construye los handlers y enlaza los puertos con sus implementaciones.
+El host inicial es [CasePilot API](../../src/apps/casepilot/casepilot-api/README.md), una aplicación con composición NestJS y TypeORM como adaptador de persistencia. Mantiene una única `application/`, `domain/`, `infrastructure/` y `presentation/` bajo `src/`, sin división por contextos. Domain/Application mantienen contratos y modelos independientes del framework. `AppModule` configura los mecanismos globales e importa `ApiModule`, que registra los módulos de composición por recurso. Estos módulos construyen los handlers y enlazan los puertos con sus implementaciones, sin definir nuevas fronteras de dominio ni repetir capas.
 
 La API posee `HealthCheckObject`, su contrato de repositorio, query, schema y transporte en esas capas compartidas:
 
 - `GET /health` responde desde el controller sin Application ni acceso a PostgreSQL.
 - `GET /health/database` construye el request, ejecuta la query, obtiene entidades por su contrato de repositorio y devuelve el response HTTP mapeado.
 - El repositorio TypeORM realiza un SELECT sobre `HealthCheckObject(Guid, Value)`. La migración crea esa tabla y una fila técnica.
-- Fallos de persistencia producen `503` sanitizado; la sonda simple sigue disponible. La conexión es diferida y se libera al cerrar el proceso.
+- Fallos de persistencia producen `500` con el UnexpectedError compartido y código UNEXPECTED_ERROR; la sonda simple sigue disponible. La conexión es diferida y se libera al cerrar el proceso. Los detalles siguen la política de ambiente, sin exponer errores del driver.
 
-Los comandos, variables, versiones y definición detallada del host tienen su fuente canónica en el README de la API y el ADR 0003. Los nuevos modelos y casos de uso se incorporan a las mismas capas. Health es una capacidad técnica, sin contexto ni módulo de composición propio.
+Los comandos, variables, versiones y definición detallada del host tienen su fuente canónica en el README de la API y el ADR 0003. Los nuevos modelos y casos de uso se incorporan a las mismas capas. Health es una capacidad técnica cuyo módulo, controller y responses HTTP pertenecen a `presentation/health/`. El [ADR 0013](../adr/0013-resource-module-composition.md) introduce la composición por recurso; el [ADR 0014](../adr/0014-resource-organized-presentation.md) concreta su ubicación mediante CPA-004. El procedimiento para agregar endpoints y registrar recursos se mantiene en el [README de la API](../../src/apps/casepilot/casepilot-api/README.md#agregar-endpoints-sin-modificar-appmodule).
 
-El [ADR 0012](../adr/0012-configurable-http-error-handler.md) incorpora la [librería exception-handler](../../src/libs/backend/exception-handler/README.md): vocabulario de errores puro y adaptador HTTP NestJS separado. El filtro global reemplaza el filtro específico de Health, conserva su 503 sanitizado y adopta Problem Details para todos los errores HTTP. La configuración de API controla el detalle por ambiente; Application sigue interpretando errores sin conocer HTTP conforme a BCK-008/BCK-016. La cobertura de imports/privacidad y sus límites se registran en la guía de validación de la API y el README de la librería.
+El [ADR 0012](../adr/0012-configurable-http-error-handler.md) incorpora la [librería exception-handler](../../src/libs/backend/exception-handler/README.md): adaptador HTTP NestJS sobre el vocabulario puro de [abstractions](../../src/libs/backend/abstractions/README.md), reexportado por compatibilidad. El filtro global reemplaza el filtro específico de Health y adopta Problem Details para todos los errores HTTP. Health utiliza UnexpectedError de abstractions y su mapeo estándar a 500, sin error ni mapping propios. La configuración de API controla el detalle por ambiente; Application sigue interpretando errores sin conocer HTTP conforme a BCK-008/BCK-016. La cobertura de imports/privacidad y sus límites se registran en la guía de validación de la API y el README de la librería.
 
 ## CPA-001 — Application de la API organizada por recurso
 
@@ -67,6 +67,20 @@ El [ADR 0012](../adr/0012-configurable-http-error-handler.md) incorpora la [libr
 - `getPaged` incluye total e items solo si el adaptador realiza una operación de lectura individual, por ejemplo una consulta parametrizada con total y página. Si requiere dos lecturas, Application coordina `getAll`/lectura especializada y `count` y construye PageResponse; no se implementa con findAndCount. El orden es determinista y los campos de sort se traducen mediante una lista permitida.
 
 **Verificación:** TypeScript valida los genéricos; ts-morph valida contratos, herencia explícita, firmas heredadas y usos directos de repositorios/UnitOfWork; ESLint y dependency-cruiser protegen entradas públicas y la frontera ORM. Las pruebas PostgreSQL del paquete abstractions acreditan commit/rollback entre repositorios y aislamiento de scopes concurrentes. Fábricas, escapes, SQL, una sola operación y concurrencia funcional siguen requiriendo revisión. Comandos y límites: [README del paquete](../../src/libs/backend/abstractions/README.md) y [cobertura API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
+
+<a id="cpa-004--presentation-organizada-por-modulo-de-recurso"></a>
+
+## CPA-004 — Presentation organizada por módulo de recurso
+
+**CasePilot API DEBE ubicar cada módulo NestJS de recurso en `src/presentation/<recurso>/<recurso>.module.ts`, junto a sus controllers y modelos de transporte.** Esta regla particular complementa BCK-003/BCK-008/BCK-014 y se registra en el [ADR 0014](../adr/0014-resource-organized-presentation.md); no impone rutas específicas a otros proyectos.
+
+- Cada carpeta de Presentation tiene un módulo propietario con el mismo nombre. Health reúne `health.module.ts`, `health.controller.ts` y `health-http.response.ts` en `presentation/health/`. Se permiten subcarpetas para organizar operaciones/adaptadores del mismo módulo, pero su archivo `.module.ts` permanece directamente en la carpeta del recurso.
+- NO se dejan módulos de recurso en la raíz de `src/`, controllers fuera de Presentation ni archivos sueltos en la raíz de Presentation. No se agrupa el transporte de varios recursos en una carpeta técnica sin módulos propietarios, como la antigua `presentation/http/`.
+- `app.module.ts` y `api.module.ts` conservan configuración y registro raíz. Los módulos técnicos de Infrastructure, como `database.module.ts`, conservan su ubicación. No se crean recursos futuros ni se repiten Application/Domain/Infrastructure/Presentation dentro del recurso.
+- El archivo `.module.ts` es composición: PUEDE importar contratos de Domain e implementaciones de Infrastructure para registrar bindings. Solo contiene construcción/inyección y metadata NestJS, sin negocio ni adaptación de requests. Los controllers y otros archivos de transporte invocan Application; NO importan Domain, Infrastructure, drivers ni módulos de composición, directamente o mediante barrels de Presentation.
+- Application y Domain NO dependen de esos módulos; Infrastructure NO depende de Presentation. Exportar un provider en metadata NestJS permite inyectarlo desde otro módulo de composición que importe el propietario, sin añadir imports de composición al controller.
+
+**Verificación:** ts-morph comprueba paths, nombre/ubicación del módulo propietario y pertenencia de fuentes a su carpeta, incluidos archivos sin imports. ESLint restringe imports locales de los adaptadores y dependency-cruiser separa composición de transporte y rechaza acceso alcanzable a módulos mediante barrels. Los selectores de composición se basan en nombres/rutas; verificar que esos archivos solo compongan bindings y que la agrupación corresponda al recurso sigue requiriendo revisión. Alcance, regresiones y límites: [cobertura API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
 
 ## Decisiones de entorno y persistencia
 

@@ -22,6 +22,10 @@ export default tseslint.config(
   },
   {
     files: ['src/**/*.ts'],
+    languageOptions: { parserOptions: { project: false, projectService: true } },
+  },
+  {
+    files: ['src/**/*.ts'],
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{

@@ -11,6 +11,8 @@ La estructura `contexts/health/` convierte una capacidad técnica pequeña en un
 
 ## Decisión
 
+Evolución de composición: el [ADR 0013](0013-resource-module-composition.md) sustituye el registro directo de Health en `AppModule` por módulos de composición por recurso. Las capas únicas, el dominio compartido y las reglas de este ADR se conservan.
+
 - Usar una sola `application/`, `domain/`, `infrastructure/` y `presentation/` directamente bajo `src/` de cada aplicación backend. No repetir esas capas por entidad, endpoint o feature ni introducir `contexts/`.
 - Compartir en Domain los modelos y contratos internos del proyecto. Las relaciones entre entidades de la misma aplicación no requieren APIs públicas por feature; conservan las reglas de capas, autorización y persistencia.
 - Ubicar conexión, opciones, DataSource CLI y migraciones en `infrastructure/database/`, y configuración técnica en `infrastructure/config/`. Schemas y repositorios concretos permanecen en `infrastructure/persistence/`.

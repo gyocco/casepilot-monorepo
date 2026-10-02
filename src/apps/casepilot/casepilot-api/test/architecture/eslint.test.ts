@@ -13,6 +13,34 @@ const eslint = new ESLint({
   // Synthetic snippets need no TS program; the production architecture selectors stay active.
   overrideConfig: [...configuration, tseslint.configs.disableTypeChecked],
 });
+// Real files and typed regressions must use the unmodified production configuration.
+const typedEslint = new ESLint({ cwd: apiDirectory });
+
+void test('BCK-019 typed ESLint resolves Health response bases and shared error constructors', async () => {
+  const paths = [
+    'src/application/health/get-health-check-objects.response.ts',
+    'src/application/health/get-health-check-objects.handler.ts',
+  ];
+  const results = await typedEslint.lintFiles(paths);
+  assert.equal(results.length, paths.length);
+  assert.deepEqual(results.flatMap(result => result.messages), []);
+});
+
+void test('BCK-019 typed ESLint rejects unsafe calls, construction and unresolved base types', async () => {
+  const path = join(apiDirectory, 'src/application/health/get-health-check-objects.response.ts');
+  for (const code of [
+    'declare const operation: any; export const result = operation();',
+    'declare const Constructor: any; export const result = new Constructor();',
+    "import { Response } from '@casepilot/missing-contracts'; export class SampleResponse extends Response { constructor() { super(); } }",
+    "import { UnexpectedError } from '@casepilot/missing-contracts'; export function fail(): never { throw new UnexpectedError(); }",
+  ]) {
+    const results = await typedEslint.lintText(code, { filePath: path });
+    assert.ok(results.flatMap(result => result.messages).some(message =>
+      message.ruleId === '@typescript-eslint/no-unsafe-call' && message.severity === 2,
+    ), code);
+    assert.ok(results.every(result => result.fatalErrorCount === 0), code);
+  }
+});
 
 async function messages(path: string, code: string): Promise<string[]> {
   const results = await eslint.lintText(code, { filePath: join(apiDirectory, path) });
@@ -29,6 +57,7 @@ void test('ESLint rejects framework imports and direct runtime APIs in the core'
 void test('BCK-008 permits pure errors but rejects the NestJS error adapter in core layers', async () => {
   for (const path of ['src/application/users/errors.ts', 'src/domain/model.ts']) {
     assert.deepEqual(await messages(path, "export { ValidationError } from '@casepilot/exception-handler';"), []);
+    assert.deepEqual(await messages(path, "export { UnexpectedError } from '@casepilot/abstractions';"), []);
     assert.ok((await messages(path, "export { ExceptionHandlerModule } from '@casepilot/exception-handler/nestjs';")).some(message => message.includes('BCK-008')));
   }
   assert.deepEqual(await messages('src/app.module.ts', "export { ExceptionHandlerModule } from '@casepilot/exception-handler/nestjs';"), []);
@@ -38,6 +67,29 @@ void test('ESLint applies Presentation restrictions and permits shared Domain mo
   assert.ok((await messages('src/presentation/http/sample.ts', "export { DatabaseConnection } from '../../infrastructure/database/database-connection.js';")).some(message => message.includes('BCK-003')));
   assert.deepEqual(await messages('src/domain/entities/order.ts', "export type { Product } from './product.js';"), []);
   assert.deepEqual(await messages('src/infrastructure/database/options.ts', 'export const options = { synchronize: false };'), []);
+});
+
+void test('CPA-004 permits resource composition imports while keeping transport restrictions', async () => {
+  const imports = [
+    "export { DatabaseConnection } from '../../infrastructure/database/database-connection.js';",
+    "export type { HealthCheckObjectRepository } from '../../domain/repositories/health-check-object.repository.js';",
+    "export { EntitySchema } from 'typeorm';",
+  ];
+  for (const code of imports) {
+    assert.deepEqual(await messages('src/presentation/health/health.module.ts', code), []);
+    for (const path of ['src/presentation/health/health.controller.ts', 'src/presentation/health/health-http.response.ts', 'src/presentation/health/bridge.ts']) {
+      assert.ok((await messages(path, code)).some(message => message.includes('BCK-003')), path);
+    }
+    assert.ok((await messages('src/presentation/health/nested/health.module.ts', code)).some(message => message.includes('BCK-003')));
+  }
+});
+
+void test('CPA-004 rejects transport imports/reexports of composition modules', async () => {
+  for (const specifier of ['./health.module.js', '../../app.module.js', '../orders/orders.module.js', './health.module']) {
+    const code = `export { Module } from '${specifier}';`;
+    assert.ok((await messages('src/presentation/health/health.controller.ts', code)).some(message => message.includes('CPA-004')), specifier);
+    assert.deepEqual(await messages('src/presentation/health/health.module.ts', code), []);
+  }
 });
 
 void test('ESLint blocks repository transaction APIs and composed reads', async () => {

@@ -130,6 +130,10 @@ importers:
         version: 8.71.0(eslint@9.39.5)(typescript@5.9.3)
 
   src/libs/backend/exception-handler:
+    dependencies:
+      '@casepilot/abstractions':
+        specifier: workspace:*
+        version: link:../abstractions
     devDependencies:
       '@eslint/js':
         specifier: 9.39.5

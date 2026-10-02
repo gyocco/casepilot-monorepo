@@ -2,8 +2,8 @@ import { STATUS_CODES } from 'node:http';
 import { HttpException } from '@nestjs/common';
 import {
   ApplicationError, UnexpectedError, ValidationError, NotFoundError, ForbiddenError, UnauthorizedError,
-} from '../errors.js';
-import type { ErrorDetail } from '../errors.js';
+} from '@casepilot/abstractions';
+import type { ErrorDetail } from '@casepilot/abstractions';
 
 export interface ProblemDetails {
   readonly type: string;

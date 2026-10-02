@@ -1,10 +1,10 @@
 # Exception handler
 
-`@casepilot/exception-handler` proporciona errores independientes del transporte y un filtro HTTP global configurable para NestJS 12.1.2. Es una capacidad técnica server-side reutilizable por APIs; no contiene decisiones de negocio ni importa desde apps, frontend o mobile. CasePilot API es su consumidor inicial.
+`@casepilot/exception-handler` proporciona un filtro HTTP global configurable para NestJS 12.1.2 sobre los [errores puros de abstractions](../abstractions/README.md). Es una capacidad técnica server-side reutilizable por APIs; no contiene decisiones de negocio ni importa desde apps, frontend o mobile. CasePilot API es su consumidor inicial.
 
 ## Entradas públicas
 
-- `@casepilot/exception-handler`: ApplicationError, UnexpectedError, ValidationError, NotFoundError, ForbiddenError, UnauthorizedError y sus opciones/detalles. No carga NestJS, Node, HTTP ni proveedores. Application decide cuándo emitir cada error.
+- `@casepilot/exception-handler`: reexporta por compatibilidad ApplicationError, UnexpectedError, ValidationError, NotFoundError, ForbiddenError, UnauthorizedError y sus opciones/detalles desde `@casepilot/abstractions`, conservando la identidad de sus constructores. No carga NestJS, Node, HTTP ni proveedores. Application consume los errores desde abstractions y decide cuándo emitirlos.
 - `@casepilot/exception-handler/nestjs`: ExceptionHandlerModule, ProblemDetailsFilter, ProblemDetailsFactory y tipos de configuración/response. Solo transporte/composición; no se importa desde Domain/Application. No usar deep imports ni rutas a internals.
 
 `UnauthroizedError` es un alias de `UnauthorizedError` que admite la grafía de la solicitud inicial. Ambos representan la misma clase.
@@ -12,7 +12,7 @@
 ## Uso
 
 ```typescript
-import { ValidationError } from '@casepilot/exception-handler';
+import { ValidationError } from '@casepilot/abstractions';
 
 throw new ValidationError('Email must be valid.', {
   details: [{ message: 'Invalid email format.', code: 'FORMAT', pointer: '/email' }],
@@ -80,8 +80,8 @@ Un mapeo exige status entero 400–599 y code no vacío. Type opcional debe ser 
 
 ## Verificación y límites arquitectónicos
 
-Desde la raíz: `pnpm check:exception-handler`, `pnpm build:exception-handler` o `pnpm test:exception-handler`. El check incluye tipos, lint, unitarias, integración HTTP y build. Las pruebas HTTP usan puertos efímeros, sin Docker, credenciales ni persistencia; las pruebas propias viven en `test/` de esta librería.
+Desde la raíz: `pnpm check:exception-handler`, `pnpm build:exception-handler` o `pnpm test:exception-handler`. Los comandos construyen primero abstractions. El check incluye tipos, lint, unitarias, integración HTTP y build. Las pruebas HTTP usan puertos efímeros, sin Docker, credenciales ni persistencia; las pruebas propias viven en `test/` de esta librería. Los contratos de errores se prueban en abstractions; [la prueba de compatibilidad](test/unit/errors.test.ts) acredita la identidad de las reexportaciones y el mapeo del UnexpectedError original.
 
-[ESLint](eslint.config.mjs) protege la entrada pura y prohíbe imports de apps (BCK-008/BCK-015), con [regresiones](test/unit/architecture.test.ts). [Unitarias](test/unit/problem-details.test.ts) e [integración HTTP](test/integration/nestjs.test.ts) acreditan mapeos, privacidad y contrato (BCK-016/BCK-019). La API también bloquea el adaptador en sus capas core mediante lint y grafo. El scanner ts-morph de handlers/repositorios no cambia: esta librería no incorpora casos de uso, repositorios ni transacciones. Los checks no acreditan semánticamente que todos los mensajes del consumidor estén libres de secretos ni verifican futuros consumidores: esa revisión conserva su dueño.
+[ESLint](eslint.config.mjs) protege la entrada pura: admite contratos locales y la entrada pública de abstractions, rechazando su adaptador TypeORM y deep imports. Prohíbe imports de apps (BCK-008/BCK-015), con [regresiones](test/unit/architecture.test.ts). [Unitarias](test/unit/problem-details.test.ts) e [integración HTTP](test/integration/nestjs.test.ts) acreditan mapeos, privacidad y contrato (BCK-016/BCK-019). La API también bloquea el adaptador en sus capas core mediante lint y grafo. El scanner ts-morph de handlers/repositorios no cambia: esta librería no incorpora casos de uso, repositorios ni transacciones. Los checks no acreditan semánticamente que todos los mensajes del consumidor estén libres de secretos ni verifican futuros consumidores: esa revisión conserva su dueño.
 
 Requisitos: Node >=22.12.0; NestJS common/core 12.1.2 son peers opcionales para consumidores de la entrada pura y requeridos al usar `/nestjs`. Se reutilizan las dependencias y versiones del workspace, sin una librería externa de normalización. Referencias consultadas el 2026-10-02: [filtros de NestJS](https://docs.nestjs.com/exception-filters) y RFC 9457.

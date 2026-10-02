@@ -1,29 +1,18 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import {
-  ApplicationError, UnexpectedError, ValidationError, NotFoundError, ForbiddenError,
-  UnauthorizedError, UnauthroizedError,
-} from '../../src/index.js';
+import * as abstractions from '@casepilot/abstractions';
+import * as errors from '../../src/index.js';
+import { ProblemDetailsFactory } from '../../src/nestjs/problem-details.js';
 
-void test('typed errors carry transport-independent codes, diagnostics and an unexposed cause', () => {
-  const cause = new Error('private provider failure');
-  for (const [ErrorType, code] of [
-    [UnexpectedError, 'UNEXPECTED_ERROR'], [ValidationError, 'VALIDATION_ERROR'],
-    [NotFoundError, 'NOT_FOUND_ERROR'], [ForbiddenError, 'FORBIDDEN_ERROR'],
-    [UnauthorizedError, 'UNAUTHORIZED_ERROR'],
+void test('compatibility exports preserve shared constructors and their HTTP mapping', () => {
+  for (const name of [
+    'ApplicationError', 'UnexpectedError', 'ValidationError', 'NotFoundError',
+    'ForbiddenError', 'UnauthorizedError', 'UnauthroizedError',
   ] as const) {
-    const error = new ErrorType('Selected diagnostic', {
-      cause, details: [{ message: 'Invalid format', pointer: '/email', code: 'FORMAT' }],
-    });
-    assert.ok(error instanceof Error);
-    assert.ok(error instanceof ApplicationError);
-    assert.equal(error.name, ErrorType.name);
-    assert.equal(error.code, code);
-    assert.equal(error.message, 'Selected diagnostic');
-    assert.equal(error.cause, cause);
-    assert.equal('status' in error, false);
-    assert.deepEqual(error.details, [{ message: 'Invalid format', pointer: '/email', code: 'FORMAT' }]);
-    assert.ok(new ErrorType().message.length > 0);
+    assert.equal(errors[name], abstractions[name]);
   }
-  assert.equal(UnauthroizedError, UnauthorizedError);
+  const problem = new ProblemDetailsFactory().create(new abstractions.UnexpectedError(), 'urn:uuid:fixture');
+  assert.equal(problem.status, 500);
+  assert.equal(problem.code, 'UNEXPECTED_ERROR');
+  assert.equal(problem.detail, undefined);
 });
