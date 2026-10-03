@@ -1,6 +1,6 @@
 import type { BusinessAccount } from '../../domain/entities/business-account.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 
 export const business_accountFields: readonly FieldRule[] = [
@@ -9,13 +9,13 @@ export const business_accountFields: readonly FieldRule[] = [
   { name: 'slug', kind: 'string', nullable: true },
   { name: 'type', kind: 'string', nullable: true },
   { name: 'taxId', kind: 'string', nullable: true },
-  { name: 'email', kind: 'string', nullable: true },
+  { name: 'email', kind: 'string', nullable: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
   { name: 'phone', kind: 'string', nullable: true },
   { name: 'website', kind: 'string', nullable: true },
   { name: 'timezone', kind: 'string', nullable: false },
   { name: 'locale', kind: 'string', nullable: false },
-  { name: 'currency', kind: 'string', nullable: false },
-  { name: 'countryCode', kind: 'string', nullable: false },
+  { name: 'currency', kind: 'string', nullable: false, pattern: /^[A-Z]{3}$/ },
+  { name: 'countryCode', kind: 'string', nullable: false, pattern: /^[A-Z]{2}$/ },
   { name: 'status', kind: 'string', nullable: false, choices: ['ACTIVE', 'SUSPENDED', 'CLOSED'] },
   { name: 'settings', kind: 'json', nullable: true },
 ];

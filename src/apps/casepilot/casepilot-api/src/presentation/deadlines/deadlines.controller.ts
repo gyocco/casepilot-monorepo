@@ -5,7 +5,7 @@ import { UpdateDeadlineHandler } from '../../application/deadlines/update-deadli
 import { DeleteDeadlineHandler } from '../../application/deadlines/delete-deadline.handler.js';
 import { ListDeadlinesHandler } from '../../application/deadlines/list-deadlines.handler.js';
 import { CreateDeadlineRequest, GetDeadlineRequest, UpdateDeadlineRequest, DeleteDeadlineRequest, ListDeadlinesRequest } from '../../application/deadlines/deadline.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, choiceValue, optionalChoice, nullableString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, choiceValue, optionalChoice, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { DeadlineItemHttpResponse, DeadlinesPageHttpResponse, DeleteDeadlineHttpResponse, toDeadlineHttpResponse } from './deadline-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/deadlines')

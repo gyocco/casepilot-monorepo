@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { CustomFieldValue } from '../../domain/entities/custom-field-value.js';
-import type { JsonValue } from '../../domain/entities/stored-entity.js';
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { JsonValue } from '@casepilot/abstractions';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateCustomFieldValueData {
   readonly customFieldDefinitionId: string;

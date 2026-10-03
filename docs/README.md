@@ -49,3 +49,6 @@ La documentación específica de una aplicación o librería vive en su README l
 - [Modelo de dominio de servicios profesionales](product/domain-model-professional-services.md): definición suministrada por el usuario, con los 28 modelos y relaciones.
 - [CRUD de servicios profesionales](../src/apps/casepilot/casepilot-api/docs/professional-services-crud.md): rutas públicas, campos, paginación, versiones, integridad y límites de la API de datos.
 - [ADR 0015 — CRUD de servicios profesionales](adr/0015-professional-services-database-crud.md): alcance de persistencia, endpoints públicos y decisiones de schema/concurrencia.
+
+- [Mecanismos backend reutilizables](adr/0016-reusable-backend-mechanisms.md): CPA-005, contratos/SQL/runtime compartidos y políticas con su aplicación propietaria.
+- [Librería de validación](../src/libs/backend/validation/README.md): helpers estructurales parametrizados y adaptador HTTP separado.

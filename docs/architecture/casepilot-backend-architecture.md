@@ -65,7 +65,7 @@ El [ADR 0012](../adr/0012-configurable-http-error-handler.md) incorpora la [libr
 - Entity, PageRequest y PageResponse pertenecen a `src/libs/backend/abstractions/src/dataaccess/models/`. La lista cerrada de modelos de operaciones es PageRequest y PageResponse; sus identidades se verifican por símbolo, no por forma o nombre.
 - Los contratos específicos son interfaces en `domain/repositories/`, con nombres terminados en Repository. Los adaptadores son clases en `infrastructure/persistence/repositories/` que implementan esos contratos. El scanner también selecciona declaraciones terminadas en Repository y herederos del contrato compartido en el resto de las fuentes de la API, sin limitarse a paths.
 - Repository es el contrato base tipado de una entidad, sin operaciones obligatorias; su propiedad opcional entityType conserva el parámetro genérico sin requerir estado de runtime. CrudRepository define getAll, getById, add, update, delete, count y getPaged con entidad/ID genéricos. Las operaciones custom respetan BCK-021. Un contrato pequeño de lectura puede extender Repository y declarar explícitamente sus lecturas sin exponer escrituras.
-- La entrada principal es pura y no depende del ORM. El adaptador técnico TypeOrmUnitOfWork se importa exclusivamente por `@casepilot/abstractions/typeorm` desde Infrastructure/composición. Domain/Application solo consumen la entrada principal. No se usan deep imports ni rutas relativas a internals.
+- La entrada principal es pura y no depende del ORM. Los adaptadores TypeOrmUnitOfWork, DatabaseConnection y TypeOrmDataRepository se importan exclusivamente por `@casepilot/abstractions/typeorm` desde Infrastructure/composición. Domain/Application solo consumen la entrada principal. El proveedor de UUID/fecha se consume desde @casepilot/abstractions/node únicamente en Infrastructure/composición. No se usan deep imports ni rutas relativas a internals.
 - El scope genérico de UnitOfWork es un conjunto no vacío con propiedades nombradas de repositorios. Su fábrica construye adaptadores nuevos usando exclusivamente el EntityManager transaccional. No se exponen managers ni modelos ORM al callback de Application.
 - `getPaged` incluye total e items solo si el adaptador realiza una operación de lectura individual, por ejemplo una consulta parametrizada con total y página. Si requiere dos lecturas, Application coordina `getAll`/lectura especializada y `count` y construye PageResponse; no se implementa con findAndCount. El orden es determinista y los campos de sort se traducen mediante una lista permitida.
 
@@ -85,7 +85,20 @@ El [ADR 0012](../adr/0012-configurable-http-error-handler.md) incorpora la [libr
 
 **Verificación:** ts-morph comprueba paths, nombre/ubicación del módulo propietario y pertenencia de fuentes a su carpeta, incluidos archivos sin imports. ESLint restringe imports locales de los adaptadores y dependency-cruiser separa composición de transporte y rechaza acceso alcanzable a módulos mediante barrels. Los selectores de composición se basan en nombres/rutas; verificar que esos archivos solo compongan bindings y que la agrupación corresponda al recurso sigue requiriendo revisión. Alcance, regresiones y límites: [cobertura API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
 
-## Decisiones de entorno y persistencia
+<a id="cpa-005--mecanismos-backend-reutilizables-con-dueno-en-libs"></a>
+
+## CPA-005 — Mecanismos backend reutilizables con dueño en libs
+
+**Los contratos, adaptadores y helpers backend de propósito general DEBEN vivir en `src/libs/backend/` y consumirse por entradas públicas.** La primera API basta como consumidor inicial cuando futuras APIs son consumidores planificados. No se extraen reglas de CasePilot a esas librerías ni se conservan copias genéricas en la app. Decisión: [ADR 0016](../adr/0016-reusable-backend-mechanisms.md).
+
+- `@casepilot/abstractions` contiene contratos, datos, errores puros y ejecución con traducción de errores suministrada por Application. `/typeorm` contiene el adaptador SQL parametrizado y DatabaseConnection con inicialización diferida/cierre; `/node` contiene el proveedor de UUID/fecha. Domain/Application no consumen adaptadores de runtime, directa ni indirectamente.
+- `@casepilot/validation` contiene validación estructural parametrizada y su entrada `/nestjs` contiene parsers y metadata HTTP únicamente para Presentation. Límites, campos admitidos y restricciones del producto se seleccionan en Application; la librería no decide reglas por nombres de campos o recursos.
+- `@casepilot/cqrs` contiene contratos de ejecución y modelos de respuesta comunes, incluida la metadata de paginación. Los responses concretos siguen en Application.
+- Tablas, columnas, ámbito `businessAccountId`, referencias, políticas CRUD y composición de repositorios conservan su dueño en CasePilot API. El adaptador SQL recibe la columna de ámbito y las columnas inmutables; no conoce tablas o cuentas del producto.
+
+**Verificación:** ESLint y dependency-cruiser protegen entradas públicas y adaptadores; ts-morph sigue resolviendo Entity/Repository y modelos CQRS heredados de las librerías. Los paquetes verifican pureza, rechazo de imports desde apps y comportamiento parametrizado. La ausencia de negocio y duplicaciones genéricas requiere revisión semántica; no existe un detector estático completo.
+
+## Configuración del entorno y persistencia
 
 El entorno de desarrollo utiliza PostgreSQL persistente en Docker conforme al [ADR 0001](../adr/0001-local-postgresql.md). Runtime y CLI comparten la fábrica DataSource en `infrastructure/database/`; las migraciones son explícitas, con `synchronize: false` y `migrationsRun: false`. La carga y validación técnica de configuración reside en `infrastructure/config/`.
 

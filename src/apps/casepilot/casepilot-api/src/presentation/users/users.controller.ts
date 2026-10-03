@@ -5,7 +5,7 @@ import { UpdateUserHandler } from '../../application/users/update-user.handler.j
 import { DeleteUserHandler } from '../../application/users/delete-user.handler.js';
 import { ListUsersHandler } from '../../application/users/list-users.handler.js';
 import { CreateUserRequest, GetUserRequest, UpdateUserRequest, DeleteUserRequest, ListUsersRequest } from '../../application/users/user.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { UserItemHttpResponse, UsersPageHttpResponse, DeleteUserHttpResponse, toUserHttpResponse } from './user-http.response.js';
 
 @Controller('users')

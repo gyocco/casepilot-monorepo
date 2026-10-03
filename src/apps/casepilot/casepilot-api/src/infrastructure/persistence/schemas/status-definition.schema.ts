@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { StatusDefinition } from '../../../domain/entities/status-definition.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
 export const status_definitionSchema = new EntitySchema<StatusDefinition>({
   name: 'StatusDefinition', target: StatusDefinition, tableName: 'status_definitions',
   columns: {
@@ -33,7 +33,8 @@ export const status_definitionSchema = new EntitySchema<StatusDefinition>({
   ],
 });
 export const status_definitionTable: SqlTable<StatusDefinition> = {
-  schema: status_definitionSchema, tableName: 'status_definitions', tenant: true,
+  schema: status_definitionSchema, tableName: 'status_definitions', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

@@ -3,15 +3,15 @@ import { type UnitOfWork, NotFoundError } from '@casepilot/abstractions';
 import type { Task } from '../../domain/entities/task.js';
 import { GetTaskResponse, toTaskResponse, type GetTaskRequest } from './task.models.js';
 import type { CrudScope } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
-import { validateId } from '../shared/crud-validation.js';
+import { validateId } from '@casepilot/validation';
 
 export class GetTaskHandler implements Handler<GetTaskRequest, GetTaskResponse> {
   constructor(private readonly work: UnitOfWork<CrudScope<Task>>) {}
 
   async execute(request: GetTaskRequest): Promise<GetTaskResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       const entity = await scope.resource.getById(request.id, request.businessAccountId);

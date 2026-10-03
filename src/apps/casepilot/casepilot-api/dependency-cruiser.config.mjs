@@ -11,10 +11,30 @@ const configuration = {
       to: { path: '(^|/)libs/backend/exception-handler/(src|dist)/nestjs/', reachable: true },
     },
     {
+      name: 'CPA-005-validation-public-entry', severity: 'error',
+      from: { path: '^src/' },
+      to: { path: '(^|/)libs/backend/validation/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/nestjs/index\\.(?:ts|js|d\\.ts)$'] },
+    },
+    {
+      name: 'BCK-008-validation-core-no-nestjs', severity: 'error',
+      from: { path: '^src/(domain|application)/' },
+      to: { path: '(^|/)libs/backend/validation/(src|dist)/nestjs/', reachable: true },
+    },
+    {
+      name: 'BCK-008-abstractions-core-no-node', severity: 'error',
+      from: { path: '^src/(domain|application)/' },
+      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/node/', reachable: true },
+    },
+    {
+      name: 'BCK-003-presentation-no-shared-runtime-adapters', severity: 'error',
+      from: { path: '^src/presentation/', pathNot: resourceModule },
+      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/(node|dataaccess/typeorm)/', reachable: true },
+    },
+    {
       name: 'CPA-003-abstractions-public-entry', severity: 'error',
       comment: 'Consume only the main public index or the Infrastructure-only TypeORM index.',
       from: { path: '^src/' },
-      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/dataaccess/typeorm/index\\.(?:ts|js|d\\.ts)$'] },
+      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/dataaccess/typeorm/index\\.(?:ts|js|d\\.ts)$', '/node/index\\.(?:ts|js|d\\.ts)$'] },
     },
     {
       name: 'BCK-008-abstractions-core-no-typeorm', severity: 'error',

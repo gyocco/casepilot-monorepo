@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, ValidationError } from '@casepilot/abstractions';
 import { Folder } from '../../domain/entities/folder.js';
 import { CreateFolderResponse, toFolderResponse, type CreateFolderRequest } from './folder.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { folderFields, validateFolderRelations } from './folder.rules.js';
 import { validateFields } from '../shared/crud-validation.js';
@@ -12,7 +13,7 @@ export class CreateFolderHandler implements Handler<CreateFolderRequest, CreateF
   constructor(private readonly work: UnitOfWork<CrudScope<Folder>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: CreateFolderRequest): Promise<CreateFolderResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, folderFields, false);

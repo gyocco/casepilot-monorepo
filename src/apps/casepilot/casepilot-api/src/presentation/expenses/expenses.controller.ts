@@ -5,7 +5,7 @@ import { UpdateExpenseHandler } from '../../application/expenses/update-expense.
 import { DeleteExpenseHandler } from '../../application/expenses/delete-expense.handler.js';
 import { ListExpensesHandler } from '../../application/expenses/list-expenses.handler.js';
 import { CreateExpenseRequest, GetExpenseRequest, UpdateExpenseRequest, DeleteExpenseRequest, ListExpensesRequest } from '../../application/expenses/expense.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { ExpenseItemHttpResponse, ExpensesPageHttpResponse, DeleteExpenseHttpResponse, toExpenseHttpResponse } from './expense-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/expenses')

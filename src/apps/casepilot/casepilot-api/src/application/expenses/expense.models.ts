@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { Expense } from '../../domain/entities/expense.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateExpenseData {
   readonly caseId: string;

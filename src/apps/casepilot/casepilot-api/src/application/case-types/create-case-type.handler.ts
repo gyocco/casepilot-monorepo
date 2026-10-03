@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, ValidationError } from '@casepilot/abstractions';
 import { CaseType } from '../../domain/entities/case-type.js';
 import { CreateCaseTypeResponse, toCaseTypeResponse, type CreateCaseTypeRequest } from './case-type.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { case_typeFields, validateCaseTypeRelations } from './case-type.rules.js';
 import { validateFields } from '../shared/crud-validation.js';
@@ -12,7 +13,7 @@ export class CreateCaseTypeHandler implements Handler<CreateCaseTypeRequest, Cre
   constructor(private readonly work: UnitOfWork<CrudScope<CaseType>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: CreateCaseTypeRequest): Promise<CreateCaseTypeResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, case_typeFields, false);

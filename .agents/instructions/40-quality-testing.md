@@ -55,3 +55,5 @@ Todas las pruebas específicas de una app o paquete, incluidas integración y en
 ## Definition of Done de calidad
 
 No se considera completo un cambio que solo “se ve bien” en una pantalla. Debe ser tipeado, testeable, accesible, responsive, documentado y verificable en la ruta de build correspondiente.
+
+La librería validation posee check/typecheck/lint/test/build y tests propios de validación/arquitectura. Ejecuta pnpm check:validation cuando cambien helpers/parsers. La integración de abstractions verifica también el repositorio SQL configurable con un modelo ajeno a CasePilot; cambios de persistencia requieren pnpm test:abstractions:integration y pnpm test:api:integration.

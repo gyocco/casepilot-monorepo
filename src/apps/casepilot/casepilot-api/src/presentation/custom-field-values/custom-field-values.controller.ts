@@ -5,7 +5,7 @@ import { UpdateCustomFieldValueHandler } from '../../application/custom-field-va
 import { DeleteCustomFieldValueHandler } from '../../application/custom-field-values/delete-custom-field-value.handler.js';
 import { ListCustomFieldValuesHandler } from '../../application/custom-field-values/list-custom-field-values.handler.js';
 import { CreateCustomFieldValueRequest, GetCustomFieldValueRequest, UpdateCustomFieldValueRequest, DeleteCustomFieldValueRequest, ListCustomFieldValuesRequest } from '../../application/custom-field-values/custom-field-value.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, nullableBoolean, nullableJson, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, nullableBoolean, nullableJson, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CustomFieldValueItemHttpResponse, CustomFieldValuesPageHttpResponse, DeleteCustomFieldValueHttpResponse, toCustomFieldValueHttpResponse } from './custom-field-value-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/custom-field-values')

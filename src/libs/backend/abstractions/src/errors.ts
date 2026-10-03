@@ -42,6 +42,12 @@ export class ValidationError extends ApplicationError {
   }
 }
 
+export class ConflictError extends ApplicationError {
+  constructor(message = 'The operation conflicts with the current data.', options: ApplicationErrorOptions = {}) {
+    super('CONFLICT_ERROR', message, options);
+  }
+}
+
 export class NotFoundError extends ApplicationError {
   constructor(message = 'The requested resource was not found.', options: ApplicationErrorOptions = {}) {
     super('NOT_FOUND_ERROR', message, options);

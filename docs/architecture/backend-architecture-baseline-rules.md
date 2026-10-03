@@ -169,6 +169,7 @@ Las reglas se identifican con `BCK-NNN`. Los identificadores no se reutilizan ni
 
 **Los paquetes de capacidades backend generales DEBEN contener únicamente mecanismos técnicos configurables y reutilizables.**
 
+- Los mecanismos extraídos reciben configuración/contratos explícitos; no infieren políticas por nombres de campos, tablas o recursos. Application conserva la selección de reglas y la interpretación funcional de resultados y errores.
 - NO contiene entidades, repositorios, commands, queries o políticas específicas del producto. Las librerías NO importan desde apps ni llegan a bundles cliente.
 - Las apps NO se convierten en dependencias de otras apps para compartir casos de uso.
 - Compartir negocio entre varios hosts requiere una frontera de paquetes de producto decidida y documentada antes de la extracción; NO se disfraza como librería general.

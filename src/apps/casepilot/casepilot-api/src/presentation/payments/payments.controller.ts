@@ -5,7 +5,7 @@ import { UpdatePaymentHandler } from '../../application/payments/update-payment.
 import { DeletePaymentHandler } from '../../application/payments/delete-payment.handler.js';
 import { ListPaymentsHandler } from '../../application/payments/list-payments.handler.js';
 import { CreatePaymentRequest, GetPaymentRequest, UpdatePaymentRequest, DeletePaymentRequest, ListPaymentsRequest } from '../../application/payments/payment.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { PaymentItemHttpResponse, PaymentsPageHttpResponse, DeletePaymentHttpResponse, toPaymentHttpResponse } from './payment-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/payments')

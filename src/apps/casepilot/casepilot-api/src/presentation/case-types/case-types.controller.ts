@@ -5,7 +5,7 @@ import { UpdateCaseTypeHandler } from '../../application/case-types/update-case-
 import { DeleteCaseTypeHandler } from '../../application/case-types/delete-case-type.handler.js';
 import { ListCaseTypesHandler } from '../../application/case-types/list-case-types.handler.js';
 import { CreateCaseTypeRequest, GetCaseTypeRequest, UpdateCaseTypeRequest, DeleteCaseTypeRequest, ListCaseTypesRequest } from '../../application/case-types/case-type.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CaseTypeItemHttpResponse, CaseTypesPageHttpResponse, DeleteCaseTypeHttpResponse, toCaseTypeHttpResponse } from './case-type-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/case-types')

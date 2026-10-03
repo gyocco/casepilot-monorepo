@@ -1,5 +1,5 @@
 import type { InvoiceLineResponse } from '../../application/invoice-lines/invoice-line.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class InvoiceLineHttpResponse {
   constructor(

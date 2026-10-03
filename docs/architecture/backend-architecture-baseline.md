@@ -250,7 +250,7 @@ Los paquetes backend de propósito general contienen mecanismos técnicos config
 | Autenticación técnica | Application decide permisos sobre recursos y acciones del producto. |
 | Conexión, telemetría y mecanismo transaccional general | Application define el alcance; la aplicación conserva esquemas y repositorios concretos. |
 
-Las librerías no importan desde apps, no contienen entidades/repositorios específicos ni políticas del producto, y no llegan a bundles web/mobile. Infrastructure adapta sus APIs técnicas a los puertos que necesita Application.
+Las librerías no importan desde apps, no contienen entidades/repositorios específicos ni políticas del producto, y no llegan a bundles web/mobile. Infrastructure adapta sus APIs técnicas a los puertos que necesita Application. Los helpers estructurales reciben límites y descriptores explícitos; las decisiones de cada consumidor permanecen en Application. Un mecanismo compartido puede ejecutar una traducción de errores suministrada por Application, sin seleccionar esa política. Contratos puros y adaptadores de ORM, runtime o HTTP usan entradas públicas separadas. En CasePilot, [ADR 0016](../adr/0016-reusable-backend-mechanisms.md) concreta esas capacidades en abstractions, cqrs y validation.
 
 ## 11. Evolución hacia varias APIs
 

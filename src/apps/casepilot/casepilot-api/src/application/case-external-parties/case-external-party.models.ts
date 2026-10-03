@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { CaseExternalParty } from '../../domain/entities/case-external-party.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateCaseExternalPartyData {
   readonly caseId: string;

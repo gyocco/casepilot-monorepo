@@ -122,3 +122,5 @@ El entorno inicia PostgreSQL en `127.0.0.1:55432`, genera una contraseña local 
 - [Herramientas](tools/README.md)
 
 El backend es NestJS/TypeScript con TypeORM. No se crean proyectos ni archivos de configuración .NET.
+
+La validación backend estructural y los parsers HTTP se mantienen en [validation](src/libs/backend/validation/README.md), con pnpm check:validation, pnpm build:validation y pnpm test:validation. Los mecanismos SQL/errores/runtime compartidos se documentan en [abstractions](src/libs/backend/abstractions/README.md) y [ADR 0016](docs/adr/0016-reusable-backend-mechanisms.md).

@@ -1,6 +1,6 @@
 import type { CaseType } from '../../domain/entities/case-type.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference } from '../shared/crud-relations.js';
 export const case_typeFields: readonly FieldRule[] = [

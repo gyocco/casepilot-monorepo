@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { Payment } from '../../domain/entities/payment.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreatePaymentData {
   readonly invoiceId: string;

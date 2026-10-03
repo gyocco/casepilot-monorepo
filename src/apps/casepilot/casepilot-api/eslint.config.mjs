@@ -2,6 +2,11 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import { fileURLToPath } from 'node:url';
 
+const sharedEntryRules = [{
+  selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/validation\\/(?!nestjs$)|.*libs\\/backend\\/validation\\/)/]",
+  message: 'CPA-005: Use the public @casepilot/validation entry, never private modules.',
+}];
+
 export default tseslint.config(
   { ignores: ['dist/**', 'build/**', 'node_modules/**'] },
   { linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: 'error' } },
@@ -44,8 +49,8 @@ export default tseslint.config(
   {
     files: ['src/**/*.ts'],
     rules: {
-      'no-restricted-syntax': ['error', {
-        selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!typeorm$)|.*libs\\/backend\\/abstractions\\/)/]",
+      'no-restricted-syntax': ['error', ...sharedEntryRules, {
+        selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!(?:typeorm|node)$)|.*libs\\/backend\\/abstractions\\/)/]",
         message: 'CPA-003: Use the public @casepilot/abstractions entry or its Infrastructure-only /typeorm adapter.',
       }],
     },
@@ -55,7 +60,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-008: Domain/Application depend on internal models and ports, not runtime adapters.',
         }],
       }],
@@ -68,9 +73,9 @@ export default tseslint.config(
   {
     files: ['src/application/**/*.ts'],
     rules: {
-      'no-restricted-syntax': ['error',
+      'no-restricted-syntax': ['error', ...sharedEntryRules,
         {
-          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!typeorm$)|.*libs\\/backend\\/abstractions\\/)/]",
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!(?:typeorm|node)$)|.*libs\\/backend\\/abstractions\\/)/]",
           message: 'CPA-003: Use the public abstractions entry point.',
         },
         {
@@ -94,7 +99,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
+          group: ['@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
           message: 'BCK-003/BCK-008/CPA-004: Transport delegates to Application and cannot import persistence, Domain or composition modules.',
         }],
       }],
@@ -105,7 +110,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-002/BCK-008: Domain contains data/contracts and cannot depend on other layers.',
         }],
       }],
@@ -114,9 +119,9 @@ export default tseslint.config(
   {
     files: ['src/infrastructure/**/repositories/**/*.ts', 'src/infrastructure/**/*.repository.ts'],
     rules: {
-      'no-restricted-syntax': ['error',
+      'no-restricted-syntax': ['error', ...sharedEntryRules,
         {
-          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!typeorm$)|.*libs\\/backend\\/abstractions\\/)/]",
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!(?:typeorm|node)$)|.*libs\\/backend\\/abstractions\\/)/]",
           message: 'CPA-003: Use the public abstractions entry point.',
         },
         {
@@ -141,7 +146,7 @@ export default tseslint.config(
   {
     files: ['src/infrastructure/persistence/schemas/**/*.ts', 'src/infrastructure/persistence/entities/**/*.ts', 'src/infrastructure/persistence/models/**/*.ts'],
     rules: {
-      'no-restricted-syntax': ['error',
+      'no-restricted-syntax': ['error', ...sharedEntryRules,
         {
           selector: "Property:matches([key.name='cascade'], [key.value='cascade']):matches([value.value=true], [value.type='ArrayExpression'][value.elements.length>0])",
           message: 'BCK-012: ORM write cascades hide additional persistence operations.',
@@ -164,7 +169,7 @@ export default tseslint.config(
   {
     files: ['src/infrastructure/database/**/*.ts'],
     rules: {
-      'no-restricted-syntax': ['error', {
+      'no-restricted-syntax': ['error', ...sharedEntryRules, {
         selector: "Property:matches([key.name='synchronize'], [key.value='synchronize'])[value.value=true]",
         message: 'BCK-017: The schema evolves through versioned migrations, with synchronize: false.',
       }],

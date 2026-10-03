@@ -114,3 +114,5 @@ La migración `1790899200000-create-professional-services.ts` crea las 28 tablas
 Desde la raíz: `pnpm migration:api:run`. La API no aplica migraciones al arrancar. La ejecución sobre una base compartida debe ser un paso coordinado.
 
 `pnpm test:api` acredita validaciones de Application sin HTTP y los checks arquitectónicos. `pnpm test:api:integration` verifica los 28 recursos por HTTP con PostgreSQL 18 efímero: altas, lecturas, PATCH, DELETE, páginas vacías, orden, precisión, referencias cruzadas, errores, rollback, concurrencia, ausencia de drift y reversión/reaplicación de migraciones. Las pruebas nunca usan ni migran la base persistente de desarrollo.
+
+Los mecanismos de SQL, normalización/conversión, conexión diferida, runtime UUID/fecha, validación estructural y metadata ahora se consumen desde libs/backend según [ADR 0016](../../../../../docs/adr/0016-reusable-backend-mechanisms.md). Application conserva los límites, relaciones y traducción funcional de errores de CasePilot; los repositorios configuran explícitamente el ámbito business_account_id. No cambia el contrato público.

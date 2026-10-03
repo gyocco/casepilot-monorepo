@@ -1,6 +1,6 @@
 import type { CustomFieldValue } from '../../domain/entities/custom-field-value.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference, validateTarget } from '../shared/crud-relations.js';
 export const custom_field_valueFields: readonly FieldRule[] = [
@@ -8,7 +8,7 @@ export const custom_field_valueFields: readonly FieldRule[] = [
   { name: 'entityType', kind: 'string', nullable: false },
   { name: 'entityId', kind: 'uuid', nullable: false },
   { name: 'valueText', kind: 'text', nullable: true },
-  { name: 'valueNumber', kind: 'decimal', nullable: true },
+  { name: 'valueNumber', kind: 'decimal', nullable: true, nonnegative: false },
   { name: 'valueDate', kind: 'timestamp', nullable: true },
   { name: 'valueBoolean', kind: 'boolean', nullable: true },
   { name: 'valueJson', kind: 'json', nullable: true },

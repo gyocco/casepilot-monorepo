@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { WorkflowStep } from '../../../domain/entities/workflow-step.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
 export const workflow_stepSchema = new EntitySchema<WorkflowStep>({
   name: 'WorkflowStep', target: WorkflowStep, tableName: 'workflow_steps',
   columns: {
@@ -33,7 +33,8 @@ export const workflow_stepSchema = new EntitySchema<WorkflowStep>({
   ],
 });
 export const workflow_stepTable: SqlTable<WorkflowStep> = {
-  schema: workflow_stepSchema, tableName: 'workflow_steps', tenant: true,
+  schema: workflow_stepSchema, tableName: 'workflow_steps', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

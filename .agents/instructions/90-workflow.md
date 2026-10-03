@@ -20,7 +20,7 @@
 
 ## Verificación local
 
-La API y las librerías CQRS/abstractions/exception-handler cuentan con manifest y verificaciones; web, mobile y las demás capacidades previstas siguen sin implementación. Para CQRS ejecuta `pnpm check:cqrs`; para abstractions, `pnpm check:abstractions` y, ante cambios transaccionales, `pnpm test:abstractions:integration` con Docker/PostgreSQL efímero; para exception-handler, `pnpm check:exception-handler`, con HTTP NestJS sin Docker. Los tests propios permanecen con la librería y la API construye las tres antes de sus checks. Para cambios de documentación o configuración, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre workspace y carpetas, y `git diff --check`.
+La API y las librerías CQRS/abstractions/validation/exception-handler cuentan con manifest y verificaciones; web, mobile y las demás capacidades previstas siguen sin implementación. Para CQRS ejecuta `pnpm check:cqrs`; para abstractions, `pnpm check:abstractions` y, ante cambios transaccionales, `pnpm test:abstractions:integration` con Docker/PostgreSQL efímero; para exception-handler, `pnpm check:exception-handler`, con HTTP NestJS sin Docker. Los tests propios permanecen con la librería y la API construye las cuatro antes de sus checks. Para validation ejecuta `pnpm check:validation`. Para cambios de documentación o configuración, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre workspace y carpetas, y `git diff --check`.
 
 Cuando `src/apps/casepilot/casepilot-web/` tenga un `package.json` con scripts `lint` y `build`, usa desde la raíz:
 

@@ -1,6 +1,6 @@
 import type { Workflow } from '../../domain/entities/workflow.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 
 export const workflowFields: readonly FieldRule[] = [

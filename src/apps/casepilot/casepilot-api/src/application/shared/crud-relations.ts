@@ -2,7 +2,7 @@ import { NotFoundError, ValidationError } from '@casepilot/abstractions';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
 import type { ReferenceRecord } from '../../domain/entities/reference-record.js';
 import { tenantResourceKinds, type ResourceKind } from '../../domain/entities/resource-kind.js';
-import { validateId } from './crud-validation.js';
+import { validateId } from '@casepilot/validation';
 
 // Tenant IDs select public data; they are not authenticated authorization context.
 export async function validateTenant(references: ReferenceRepository, tenant: string | null, required: boolean): Promise<void> {

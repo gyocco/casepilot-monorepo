@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { InvoiceLine } from '../../../domain/entities/invoice-line.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
 export const invoice_lineSchema = new EntitySchema<InvoiceLine>({
   name: 'InvoiceLine', target: InvoiceLine, tableName: 'invoice_lines',
   columns: {
@@ -35,7 +35,8 @@ export const invoice_lineSchema = new EntitySchema<InvoiceLine>({
   ],
 });
 export const invoice_lineTable: SqlTable<InvoiceLine> = {
-  schema: invoice_lineSchema, tableName: 'invoice_lines', tenant: true,
+  schema: invoice_lineSchema, tableName: 'invoice_lines', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

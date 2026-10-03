@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { Request, Response, type Handler } from '../src/index.js';
+import { Request, Response, PageMetadataResponse, type Handler } from '../src/index.js';
+
+void test('shared page metadata is a CQRS response without computed or product fields', () => {
+  const response = new PageMetadataResponse(2, 10, 25, 3, true, true);
+  assert.ok(response instanceof Response);
+  assert.deepEqual(Object.keys(response), ['pageNumber', 'pageSize', 'totalCount', 'totalPages', 'hasNextPage', 'hasPreviousPage']);
+});
 
 class EchoRequest extends Request {
   constructor(public readonly value: string) { super(); }

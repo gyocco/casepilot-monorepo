@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { StatusDefinition } from '../../domain/entities/status-definition.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateStatusDefinitionData {
   readonly entityType: string;

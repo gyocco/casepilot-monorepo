@@ -1,5 +1,5 @@
 import type { WorkflowResponse } from '../../application/workflows/workflow.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class WorkflowHttpResponse {
   constructor(

@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Expense } from '../../../domain/entities/expense.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlDate, sqlBoolean } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlDate, sqlBoolean } from '@casepilot/abstractions/typeorm';
 export const expenseSchema = new EntitySchema<Expense>({
   name: 'Expense', target: Expense, tableName: 'expenses',
   columns: {
@@ -39,7 +39,8 @@ export const expenseSchema = new EntitySchema<Expense>({
   ],
 });
 export const expenseTable: SqlTable<Expense> = {
-  schema: expenseSchema, tableName: 'expenses', tenant: true,
+  schema: expenseSchema, tableName: 'expenses', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

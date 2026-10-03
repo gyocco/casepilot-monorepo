@@ -60,3 +60,5 @@ Desde este paquete: `pnpm build`, `pnpm typecheck`, `pnpm lint`, `pnpm test` y `
 El manifest exporta declaraciones en `dist/index.d.ts` y ESM en `dist/index.js`. Los consumidores declaran `"@casepilot/cqrs": "workspace:*"` y construyen la librería antes de compilar o ejecutar. Los scripts de CasePilot API coordinan ese build automáticamente para sus verificaciones, tests y build. Los artefactos `dist/` y `build/` están ignorados por Git.
 
 Decisión y evolución: [ADR 0010](../../../../docs/adr/0010-shared-cqrs-contracts.md).
+
+PageMetadataResponse es un response compartido con pageNumber/pageSize/totalCount/totalPages/hasNextPage/hasPreviousPage, sin cálculos ni reglas. Application suministra su metadata y el transporte selecciona los campos públicos. Su herencia real de Response se prueba en test/contracts.test.ts; decisión: [ADR 0016](../../../../docs/adr/0016-reusable-backend-mechanisms.md).

@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, ValidationError } from '@casepilot/abstractions';
 import { WorkflowStep } from '../../domain/entities/workflow-step.js';
 import { CreateWorkflowStepResponse, toWorkflowStepResponse, type CreateWorkflowStepRequest } from './workflow-step.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { workflow_stepFields, validateWorkflowStepRelations } from './workflow-step.rules.js';
 import { validateFields } from '../shared/crud-validation.js';
@@ -12,7 +13,7 @@ export class CreateWorkflowStepHandler implements Handler<CreateWorkflowStepRequ
   constructor(private readonly work: UnitOfWork<CrudScope<WorkflowStep>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: CreateWorkflowStepRequest): Promise<CreateWorkflowStepResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, workflow_stepFields, false);

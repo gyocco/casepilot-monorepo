@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { Folder } from '../../domain/entities/folder.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateFolderData {
   readonly caseId?: string | null;

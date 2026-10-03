@@ -1,4 +1,5 @@
-import { TenantEntity, type JsonValue } from './stored-entity.js';
+import { TenantEntity } from './tenant-entity.js';
+import type { JsonValue } from '@casepilot/abstractions';
 
 export class Activity extends TenantEntity {
   actorMemberId!: string | null;

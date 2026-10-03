@@ -88,3 +88,5 @@ Antes de copiar lógica:
 5. Si es un contrato entre procesos o tecnologías, ubícalo en `contracts/`.
 
 Una abstracción compartida debe tener consumidores reales o un contrato claramente planificado.
+
+Aplica CPA-005 y ADR 0016: mecanismos backend genéricos en libs/backend, políticas en la app, entradas públicas puras y adaptadores /typeorm, /node y /nestjs separados. Consulta los README de abstractions, cqrs, validation y exception-handler; no recrees helpers genéricos en application/shared.

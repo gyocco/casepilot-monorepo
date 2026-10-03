@@ -5,7 +5,7 @@ import { UpdateCommunicationHandler } from '../../application/communications/upd
 import { DeleteCommunicationHandler } from '../../application/communications/delete-communication.handler.js';
 import { ListCommunicationsHandler } from '../../application/communications/list-communications.handler.js';
 import { CreateCommunicationRequest, GetCommunicationRequest, UpdateCommunicationRequest, DeleteCommunicationRequest, ListCommunicationsRequest } from '../../application/communications/communication.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, choiceValue, optionalChoice, nullableChoice, stringValue, optionalString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, choiceValue, optionalChoice, nullableChoice, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CommunicationItemHttpResponse, CommunicationsPageHttpResponse, DeleteCommunicationHttpResponse, toCommunicationHttpResponse } from './communication-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/communications')

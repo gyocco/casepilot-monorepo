@@ -1,6 +1,6 @@
 import type { CustomFieldDefinitionResponse } from '../../application/custom-field-definitions/custom-field-definition.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
-import type { JsonValue } from '../../application/shared/crud-models.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
+import type { JsonValue } from '@casepilot/abstractions';
 export class CustomFieldDefinitionHttpResponse {
   constructor(
     public readonly id: string,

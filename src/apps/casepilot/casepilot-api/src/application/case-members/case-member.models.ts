@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { CaseMember } from '../../domain/entities/case-member.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateCaseMemberData {
   readonly caseId: string;

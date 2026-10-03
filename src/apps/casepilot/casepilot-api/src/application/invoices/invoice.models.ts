@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { Invoice } from '../../domain/entities/invoice.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateInvoiceData {
   readonly externalPartyId: string;

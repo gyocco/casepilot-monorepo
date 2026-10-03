@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { CaseType } from '../../domain/entities/case-type.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateCaseTypeData {
   readonly name: string;

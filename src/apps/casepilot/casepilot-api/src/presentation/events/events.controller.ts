@@ -5,7 +5,7 @@ import { UpdateEventHandler } from '../../application/events/update-event.handle
 import { DeleteEventHandler } from '../../application/events/delete-event.handler.js';
 import { ListEventsHandler } from '../../application/events/list-events.handler.js';
 import { CreateEventRequest, GetEventRequest, UpdateEventRequest, DeleteEventRequest, ListEventsRequest } from '../../application/events/event.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { EventItemHttpResponse, EventsPageHttpResponse, DeleteEventHttpResponse, toEventHttpResponse } from './event-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/events')

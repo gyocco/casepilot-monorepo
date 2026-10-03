@@ -5,7 +5,7 @@ import { UpdateExternalPartyHandler } from '../../application/external-parties/u
 import { DeleteExternalPartyHandler } from '../../application/external-parties/delete-external-party.handler.js';
 import { ListExternalPartiesHandler } from '../../application/external-parties/list-external-parties.handler.js';
 import { CreateExternalPartyRequest, GetExternalPartyRequest, UpdateExternalPartyRequest, DeleteExternalPartyRequest, ListExternalPartiesRequest } from '../../application/external-parties/external-party.models.js';
-import { readBody, numberValue, numberQuery, textQuery, choiceValue, optionalChoice, stringValue, optionalString, nullableString, nullableChoice, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, choiceValue, optionalChoice, stringValue, optionalString, nullableString, nullableChoice, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { ExternalPartyItemHttpResponse, ExternalPartiesPageHttpResponse, DeleteExternalPartyHttpResponse, toExternalPartyHttpResponse } from './external-party-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/external-parties')

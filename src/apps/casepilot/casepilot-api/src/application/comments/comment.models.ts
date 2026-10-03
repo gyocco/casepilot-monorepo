@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { Comment } from '../../domain/entities/comment.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateCommentData {
   readonly authorMemberId: string;

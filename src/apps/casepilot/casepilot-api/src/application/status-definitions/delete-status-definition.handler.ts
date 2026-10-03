@@ -3,17 +3,17 @@ import { type UnitOfWork, NotFoundError } from '@casepilot/abstractions';
 import type { StatusDefinition } from '../../domain/entities/status-definition.js';
 import { DeleteStatusDefinitionResponse, type DeleteStatusDefinitionRequest } from './status-definition.models.js';
 import type { CrudScope } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
-import { validateId } from '../shared/crud-validation.js';
+import { validateId } from '@casepilot/validation';
 import { validateVersion } from '../shared/crud-pagination.js';
-import { ConflictError } from '../shared/conflict-error.js';
+import { ConflictError } from '@casepilot/abstractions';
 
 export class DeleteStatusDefinitionHandler implements Handler<DeleteStatusDefinitionRequest, DeleteStatusDefinitionResponse> {
   constructor(private readonly work: UnitOfWork<CrudScope<StatusDefinition>>) {}
 
   async execute(request: DeleteStatusDefinitionRequest): Promise<DeleteStatusDefinitionResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

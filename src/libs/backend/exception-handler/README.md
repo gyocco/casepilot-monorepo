@@ -4,7 +4,7 @@
 
 ## Entradas públicas
 
-- `@casepilot/exception-handler`: reexporta por compatibilidad ApplicationError, UnexpectedError, ValidationError, NotFoundError, ForbiddenError, UnauthorizedError y sus opciones/detalles desde `@casepilot/abstractions`, conservando la identidad de sus constructores. No carga NestJS, Node, HTTP ni proveedores. Application consume los errores desde abstractions y decide cuándo emitirlos.
+- `@casepilot/exception-handler`: reexporta por compatibilidad ApplicationError, UnexpectedError, ValidationError, ConflictError, NotFoundError, ForbiddenError, UnauthorizedError y sus opciones/detalles desde `@casepilot/abstractions`, conservando la identidad de sus constructores. No carga NestJS, Node, HTTP ni proveedores. Application consume los errores desde abstractions y decide cuándo emitirlos.
 - `@casepilot/exception-handler/nestjs`: ExceptionHandlerModule, ProblemDetailsFilter, ProblemDetailsFactory y tipos de configuración/response. Solo transporte/composición; no se importa desde Domain/Application. No usar deep imports ni rutas a internals.
 
 `UnauthroizedError` es un alias de `UnauthorizedError` que admite la grafía de la solicitud inicial. Ambos representan la misma clase.
@@ -39,6 +39,7 @@ El módulo registra un `APP_FILTER` global que atiende errores de controllers, p
 | --- | --- | --- |
 | UnexpectedError | 500 | UNEXPECTED_ERROR |
 | ValidationError | 400 | VALIDATION_ERROR |
+| ConflictError | 409 | CONFLICT_ERROR |
 | NotFoundError | 404 | NOT_FOUND_ERROR |
 | ForbiddenError | 403 | FORBIDDEN_ERROR |
 | UnauthorizedError | 401 | UNAUTHORIZED_ERROR |

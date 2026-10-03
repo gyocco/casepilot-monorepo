@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { TimeEntry } from '../../domain/entities/time-entry.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateTimeEntryData {
   readonly caseId: string;

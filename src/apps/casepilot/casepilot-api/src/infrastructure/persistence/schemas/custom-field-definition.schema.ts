@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { CustomFieldDefinition } from '../../../domain/entities/custom-field-definition.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean, sqlJson } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean, sqlJson } from '@casepilot/abstractions/typeorm';
 export const custom_field_definitionSchema = new EntitySchema<CustomFieldDefinition>({
   name: 'CustomFieldDefinition', target: CustomFieldDefinition, tableName: 'custom_field_definitions',
   columns: {
@@ -34,7 +34,8 @@ export const custom_field_definitionSchema = new EntitySchema<CustomFieldDefinit
   ],
 });
 export const custom_field_definitionTable: SqlTable<CustomFieldDefinition> = {
-  schema: custom_field_definitionSchema, tableName: 'custom_field_definitions', tenant: true,
+  schema: custom_field_definitionSchema, tableName: 'custom_field_definitions', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

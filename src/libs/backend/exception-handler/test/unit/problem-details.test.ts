@@ -1,7 +1,16 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
-import { UnexpectedError, ValidationError } from '../../src/index.js';
+import { UnexpectedError, ValidationError, ConflictError } from '../../src/index.js';
+
+void test('shared conflicts use the standard 409 mapping and keep provider causes private', () => {
+  const problem = new ProblemDetailsFactory({ exposeDetails: true }).create(new ConflictError('Selected conflict', {
+    cause: new Error('private SQL diagnostic'),
+  }), 'urn:uuid:conflict');
+  assert.equal(problem.status, 409);
+  assert.equal(problem.code, 'CONFLICT_ERROR');
+  assert.doesNotMatch(JSON.stringify(problem), /private SQL diagnostic/);
+});
 import { ProblemDetailsFactory } from '../../src/nestjs/index.js';
 
 void test('safe defaults omit detail, validation diagnostics, stack and cause', () => {

@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { User } from '../../domain/entities/user.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateUserData {
   readonly email: string;

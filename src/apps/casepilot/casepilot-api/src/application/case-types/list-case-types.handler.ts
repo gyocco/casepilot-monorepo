@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, PageResponse } from '@casepilot/abstractions';
 import type { CaseType } from '../../domain/entities/case-type.js';
 import { ListCaseTypesResponse, toCaseTypeResponse, type ListCaseTypesRequest } from './case-type.models.js';
-import { PageMetadataResponse, type CrudScope } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import { PageMetadataResponse } from '@casepilot/cqrs';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { validatePage } from '../shared/crud-pagination.js';
 import { case_typeSortFields } from './case-type.rules.js';
@@ -12,7 +13,7 @@ export class ListCaseTypesHandler implements Handler<ListCaseTypesRequest, ListC
   constructor(private readonly work: UnitOfWork<CrudScope<CaseType>>) {}
 
   async execute(request: ListCaseTypesRequest): Promise<ListCaseTypesResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       const page = validatePage(request.pageNumber, request.pageSize, request.sortBy, request.sortDirection, case_typeSortFields);
       const items = await scope.resource.getPage(page, request.businessAccountId);

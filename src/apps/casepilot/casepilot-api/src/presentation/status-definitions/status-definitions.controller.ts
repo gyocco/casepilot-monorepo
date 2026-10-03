@@ -5,7 +5,7 @@ import { UpdateStatusDefinitionHandler } from '../../application/status-definiti
 import { DeleteStatusDefinitionHandler } from '../../application/status-definitions/delete-status-definition.handler.js';
 import { ListStatusDefinitionsHandler } from '../../application/status-definitions/list-status-definitions.handler.js';
 import { CreateStatusDefinitionRequest, GetStatusDefinitionRequest, UpdateStatusDefinitionRequest, DeleteStatusDefinitionRequest, ListStatusDefinitionsRequest } from '../../application/status-definitions/status-definition.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { StatusDefinitionItemHttpResponse, StatusDefinitionsPageHttpResponse, DeleteStatusDefinitionHttpResponse, toStatusDefinitionHttpResponse } from './status-definition-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/status-definitions')

@@ -4,8 +4,8 @@ import { randomBytes } from 'node:crypto';
 import { after, before, beforeEach, test } from 'node:test';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { DataSource, EntitySchema, type EntityManager } from 'typeorm';
-import { PageRequest, PageResponse, UnitOfWorkError, type CrudRepository, type Entity } from '../../src/index.js';
-import { TypeOrmUnitOfWork } from '../../src/dataaccess/typeorm/index.js';
+import { PageRequest, PageResponse, PersistenceError, StoredEntity, UnitOfWorkError, type CrudRepository, type Entity, type JsonValue } from '../../src/index.js';
+import { TypeOrmUnitOfWork, TypeOrmDataRepository, sqlString, sqlInteger, sqlTimestamp, sqlJson, type SqlTable } from '../../src/dataaccess/typeorm/index.js';
 
 class Row implements Entity<string> {
   constructor(public readonly id: string, public readonly value: string) {}
@@ -53,6 +53,33 @@ class TableRepository implements CrudRepository<Row> {
 }
 
 interface Repositories { readonly first: CrudRepository<Row>; readonly second: CrudRepository<Row> }
+class InventoryRow extends StoredEntity {
+  organizationId!: string;
+  label!: string;
+  payload!: JsonValue;
+}
+const inventorySchema = new EntitySchema<InventoryRow>({ name: 'InventoryFixture', columns: {
+  id: { type: 'text', primary: true }, version: { type: 'integer' }, createdAt: { type: 'timestamptz' }, updatedAt: { type: 'timestamptz' },
+  organizationId: { type: 'text' }, label: { type: 'text' }, payload: { type: 'jsonb' },
+} });
+const inventoryTable: SqlTable<InventoryRow> = {
+  schema: inventorySchema, tableName: 'MechanismRows', scopeColumn: 'organization_key', idColumn: 'record_key', versionColumn: 'revision',
+  immutableColumns: ['record_key', 'organization_key', 'inserted_at'],
+  columns: [
+    { property: 'id', name: 'record_key', value: entity => entity.id },
+    { property: 'version', name: 'revision', value: entity => entity.version },
+    { property: 'createdAt', name: 'inserted_at', value: entity => entity.createdAt },
+    { property: 'updatedAt', name: 'edited_at', value: entity => entity.updatedAt },
+    { property: 'organizationId', name: 'organization_key', value: entity => entity.organizationId },
+    { property: 'label', name: 'display_label', value: entity => entity.label },
+    { property: 'payload', name: 'payload', json: true, value: entity => entity.payload },
+  ],
+  read: row => Object.assign(new InventoryRow(), {
+    id: sqlString(row.id), version: sqlInteger(row.version), createdAt: sqlTimestamp(row.createdAt), updatedAt: sqlTimestamp(row.updatedAt),
+    organizationId: sqlString(row.organizationId), label: sqlString(row.label), payload: sqlJson(row.payload),
+  }),
+};
+class InventoryRepository extends TypeOrmDataRepository<InventoryRow> {}
 let container: StartedPostgreSqlContainer | undefined;
 let source: DataSource;
 let unitOfWork: TypeOrmUnitOfWork<Repositories>;
@@ -91,6 +118,39 @@ void test('commits two different repositories before returning the callback resu
   assert.equal(result, 'committed');
   assert.equal(await source.manager.count(firstSchema), 1);
   assert.equal(await source.manager.count(secondSchema), 1);
+});
+
+void test('shared SQL works with unrelated tables, custom identity/version/scope columns and Application-selected transactions', async () => {
+  await source.query('CREATE TABLE "MechanismRows" (record_key text PRIMARY KEY, revision integer NOT NULL, inserted_at timestamptz NOT NULL, edited_at timestamptz NOT NULL, organization_key text NOT NULL, display_label text NOT NULL, payload jsonb NOT NULL)');
+  const repository = new InventoryRepository(source.manager, inventoryTable);
+  const record = (id: string, organizationId: string): InventoryRow => Object.assign(new InventoryRow(), {
+    id, organizationId, version: 1, createdAt: '2026-10-02T00:00:00.000Z', updatedAt: '2026-10-02T00:00:00.000Z',
+    label: "literal ' ; SELECT secret", payload: { nested: [true, null, 1] },
+  });
+  const first = await repository.add(record('one', 'organization-a'));
+  await repository.add(record('two', 'organization-b'));
+  assert.equal(await repository.getById('one', 'organization-b'), null);
+  assert.equal(await repository.count('organization-a'), 1);
+  assert.equal((await repository.getPage(new PageRequest(1, 10, 'label', 'asc'), 'organization-a'))[0]?.id, 'one');
+  assert.deepEqual(first.payload, { nested: [true, null, 1] });
+  await assert.rejects(repository.add(first), (error: unknown) => error instanceof PersistenceError && error.reason === 'unique' && error.cause instanceof Error);
+  first.label = 'changed'; first.version = 2; first.organizationId = 'organization-b';
+  assert.equal(await repository.update(first, 'organization-a', 0), null);
+  const changed = await repository.update(first, 'organization-a', 1);
+  assert.equal(changed?.organizationId, 'organization-a', 'The configured immutable scope column cannot change.');
+  assert.equal(changed?.version, 2);
+  assert.equal(await repository.delete('one', 'organization-a', 1), false);
+  assert.equal(await repository.delete('one', 'organization-a', 2), true);
+  const work = new TypeOrmUnitOfWork<{ readonly rows: InventoryRepository }>(() => Promise.resolve(source), manager => ({ rows: new InventoryRepository(manager, inventoryTable) }));
+  const failure = new Error('Application rejected the write');
+  await assert.rejects(work.execute(async repositories => { await repositories.rows.add(record('rollback', 'organization-a')); throw failure; }), error => error === failure);
+  assert.equal(await repository.getById('rollback', 'organization-a'), null);
+  await source.query('CREATE TABLE "GlobalMechanismRows" (LIKE "MechanismRows" INCLUDING ALL)');
+  const global = new InventoryRepository(source.manager, { ...inventoryTable, tableName: 'GlobalMechanismRows', scopeColumn: null });
+  await global.add(record('global', 'metadata-only'));
+  assert.equal((await global.getById('global', null))?.id, 'global');
+  await assert.rejects(global.getById('global', 'wrong-scope'));
+  await assert.rejects(repository.getById('two', null));
 });
 
 void test('rolls back all repositories when the Application callback fails', async () => {

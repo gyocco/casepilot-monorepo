@@ -1,4 +1,4 @@
-import { StoredEntity } from './stored-entity.js';
+import { StoredEntity } from '@casepilot/abstractions';
 
 export class User extends StoredEntity {
   email!: string;

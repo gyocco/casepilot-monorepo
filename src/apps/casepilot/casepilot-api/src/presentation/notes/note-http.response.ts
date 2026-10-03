@@ -1,5 +1,5 @@
 import type { NoteResponse } from '../../application/notes/note.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class NoteHttpResponse {
   constructor(

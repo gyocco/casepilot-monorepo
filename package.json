@@ -5,7 +5,7 @@
   "packageManager": "pnpm@10.13.1",
   "scripts": {
     "build:contracts": "pnpm --dir src/apps/casepilot/casepilot-api build:contracts",
-    "watch:contracts": "pnpm build:contracts && pnpm --parallel --filter @casepilot/cqrs --filter @casepilot/abstractions --filter @casepilot/exception-handler exec tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "watch:contracts": "pnpm build:contracts && pnpm --parallel --filter @casepilot/cqrs --filter @casepilot/abstractions --filter @casepilot/exception-handler --filter @casepilot/validation exec tsc -p tsconfig.json --watch --preserveWatchOutput",
     "build:exception-handler": "pnpm --dir src/libs/backend/exception-handler build",
     "check:exception-handler": "pnpm --dir src/libs/backend/exception-handler check",
     "test:exception-handler": "pnpm --dir src/libs/backend/exception-handler test",
@@ -35,6 +35,9 @@
     "infra:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml down",
     "infra:status": "docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml ps",
     "infra:logs": "docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml logs --follow --tail 100",
-    "infra:check": "pnpm infra:env && docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml config --quiet"
+    "infra:check": "pnpm infra:env && docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml config --quiet",
+    "build:validation": "pnpm build:abstractions && pnpm build:cqrs && pnpm --dir src/libs/backend/validation build",
+    "check:validation": "pnpm build:abstractions && pnpm build:cqrs && pnpm --dir src/libs/backend/validation check",
+    "test:validation": "pnpm build:abstractions && pnpm build:cqrs && pnpm --dir src/libs/backend/validation test"
   }
 }

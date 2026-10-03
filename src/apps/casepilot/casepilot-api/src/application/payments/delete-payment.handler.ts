@@ -3,17 +3,17 @@ import { type UnitOfWork, NotFoundError } from '@casepilot/abstractions';
 import type { Payment } from '../../domain/entities/payment.js';
 import { DeletePaymentResponse, type DeletePaymentRequest } from './payment.models.js';
 import type { CrudScope } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
-import { validateId } from '../shared/crud-validation.js';
+import { validateId } from '@casepilot/validation';
 import { validateVersion } from '../shared/crud-pagination.js';
-import { ConflictError } from '../shared/conflict-error.js';
+import { ConflictError } from '@casepilot/abstractions';
 
 export class DeletePaymentHandler implements Handler<DeletePaymentRequest, DeletePaymentResponse> {
   constructor(private readonly work: UnitOfWork<CrudScope<Payment>>) {}
 
   async execute(request: DeletePaymentRequest): Promise<DeletePaymentResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

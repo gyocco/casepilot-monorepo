@@ -5,7 +5,7 @@ import { UpdateWorkflowHandler } from '../../application/workflows/update-workfl
 import { DeleteWorkflowHandler } from '../../application/workflows/delete-workflow.handler.js';
 import { ListWorkflowsHandler } from '../../application/workflows/list-workflows.handler.js';
 import { CreateWorkflowRequest, GetWorkflowRequest, UpdateWorkflowRequest, DeleteWorkflowRequest, ListWorkflowsRequest } from '../../application/workflows/workflow.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { WorkflowItemHttpResponse, WorkflowsPageHttpResponse, DeleteWorkflowHttpResponse, toWorkflowHttpResponse } from './workflow-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/workflows')

@@ -51,6 +51,7 @@ La decisión y sus alternativas se registran en el [ADR 0005](../adr/0005-projec
 │       ├── backend/                 # capacidades server-side compartidas
 │       │   ├── abstractions/       # errores, dataaccess/models, repositorios y UnitOfWork
 │       │   ├── cqrs/               # bases y contratos puros
+│       │   ├── validation/         # validación estructural y adaptador HTTP separados
 │       │   └── exception-handler/  # adaptador HTTP NestJS de errores compartidos
 │       ├── frontend/                # capacidades compartidas de interfaz web
 │       └── mobile/                  # adaptadores y capacidades mobile compartidas
@@ -97,6 +98,8 @@ El código dentro de una aplicación puede consumir librerías y contratos. Una 
 Ejemplos válidos son un kit de componentes visuales, un adaptador de correo, logging estructurado, manejo común de excepciones, generación de PDF o una interfaz para una capacidad del dispositivo.
 
 No extraigas código a `libs/` solo porque se repite una vez. Primero identifica consumidores reales, define la responsabilidad de la librería y comprueba que la extracción no introduce dependencias de negocio o de una aplicación.
+
+Los mecanismos backend de propósito general adoptados por CasePilot y sus futuras APIs DEBEN residir en `src/libs/backend/`, aunque la primera API sea su consumidor inicial. Deben tener una entrada pública, pruebas propias y parámetros explícitos para diferencias entre aplicaciones. No se conservan copias ni wrappers locales que solo reexporten implementación genérica. Las políticas de Application, las tablas, las relaciones y la composición específicas del producto conservan su dueño en la app. La clasificación semántica de una pieza requiere revisión; los checks de imports no prueban que sea genérica. La decisión y el mapa de capacidades se registran en [ADR 0016](../adr/0016-reusable-backend-mechanisms.md).
 
 ## Organización de `src/apps/`
 
@@ -202,9 +205,11 @@ Cada librería nueva debe documentar en su README local:
 
 Capacidades server-side compartidas por APIs, workers u otros procesos backend. El paquete implementado [`cqrs/`](../../src/libs/backend/cqrs/README.md) exporta Request, Response y Handler sin negocio ni dependencias de runtime. Sus fuentes, pruebas y configuración pertenecen a ese paquete; modelos concretos y casos de uso permanecen en la app consumidora. La entrada pública es `@casepilot/cqrs`, enlazada con `workspace:*`; los consumidores construyen primero sus declaraciones/ESM. Adopción en la API: [ADR 0010](../adr/0010-shared-cqrs-contracts.md).
 
-El paquete [`abstractions/`](../../src/libs/backend/abstractions/README.md) contiene errores puros en `src/errors.ts`, `src/dataaccess/models/` para Entity, PageRequest y PageResponse, contratos Repository/CrudRepository/UnitOfWork en `src/dataaccess/` y el adaptador técnico en `src/dataaccess/typeorm/`. Solo expone `@casepilot/abstractions` (puro) y `@casepilot/abstractions/typeorm` (Infrastructure/composición). Las pruebas de errores/modelos/tipos e integración PostgreSQL viven en su propio `test/`; los validadores de consumidores API permanecen en la API. Los futuros workers deben integrar checks propios antes de declarar cobertura. Decisiones: [ADR 0011](../adr/0011-data-access-abstractions.md) y [ADR 0012](../adr/0012-configurable-http-error-handler.md).
+El paquete [`abstractions/`](../../src/libs/backend/abstractions/README.md) contiene errores puros en `src/errors.ts`, `src/dataaccess/models/` para Entity, StoredEntity, PageRequest y PageResponse, contratos Repository/CrudRepository/ScopedDataRepository/UnitOfWork en `src/dataaccess/` y mecanismos técnicos de persistencia. Expone `@casepilot/abstractions` (puro), `@casepilot/abstractions/typeorm` (SQL/conexión/transacciones) y `@casepilot/abstractions/node` (UUID/fecha); los adaptadores son exclusivos de Infrastructure/composición. Las pruebas de errores/modelos/tipos e integración PostgreSQL viven en su propio `test/`; los validadores de consumidores API permanecen en la API. Los futuros workers deben integrar checks propios antes de declarar cobertura. Decisiones: [ADR 0011](../adr/0011-data-access-abstractions.md), [ADR 0012](../adr/0012-configurable-http-error-handler.md) y [ADR 0016](../adr/0016-reusable-backend-mechanisms.md).
 
 El paquete [`exception-handler/`](../../src/libs/backend/exception-handler/README.md) implementa filtro HTTP global/configuración en `@casepilot/exception-handler/nestjs` y reexporta los errores puros de abstractions en `@casepilot/exception-handler` por compatibilidad. Depende de abstractions, sin dependencia inversa. Application consume el vocabulario puro; el adaptador pertenece a transporte/composición. Tiene tests y checks propios, con CasePilot API como consumidor inicial. Decisión y contrato Problem Details: [ADR 0012](../adr/0012-configurable-http-error-handler.md).
+
+El paquete [`validation/`](../../src/libs/backend/validation/README.md) contiene validación estructural parametrizada y una entrada `/nestjs` para parsers HTTP. Los modelos/errores/contratos, la ejecución con política explícita y los adaptadores SQL/UUID/fecha tienen dueño en abstractions; PageMetadataResponse en cqrs. Se consumen las entradas públicas, con tests propios y futuras APIs como consumidores planificados. La app conserva políticas y datos del producto según CPA-005 y ADR 0016.
 
 Capacidades adicionales previstas:
 

@@ -1,7 +1,7 @@
 import { STATUS_CODES } from 'node:http';
 import { HttpException } from '@nestjs/common';
 import {
-  ApplicationError, UnexpectedError, ValidationError, NotFoundError, ForbiddenError, UnauthorizedError,
+  ApplicationError, UnexpectedError, ValidationError, ConflictError, NotFoundError, ForbiddenError, UnauthorizedError,
 } from '@casepilot/abstractions';
 import type { ErrorDetail } from '@casepilot/abstractions';
 
@@ -37,6 +37,7 @@ export interface ExceptionHandlerOptions {
 const builtInMappings: readonly ErrorMapping[] = [
   { error: UnexpectedError, status: 500, code: 'UNEXPECTED_ERROR' },
   { error: ValidationError, status: 400, code: 'VALIDATION_ERROR' },
+  { error: ConflictError, status: 409, code: 'CONFLICT_ERROR' },
   { error: NotFoundError, status: 404, code: 'NOT_FOUND_ERROR' },
   { error: ForbiddenError, status: 403, code: 'FORBIDDEN_ERROR' },
   { error: UnauthorizedError, status: 401, code: 'UNAUTHORIZED_ERROR' },

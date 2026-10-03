@@ -5,7 +5,7 @@ import { UpdateNoteHandler } from '../../application/notes/update-note.handler.j
 import { DeleteNoteHandler } from '../../application/notes/delete-note.handler.js';
 import { ListNotesHandler } from '../../application/notes/list-notes.handler.js';
 import { CreateNoteRequest, GetNoteRequest, UpdateNoteRequest, DeleteNoteRequest, ListNotesRequest } from '../../application/notes/note.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { NoteItemHttpResponse, NotesPageHttpResponse, DeleteNoteHttpResponse, toNoteHttpResponse } from './note-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/notes')

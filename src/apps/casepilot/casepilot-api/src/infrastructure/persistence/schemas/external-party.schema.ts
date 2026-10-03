@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { ExternalParty } from '../../../domain/entities/external-party.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/abstractions/typeorm';
 export const external_partySchema = new EntitySchema<ExternalParty>({
   name: 'ExternalParty', target: ExternalParty, tableName: 'external_parties',
   columns: {
@@ -41,7 +41,8 @@ export const external_partySchema = new EntitySchema<ExternalParty>({
   ],
 });
 export const external_partyTable: SqlTable<ExternalParty> = {
-  schema: external_partySchema, tableName: 'external_parties', tenant: true,
+  schema: external_partySchema, tableName: 'external_parties', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

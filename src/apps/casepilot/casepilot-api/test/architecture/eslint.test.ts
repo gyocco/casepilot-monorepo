@@ -47,6 +47,18 @@ async function messages(path: string, code: string): Promise<string[]> {
   return results.flatMap(result => result.messages.map(message => message.message));
 }
 
+void test('CPA-005 permits public helpers and isolates shared Node/SQL/HTTP adapters', async () => {
+  for (const path of ['src/domain/model.ts', 'src/application/orders/sample.ts']) {
+    assert.deepEqual(await messages(path, "export { validateId } from '@casepilot/validation';"), []);
+    for (const specifier of ['@casepilot/validation/nestjs', '@casepilot/abstractions/node', '@casepilot/abstractions/typeorm']) {
+      assert.ok((await messages(path, `export { adapter } from '${specifier}';`)).some(message => message.includes('BCK-008')));
+    }
+    assert.ok((await messages(path, "export { validateId } from '@casepilot/validation/identifiers';")).some(message => message.includes('CPA-005')));
+  }
+  assert.deepEqual(await messages('src/infrastructure/runtime.ts', "export { systemCrudRuntime } from '@casepilot/abstractions/node';"), []);
+  assert.deepEqual(await messages('src/presentation/orders/order-http.response.ts', "export { readBody } from '@casepilot/validation/nestjs';"), []);
+});
+
 void test('ESLint rejects framework imports and direct runtime APIs in the core', async () => {
   for (const path of ['src/application/health/sample.ts', 'src/application/users/create-user/sample.ts', 'src/domain/entities/sample.ts']) {
     assert.ok((await messages(path, "import { Injectable } from '@nestjs/common'; export const value = Injectable;")).some(message => message.includes('BCK-008')));

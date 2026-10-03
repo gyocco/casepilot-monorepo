@@ -1,8 +1,7 @@
-import type { OnModuleDestroy } from '@nestjs/common';
 import type { DataSource } from 'typeorm';
 
 // The HTTP listener can start without PostgreSQL; only data access initializes it.
-export class DatabaseConnection implements OnModuleDestroy {
+export class DatabaseConnection {
   private initialization: Promise<DataSource> | undefined;
   private closing = false;
 

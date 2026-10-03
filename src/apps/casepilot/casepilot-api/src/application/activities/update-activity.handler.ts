@@ -2,19 +2,21 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, NotFoundError, ValidationError } from '@casepilot/abstractions';
 import { Activity } from '../../domain/entities/activity.js';
 import { UpdateActivityResponse, toActivityResponse, type UpdateActivityRequest } from './activity.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { activityFields, validateActivityRelations } from './activity.rules.js';
-import { validateId, validateFields } from '../shared/crud-validation.js';
+import { validateId } from '@casepilot/validation';
+import { validateFields } from '../shared/crud-validation.js';
 import { validateVersion } from '../shared/crud-pagination.js';
-import { ConflictError } from '../shared/conflict-error.js';
+import { ConflictError } from '@casepilot/abstractions';
 
 export class UpdateActivityHandler implements Handler<UpdateActivityRequest, UpdateActivityResponse> {
   constructor(private readonly work: UnitOfWork<CrudScope<Activity>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: UpdateActivityRequest): Promise<UpdateActivityResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

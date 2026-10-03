@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, ValidationError } from '@casepilot/abstractions';
 import { CustomFieldValue } from '../../domain/entities/custom-field-value.js';
 import { CreateCustomFieldValueResponse, toCustomFieldValueResponse, type CreateCustomFieldValueRequest } from './custom-field-value.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { custom_field_valueFields, validateCustomFieldValueRelations } from './custom-field-value.rules.js';
 import { validateFields } from '../shared/crud-validation.js';
@@ -12,7 +13,7 @@ export class CreateCustomFieldValueHandler implements Handler<CreateCustomFieldV
   constructor(private readonly work: UnitOfWork<CrudScope<CustomFieldValue>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: CreateCustomFieldValueRequest): Promise<CreateCustomFieldValueResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, custom_field_valueFields, false);

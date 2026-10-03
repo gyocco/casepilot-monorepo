@@ -1,4 +1,4 @@
-import type { JsonValue } from '../../../src/domain/entities/stored-entity.js';
+import type { JsonValue } from '@casepilot/abstractions';
 export interface ResourceFixtureDefinition {
   readonly resource: string;
   readonly tenant: boolean;

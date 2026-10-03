@@ -1,6 +1,6 @@
 import type { CaseExternalParty } from '../../domain/entities/case-external-party.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference } from '../shared/crud-relations.js';
 export const case_external_partyFields: readonly FieldRule[] = [

@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { DocumentVersion } from '../../domain/entities/document-version.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateDocumentVersionData {
   readonly documentId: string;

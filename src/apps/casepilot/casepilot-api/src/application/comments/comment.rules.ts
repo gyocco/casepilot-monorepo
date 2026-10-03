@@ -1,6 +1,6 @@
 import type { Comment } from '../../domain/entities/comment.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference, validateTarget } from '../shared/crud-relations.js';
 export const commentFields: readonly FieldRule[] = [

@@ -5,7 +5,7 @@ import { UpdateActivityHandler } from '../../application/activities/update-activ
 import { DeleteActivityHandler } from '../../application/activities/delete-activity.handler.js';
 import { ListActivitiesHandler } from '../../application/activities/list-activities.handler.js';
 import { CreateActivityRequest, GetActivityRequest, UpdateActivityRequest, DeleteActivityRequest, ListActivitiesRequest } from '../../application/activities/activity.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, nullableJson, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, nullableJson, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { ActivityItemHttpResponse, ActivitiesPageHttpResponse, DeleteActivityHttpResponse, toActivityHttpResponse } from './activity-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/activities')

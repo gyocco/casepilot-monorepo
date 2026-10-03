@@ -3,17 +3,17 @@ import { type UnitOfWork, NotFoundError } from '@casepilot/abstractions';
 import type { CustomFieldDefinition } from '../../domain/entities/custom-field-definition.js';
 import { DeleteCustomFieldDefinitionResponse, type DeleteCustomFieldDefinitionRequest } from './custom-field-definition.models.js';
 import type { CrudScope } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
-import { validateId } from '../shared/crud-validation.js';
+import { validateId } from '@casepilot/validation';
 import { validateVersion } from '../shared/crud-pagination.js';
-import { ConflictError } from '../shared/conflict-error.js';
+import { ConflictError } from '@casepilot/abstractions';
 
 export class DeleteCustomFieldDefinitionHandler implements Handler<DeleteCustomFieldDefinitionRequest, DeleteCustomFieldDefinitionResponse> {
   constructor(private readonly work: UnitOfWork<CrudScope<CustomFieldDefinition>>) {}
 
   async execute(request: DeleteCustomFieldDefinitionRequest): Promise<DeleteCustomFieldDefinitionResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

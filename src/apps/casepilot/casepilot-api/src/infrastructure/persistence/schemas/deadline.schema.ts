@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Deadline } from '../../../domain/entities/deadline.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/abstractions/typeorm';
 export const deadlineSchema = new EntitySchema<Deadline>({
   name: 'Deadline', target: Deadline, tableName: 'deadlines',
   columns: {
@@ -34,7 +34,8 @@ export const deadlineSchema = new EntitySchema<Deadline>({
   ],
 });
 export const deadlineTable: SqlTable<Deadline> = {
-  schema: deadlineSchema, tableName: 'deadlines', tenant: true,
+  schema: deadlineSchema, tableName: 'deadlines', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

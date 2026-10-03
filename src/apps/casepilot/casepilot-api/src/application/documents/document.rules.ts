@@ -1,7 +1,7 @@
 import { ValidationError } from '@casepilot/abstractions';
 import type { Document } from '../../domain/entities/document.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference } from '../shared/crud-relations.js';
 export const documentFields: readonly FieldRule[] = [

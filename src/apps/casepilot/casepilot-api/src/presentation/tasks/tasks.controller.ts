@@ -5,7 +5,7 @@ import { UpdateTaskHandler } from '../../application/tasks/update-task.handler.j
 import { DeleteTaskHandler } from '../../application/tasks/delete-task.handler.js';
 import { ListTasksHandler } from '../../application/tasks/list-tasks.handler.js';
 import { CreateTaskRequest, GetTaskRequest, UpdateTaskRequest, DeleteTaskRequest, ListTasksRequest } from '../../application/tasks/task.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { TaskItemHttpResponse, TasksPageHttpResponse, DeleteTaskHttpResponse, toTaskHttpResponse } from './task-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/tasks')

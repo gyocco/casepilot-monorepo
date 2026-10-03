@@ -1,5 +1,5 @@
 import type { MemberResponse } from '../../application/members/member.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class MemberHttpResponse {
   constructor(

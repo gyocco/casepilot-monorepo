@@ -1,11 +1,12 @@
-import { PageRequest, ValidationError } from '@casepilot/abstractions';
+import type { PageRequest } from '@casepilot/abstractions';
+import { validatePage as validatePagination, validateVersion as validateStoredVersion } from '@casepilot/validation';
+
+/** CasePilot's endpoint page cap; other APIs supply their own limit. */
 export function validatePage(pageNumber: number, pageSize: number, sortBy: string, sortDirection: string, fields: readonly string[]): PageRequest {
-  if (!Number.isSafeInteger(pageNumber) || pageNumber < 1 || !Number.isSafeInteger(pageSize) || pageSize < 1 || pageSize > 100
-    || !Number.isSafeInteger((pageNumber - 1) * pageSize) || !fields.includes(sortBy) || (sortDirection !== 'asc' && sortDirection !== 'desc')) {
-    throw new ValidationError('Invalid pagination or sorting.');
-  }
-  return new PageRequest(pageNumber, pageSize, sortBy, sortDirection);
+  return validatePagination(pageNumber, pageSize, sortBy, sortDirection, { maxPageSize: 100, sortFields: fields });
 }
+
+/** Leave room for the increment in CasePilot's PostgreSQL integer version. */
 export function validateVersion(version: number): void {
-  if (!Number.isInteger(version) || version < 1 || version >= 2147483647) throw new ValidationError('A positive version is required.');
+  validateStoredVersion(version, { min: 1, maxExclusive: 2147483647 });
 }

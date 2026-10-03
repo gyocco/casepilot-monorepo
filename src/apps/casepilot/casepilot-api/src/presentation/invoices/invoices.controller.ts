@@ -5,7 +5,7 @@ import { UpdateInvoiceHandler } from '../../application/invoices/update-invoice.
 import { DeleteInvoiceHandler } from '../../application/invoices/delete-invoice.handler.js';
 import { ListInvoicesHandler } from '../../application/invoices/list-invoices.handler.js';
 import { CreateInvoiceRequest, GetInvoiceRequest, UpdateInvoiceRequest, DeleteInvoiceRequest, ListInvoicesRequest } from '../../application/invoices/invoice.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, choiceValue, optionalChoice, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, choiceValue, optionalChoice, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { InvoiceItemHttpResponse, InvoicesPageHttpResponse, DeleteInvoiceHttpResponse, toInvoiceHttpResponse } from './invoice-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/invoices')

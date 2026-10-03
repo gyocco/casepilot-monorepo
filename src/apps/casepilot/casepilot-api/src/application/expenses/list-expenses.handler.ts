@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, PageResponse } from '@casepilot/abstractions';
 import type { Expense } from '../../domain/entities/expense.js';
 import { ListExpensesResponse, toExpenseResponse, type ListExpensesRequest } from './expense.models.js';
-import { PageMetadataResponse, type CrudScope } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import { PageMetadataResponse } from '@casepilot/cqrs';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { validatePage } from '../shared/crud-pagination.js';
 import { expenseSortFields } from './expense.rules.js';
@@ -12,7 +13,7 @@ export class ListExpensesHandler implements Handler<ListExpensesRequest, ListExp
   constructor(private readonly work: UnitOfWork<CrudScope<Expense>>) {}
 
   async execute(request: ListExpensesRequest): Promise<ListExpensesResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       const page = validatePage(request.pageNumber, request.pageSize, request.sortBy, request.sortDirection, expenseSortFields);
       const items = await scope.resource.getPage(page, request.businessAccountId);

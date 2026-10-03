@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { CaseType } from '../../../domain/entities/case-type.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
 export const case_typeSchema = new EntitySchema<CaseType>({
   name: 'CaseType', target: CaseType, tableName: 'case_types',
   columns: {
@@ -29,7 +29,8 @@ export const case_typeSchema = new EntitySchema<CaseType>({
   ],
 });
 export const case_typeTable: SqlTable<CaseType> = {
-  schema: case_typeSchema, tableName: 'case_types', tenant: true,
+  schema: case_typeSchema, tableName: 'case_types', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

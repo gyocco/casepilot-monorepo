@@ -32,7 +32,7 @@ function cqrsFixture(): Project {
   const project = fixture('execute(request: ReadCaseRequest): Promise<ReadCaseResponse> { return Promise.resolve(new ReadCaseResponse()); }');
   const cqrsDirectory = resolve(apiDirectory, '../../../libs/backend/cqrs/src');
   const actualApiDirectory = fileURLToPath(new URL('../../', import.meta.url));
-  for (const file of ['index.ts', 'handler.ts', 'request.ts', 'response.ts']) {
+  for (const file of ['index.ts', 'handler.ts', 'request.ts', 'response.ts', 'page-metadata.response.ts']) {
     project.createSourceFile(resolve(cqrsDirectory, file), readFileSync(resolve(actualApiDirectory, '../../../libs/backend/cqrs/src', file), 'utf8'));
   }
   project.compilerOptions.set({ baseUrl: apiDirectory, paths: { '@casepilot/cqrs': [resolve(cqrsDirectory, 'index.ts')] } });

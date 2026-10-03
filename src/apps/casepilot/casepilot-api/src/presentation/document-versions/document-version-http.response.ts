@@ -1,5 +1,5 @@
 import type { DocumentVersionResponse } from '../../application/document-versions/document-version.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class DocumentVersionHttpResponse {
   constructor(

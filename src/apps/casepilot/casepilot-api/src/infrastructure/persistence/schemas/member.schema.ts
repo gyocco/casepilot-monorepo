@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Member } from '../../../domain/entities/member.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/abstractions/typeorm';
 export const memberSchema = new EntitySchema<Member>({
   name: 'Member', target: Member, tableName: 'members',
   columns: {
@@ -33,7 +33,8 @@ export const memberSchema = new EntitySchema<Member>({
   ],
 });
 export const memberTable: SqlTable<Member> = {
-  schema: memberSchema, tableName: 'members', tenant: true,
+  schema: memberSchema, tableName: 'members', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

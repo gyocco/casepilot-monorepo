@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Event } from '../../../domain/entities/event.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
 export const eventSchema = new EntitySchema<Event>({
   name: 'Event', target: Event, tableName: 'events',
   columns: {
@@ -35,7 +35,8 @@ export const eventSchema = new EntitySchema<Event>({
   ],
 });
 export const eventTable: SqlTable<Event> = {
-  schema: eventSchema, tableName: 'events', tenant: true,
+  schema: eventSchema, tableName: 'events', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

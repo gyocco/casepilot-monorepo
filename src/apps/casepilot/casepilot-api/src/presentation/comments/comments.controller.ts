@@ -5,7 +5,7 @@ import { UpdateCommentHandler } from '../../application/comments/update-comment.
 import { DeleteCommentHandler } from '../../application/comments/delete-comment.handler.js';
 import { ListCommentsHandler } from '../../application/comments/list-comments.handler.js';
 import { CreateCommentRequest, GetCommentRequest, UpdateCommentRequest, DeleteCommentRequest, ListCommentsRequest } from '../../application/comments/comment.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CommentItemHttpResponse, CommentsPageHttpResponse, DeleteCommentHttpResponse, toCommentHttpResponse } from './comment-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/comments')

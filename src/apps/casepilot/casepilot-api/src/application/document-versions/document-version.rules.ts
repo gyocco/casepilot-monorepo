@@ -1,6 +1,6 @@
 import type { DocumentVersion } from '../../domain/entities/document-version.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference } from '../shared/crud-relations.js';
 export const document_versionFields: readonly FieldRule[] = [

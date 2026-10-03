@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Folder } from '../../../domain/entities/folder.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
 export const folderSchema = new EntitySchema<Folder>({
   name: 'Folder', target: Folder, tableName: 'folders',
   columns: {
@@ -32,7 +32,8 @@ export const folderSchema = new EntitySchema<Folder>({
   ],
 });
 export const folderTable: SqlTable<Folder> = {
-  schema: folderSchema, tableName: 'folders', tenant: true,
+  schema: folderSchema, tableName: 'folders', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

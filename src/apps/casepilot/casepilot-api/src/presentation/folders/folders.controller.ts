@@ -5,7 +5,7 @@ import { UpdateFolderHandler } from '../../application/folders/update-folder.han
 import { DeleteFolderHandler } from '../../application/folders/delete-folder.handler.js';
 import { ListFoldersHandler } from '../../application/folders/list-folders.handler.js';
 import { CreateFolderRequest, GetFolderRequest, UpdateFolderRequest, DeleteFolderRequest, ListFoldersRequest } from '../../application/folders/folder.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { FolderItemHttpResponse, FoldersPageHttpResponse, DeleteFolderHttpResponse, toFolderHttpResponse } from './folder-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/folders')

@@ -5,7 +5,7 @@ import { UpdateTimeEntryHandler } from '../../application/time-entries/update-ti
 import { DeleteTimeEntryHandler } from '../../application/time-entries/delete-time-entry.handler.js';
 import { ListTimeEntriesHandler } from '../../application/time-entries/list-time-entries.handler.js';
 import { CreateTimeEntryRequest, GetTimeEntryRequest, UpdateTimeEntryRequest, DeleteTimeEntryRequest, ListTimeEntriesRequest } from '../../application/time-entries/time-entry.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { TimeEntryItemHttpResponse, TimeEntriesPageHttpResponse, DeleteTimeEntryHttpResponse, toTimeEntryHttpResponse } from './time-entry-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/time-entries')

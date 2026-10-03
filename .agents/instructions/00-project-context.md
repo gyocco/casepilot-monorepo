@@ -26,7 +26,7 @@ Si dos documentos se contradicen, no elijas silenciosamente. Identifica la fuent
 
 ## Estado actual y evolución
 
-`src/apps/casepilot/casepilot-api/` contiene manifest, código, pruebas y README, con PostgreSQL local en Docker. `src/libs/backend/cqrs/` contiene bases Request/Response y Handler. `src/libs/backend/abstractions/` contiene Entity/paginación, Repository/CrudRepository y UnitOfWork con adaptador TypeORM separado. `src/libs/backend/exception-handler/` contiene errores puros y filtro HTTP NestJS configurable con Problem Details. Los tres paquetes tienen pruebas, configuración y README propios. Web, mobile y las demás capacidades previstas incorporarán su propio paquete cuando se implementen. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`.
+`src/apps/casepilot/casepilot-api/` contiene manifest, código, pruebas y README, con PostgreSQL local en Docker. `src/libs/backend/cqrs/` contiene bases Request/Response y Handler. `src/libs/backend/abstractions/` contiene Entity/paginación, Repository/CrudRepository y UnitOfWork con adaptador TypeORM separado. `src/libs/backend/exception-handler/` contiene errores puros y filtro HTTP NestJS configurable con Problem Details. `src/libs/backend/validation/` contiene helpers estructurales parametrizados y parsers HTTP en su entrada /nestjs. Los cuatro paquetes tienen pruebas, configuración y README propios. Web, mobile y las demás capacidades previstas incorporarán su propio paquete cuando se implementen. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`.
 
 Las áreas del monorepo son:
 

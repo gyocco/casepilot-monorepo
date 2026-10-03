@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, ValidationError } from '@casepilot/abstractions';
 import { CustomFieldDefinition } from '../../domain/entities/custom-field-definition.js';
 import { CreateCustomFieldDefinitionResponse, toCustomFieldDefinitionResponse, type CreateCustomFieldDefinitionRequest } from './custom-field-definition.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { custom_field_definitionFields, validateCustomFieldDefinitionRelations } from './custom-field-definition.rules.js';
 import { validateFields } from '../shared/crud-validation.js';
@@ -12,7 +13,7 @@ export class CreateCustomFieldDefinitionHandler implements Handler<CreateCustomF
   constructor(private readonly work: UnitOfWork<CrudScope<CustomFieldDefinition>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: CreateCustomFieldDefinitionRequest): Promise<CreateCustomFieldDefinitionResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, custom_field_definitionFields, false);

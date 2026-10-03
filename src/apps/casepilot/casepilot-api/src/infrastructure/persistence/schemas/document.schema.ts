@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Document } from '../../../domain/entities/document.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
 export const documentSchema = new EntitySchema<Document>({
   name: 'Document', target: Document, tableName: 'documents',
   columns: {
@@ -40,7 +40,8 @@ export const documentSchema = new EntitySchema<Document>({
   ],
 });
 export const documentTable: SqlTable<Document> = {
-  schema: documentSchema, tableName: 'documents', tenant: true,
+  schema: documentSchema, tableName: 'documents', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

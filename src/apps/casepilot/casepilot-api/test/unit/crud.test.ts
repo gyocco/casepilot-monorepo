@@ -7,9 +7,9 @@ import { UpdateNoteHandler } from '../../src/application/notes/update-note.handl
 import { UpdateNoteRequest } from '../../src/application/notes/note.models.js';
 import { ListNotesHandler } from '../../src/application/notes/list-notes.handler.js';
 import { ListNotesRequest } from '../../src/application/notes/note.models.js';
-import { ConflictError } from '../../src/application/shared/conflict-error.js';
+import { ConflictError } from '@casepilot/abstractions';
 import type { CrudScope } from '../../src/application/shared/crud-models.js';
-import type { DataRepository } from '../../src/domain/repositories/data.repository.js';
+import type { ScopedDataRepository as DataRepository } from '@casepilot/abstractions';
 import type { ReferenceRepository } from '../../src/domain/repositories/reference.repository.js';
 import { ReferenceRecord } from '../../src/domain/entities/reference-record.js';
 import { Note } from '../../src/domain/entities/note.js';

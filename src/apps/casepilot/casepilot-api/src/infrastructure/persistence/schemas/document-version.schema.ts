@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { DocumentVersion } from '../../../domain/entities/document-version.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
 export const document_versionSchema = new EntitySchema<DocumentVersion>({
   name: 'DocumentVersion', target: DocumentVersion, tableName: 'document_versions',
   columns: {
@@ -36,7 +36,8 @@ export const document_versionSchema = new EntitySchema<DocumentVersion>({
   ],
 });
 export const document_versionTable: SqlTable<DocumentVersion> = {
-  schema: document_versionSchema, tableName: 'document_versions', tenant: true,
+  schema: document_versionSchema, tableName: 'document_versions', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

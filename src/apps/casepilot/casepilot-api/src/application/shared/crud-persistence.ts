@@ -1,20 +1,15 @@
-import { UnexpectedError, UnitOfWorkError, ValidationError } from '@casepilot/abstractions';
-import { PersistenceError } from '../../domain/errors/persistence-error.js';
-import { ConflictError } from './conflict-error.js';
+import { ConflictError, UnexpectedError, UnitOfWorkError, ValidationError, runPersistence } from '@casepilot/abstractions';
 
-export async function runPersistence<T>(operation: () => Promise<T>): Promise<T> {
-  try { return await operation(); }
-  catch (error: unknown) {
-    if (error instanceof UnitOfWorkError) throw new UnexpectedError();
-    if (error instanceof PersistenceError) {
-      switch (error.reason) {
-        case 'unique': throw new ConflictError('A unique value already exists.');
-        case 'reference': throw new ConflictError('A referenced record is missing or still in use.');
-        case 'concurrent': throw new ConflictError('The data changed concurrently. Read it again before retrying.');
-        case 'required': throw new ValidationError();
-        case 'unavailable': throw new UnexpectedError();
-      }
+/** CasePilot CRUD error policy, selected by its handlers. */
+export async function runCrudPersistence<T>(operation: () => Promise<T>): Promise<T> {
+  return runPersistence(operation, error => {
+    if (error instanceof UnitOfWorkError) return new UnexpectedError(undefined, { cause: error });
+    switch (error.reason) {
+      case 'unique': return new ConflictError('A unique value already exists.', { cause: error });
+      case 'reference': return new ConflictError('A referenced record is missing or still in use.', { cause: error });
+      case 'concurrent': return new ConflictError('The data changed concurrently. Read it again before retrying.', { cause: error });
+      case 'required': return new ValidationError(undefined, { cause: error });
+      case 'unavailable': case 'invalid-data': return new UnexpectedError(undefined, { cause: error });
     }
-    throw error;
-  }
+  });
 }

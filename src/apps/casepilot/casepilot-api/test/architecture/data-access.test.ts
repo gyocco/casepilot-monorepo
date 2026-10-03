@@ -14,7 +14,7 @@ function fixture(methods = ''): Project {
     strict: true, target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
   } });
   const library = resolve(apiDirectory, '../../../libs/backend/abstractions/src');
-  for (const file of ['index.ts', 'errors.ts', 'dataaccess/models/entity.ts', 'dataaccess/models/page-request.ts', 'dataaccess/models/page-response.ts', 'dataaccess/repository.ts', 'dataaccess/crud-repository.ts', 'dataaccess/unit-of-work.ts', 'dataaccess/unit-of-work-error.ts']) {
+  for (const file of ['index.ts', 'errors.ts', 'json-value.ts', 'crud-runtime.ts', 'dataaccess/models/stored-entity.ts', 'dataaccess/scoped-data-repository.ts', 'dataaccess/persistence-error.ts', 'dataaccess/run-persistence.ts', 'dataaccess/models/entity.ts', 'dataaccess/models/page-request.ts', 'dataaccess/models/page-response.ts', 'dataaccess/repository.ts', 'dataaccess/crud-repository.ts', 'dataaccess/unit-of-work.ts', 'dataaccess/unit-of-work-error.ts']) {
     project.createSourceFile(resolve(library, file), readFileSync(resolve(actualApiDirectory, '../../../libs/backend/abstractions/src', file), 'utf8'));
   }
   project.compilerOptions.set({ baseUrl: apiDirectory, paths: { '@casepilot/abstractions': [resolve(library, 'index.ts')] } });
@@ -34,6 +34,22 @@ function fixture(methods = ''): Project {
 }
 
 function rules(project: Project): string[] { return validateDataAccess(project, apiDirectory).map(finding => finding.rule); }
+
+void test('CPA-005 resolves Entity and inherited repository signatures from the extracted shared contracts', () => {
+  const project = fixture();
+  project.createSourceFile(resolve(apiDirectory, 'src/domain/entities/shared-row.ts'), `
+    import { StoredEntity } from '@casepilot/abstractions';
+    export class SharedRow extends StoredEntity { readonly label = 'example'; }
+  `);
+  project.createSourceFile(resolve(apiDirectory, 'src/domain/repositories/shared-row.repository.ts'), `
+    import type { ScopedDataRepository } from '@casepilot/abstractions';
+    import type { SharedRow } from '../entities/shared-row.js';
+    export interface SharedRowRepository extends ScopedDataRepository<SharedRow> {}
+  `);
+  project.resolveSourceFileDependencies();
+  assert.deepEqual(project.getPreEmitDiagnostics(), []);
+  assert.deepEqual(validateDataAccess(project, apiDirectory), []);
+});
 
 void test('accepts primitive unions, entities, shared pages, arrays and constrained generics', () => {
   const project = fixture(`

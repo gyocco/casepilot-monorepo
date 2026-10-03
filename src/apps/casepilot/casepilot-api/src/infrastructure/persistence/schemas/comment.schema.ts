@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Comment } from '../../../domain/entities/comment.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
 export const commentSchema = new EntitySchema<Comment>({
   name: 'Comment', target: Comment, tableName: 'comments',
   columns: {
@@ -28,7 +28,8 @@ export const commentSchema = new EntitySchema<Comment>({
   ],
 });
 export const commentTable: SqlTable<Comment> = {
-  schema: commentSchema, tableName: 'comments', tenant: true,
+  schema: commentSchema, tableName: 'comments', scopeColumn: 'business_account_id',
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

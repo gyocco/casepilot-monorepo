@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
-import type { JsonValue } from '../../application/shared/crud-models.js';
-import type { PageMetadataResponse } from '../../application/shared/crud-models.js';
+import { isJsonValue, type JsonValue } from '@casepilot/abstractions';
+
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export function readBody(value: unknown, fields: readonly string[]): Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new BadRequestException('A JSON object is required.');
@@ -44,17 +45,10 @@ export function optionalBoolean(body: Record<string, unknown>, key: string): boo
 export function nullableBoolean(body: Record<string, unknown>, key: string): boolean | null | undefined {
   return body[key] === null ? null : optionalBoolean(body, key);
 }
-function jsonValue(value: unknown, depth = 0): value is JsonValue {
-  if (depth > 20) return false;
-  if (value === null || typeof value === 'string' || typeof value === 'boolean') return true;
-  if (typeof value === 'number') return Number.isFinite(value);
-  if (Array.isArray(value)) return value.every(item => jsonValue(item, depth + 1));
-  return typeof value === 'object' && Object.values(value).every(item => jsonValue(item, depth + 1));
-}
-export function nullableJson(body: Record<string, unknown>, key: string): JsonValue | undefined {
+export function nullableJson(body: Record<string, unknown>, key: string, maxDepth = 20): JsonValue | undefined {
   const value = body[key];
   if (value === undefined) return undefined;
-  if (!jsonValue(value)) throw new BadRequestException('A JSON value is required.');
+  if (!isJsonValue(value, maxDepth)) throw new BadRequestException('A JSON value is required.');
   return value;
 }
 export function choiceValue<T extends string>(body: Record<string, unknown>, key: string, choices: readonly T[]): T {

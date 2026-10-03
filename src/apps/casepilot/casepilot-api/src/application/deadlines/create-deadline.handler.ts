@@ -2,8 +2,9 @@ import type { Handler } from '@casepilot/cqrs';
 import { type UnitOfWork, ValidationError } from '@casepilot/abstractions';
 import { Deadline } from '../../domain/entities/deadline.js';
 import { CreateDeadlineResponse, toDeadlineResponse, type CreateDeadlineRequest } from './deadline.models.js';
-import { type CrudScope, type CrudRuntime } from '../shared/crud-models.js';
-import { runPersistence } from '../shared/crud-persistence.js';
+import { type CrudScope } from '../shared/crud-models.js';
+import type { CrudRuntime } from '@casepilot/abstractions';
+import { runCrudPersistence } from '../shared/crud-persistence.js';
 import { validateTenant } from '../shared/crud-relations.js';
 import { deadlineFields, validateDeadlineRelations } from './deadline.rules.js';
 import { validateFields } from '../shared/crud-validation.js';
@@ -12,7 +13,7 @@ export class CreateDeadlineHandler implements Handler<CreateDeadlineRequest, Cre
   constructor(private readonly work: UnitOfWork<CrudScope<Deadline>>, private readonly runtime: CrudRuntime) {}
 
   async execute(request: CreateDeadlineRequest): Promise<CreateDeadlineResponse> {
-    return runPersistence(() => this.work.execute(async scope => {
+    return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, deadlineFields, false);

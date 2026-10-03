@@ -17,7 +17,7 @@ function cruise(files: Readonly<Record<string, string>>): { status: number | nul
   mkdirSync(directory, { recursive: true });
   try {
     writeFileSync(join(directory, 'package.json'), JSON.stringify({ type: 'module', dependencies: { typeorm: '0.3.31' }, devDependencies: { 'ts-morph': '27.0.2' } }));
-    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/typeorm': ['../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts'] } } }));
+    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/typeorm': ['../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts'], '@casepilot/abstractions/node': ['../../../libs/backend/abstractions/src/node/index.ts'], '@casepilot/validation': ['../../../libs/backend/validation/src/index.ts'], '@casepilot/validation/nestjs': ['../../../libs/backend/validation/src/nestjs/index.ts'] } } }));
     for (const [path, text] of Object.entries(files)) {
       const target = join(directory, path);
       const ownedPath = relative(fixture, target);
@@ -69,6 +69,38 @@ void test('BCK-008 rejects the abstractions TypeORM adapter through a core barre
   assert.notEqual(result.status, 0);
   assert.match(result.output, /BCK-008-abstractions-core-no-typeorm/);
   assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
+});
+
+void test('CPA-005 public pure validation is allowed; private modules and runtime barrels are rejected', () => {
+  const files = {
+    '../../../libs/backend/validation/src/index.ts': "export { validateId } from './identifiers.js';",
+    '../../../libs/backend/validation/src/identifiers.ts': 'export function validateId(): void {}',
+    '../../../libs/backend/validation/src/nestjs/index.ts': 'export function readBody(): void {}',
+    '../../../libs/backend/abstractions/src/node/index.ts': 'export const systemCrudRuntime = {};',
+  };
+  const allowed = cruise({ ...files,
+    'src/application/orders/id.ts': "export { validateId } from '@casepilot/validation';",
+    'src/infrastructure/runtime.ts': "export { systemCrudRuntime } from '@casepilot/abstractions/node';",
+    'src/presentation/orders/input.ts': "export { readBody } from '@casepilot/validation/nestjs';",
+  });
+  assert.equal(allowed.status, 0, allowed.output);
+  const privateModule = cruise({ ...files,
+    'src/application/orders/id.ts': "export { validateId } from '../../../../../../libs/backend/validation/src/identifiers.js';",
+  });
+  assert.match(privateModule.output, /CPA-005-validation-public-entry/);
+  assert.doesNotMatch(privateModule.output, /BCK-019-resolvable-imports/);
+  for (const [specifier, rule, symbol] of [
+    ['@casepilot/abstractions/node', 'BCK-008-abstractions-core-no-node', 'systemCrudRuntime'],
+    ['@casepilot/validation/nestjs', 'BCK-008-validation-core-no-nestjs', 'readBody'],
+  ]) {
+    const rejected = cruise({ ...files,
+      'src/application/orders/run.ts': `export { ${symbol} } from './bridge.js';`,
+      'src/application/orders/bridge.ts': `export { ${symbol} } from '${specifier}';`,
+    });
+    assert.notEqual(rejected.status, 0);
+    assert.ok(rejected.output.includes(rule), rejected.output);
+    assert.doesNotMatch(rejected.output, /BCK-019-resolvable-imports/);
+  }
 });
 
 void test('BCK-008 permits pure errors and rejects the NestJS adapter through a core barrel', () => {

@@ -1,4 +1,4 @@
-import { TenantEntity } from './stored-entity.js';
+import { TenantEntity } from './tenant-entity.js';
 
 export class Comment extends TenantEntity {
   authorMemberId!: string;

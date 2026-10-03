@@ -2,7 +2,7 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import type { DatabaseConfig } from '../config/backend-config.js';
 import { createDataSourceOptions } from './create-data-source-options.js';
-import { DatabaseConnection } from './database-connection.js';
+import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 
 @Module({})
 export class DatabaseModule {

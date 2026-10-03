@@ -1,5 +1,5 @@
 import type { ExternalPartyResponse } from '../../application/external-parties/external-party.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class ExternalPartyHttpResponse {
   constructor(

@@ -1,4 +1,4 @@
-import { StoredEntity, type JsonValue } from './stored-entity.js';
+import { StoredEntity, type JsonValue } from '@casepilot/abstractions';
 
 export class BusinessAccount extends StoredEntity {
   name!: string;

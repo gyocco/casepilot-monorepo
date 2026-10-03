@@ -1,10 +1,10 @@
 import type { User } from '../../domain/entities/user.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 
 export const userFields: readonly FieldRule[] = [
-  { name: 'email', kind: 'string', nullable: false },
+  { name: 'email', kind: 'string', nullable: false, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
   { name: 'emailVerifiedAt', kind: 'timestamp', nullable: true },
   { name: 'firstName', kind: 'string', nullable: false },
   { name: 'lastName', kind: 'string', nullable: false },

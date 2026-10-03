@@ -5,7 +5,7 @@ import { UpdateCaseHandler } from '../../application/cases/update-case.handler.j
 import { DeleteCaseHandler } from '../../application/cases/delete-case.handler.js';
 import { ListCasesHandler } from '../../application/cases/list-cases.handler.js';
 import { CreateCaseRequest, GetCaseRequest, UpdateCaseRequest, DeleteCaseRequest, ListCasesRequest } from '../../application/cases/case.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, nullableChoice, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, nullableChoice, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CaseItemHttpResponse, CasesPageHttpResponse, DeleteCaseHttpResponse, toCaseHttpResponse } from './case-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/cases')

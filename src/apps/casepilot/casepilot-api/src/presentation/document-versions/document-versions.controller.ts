@@ -5,7 +5,7 @@ import { UpdateDocumentVersionHandler } from '../../application/document-version
 import { DeleteDocumentVersionHandler } from '../../application/document-versions/delete-document-version.handler.js';
 import { ListDocumentVersionsHandler } from '../../application/document-versions/list-document-versions.handler.js';
 import { CreateDocumentVersionRequest, GetDocumentVersionRequest, UpdateDocumentVersionRequest, DeleteDocumentVersionRequest, ListDocumentVersionsRequest } from '../../application/document-versions/document-version.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, optionalNumber, nullableString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, optionalNumber, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { DocumentVersionItemHttpResponse, DocumentVersionsPageHttpResponse, DeleteDocumentVersionHttpResponse, toDocumentVersionHttpResponse } from './document-version-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/document-versions')

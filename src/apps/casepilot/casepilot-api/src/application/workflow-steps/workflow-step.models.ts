@@ -1,7 +1,7 @@
 import { Request, Response } from '@casepilot/cqrs';
 import type { WorkflowStep } from '../../domain/entities/workflow-step.js';
 
-import type { PageMetadataResponse } from '../shared/crud-models.js';
+import type { PageMetadataResponse } from '@casepilot/cqrs';
 
 export interface CreateWorkflowStepData {
   readonly workflowId: string;

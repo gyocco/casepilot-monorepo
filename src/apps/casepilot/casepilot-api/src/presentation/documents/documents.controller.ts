@@ -5,7 +5,7 @@ import { UpdateDocumentHandler } from '../../application/documents/update-docume
 import { DeleteDocumentHandler } from '../../application/documents/delete-document.handler.js';
 import { ListDocumentsHandler } from '../../application/documents/list-documents.handler.js';
 import { CreateDocumentRequest, GetDocumentRequest, UpdateDocumentRequest, DeleteDocumentRequest, ListDocumentsRequest } from '../../application/documents/document.models.js';
-import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { DocumentItemHttpResponse, DocumentsPageHttpResponse, DeleteDocumentHttpResponse, toDocumentHttpResponse } from './document-http.response.js';
 
 @Controller('business-accounts/:businessAccountId/documents')

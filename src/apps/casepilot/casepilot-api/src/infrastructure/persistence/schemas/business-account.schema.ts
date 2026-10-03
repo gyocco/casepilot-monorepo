@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { BusinessAccount } from '../../../domain/entities/business-account.js';
-import type { SqlTable } from '../sql-table.js';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice, sqlJson } from '../sql-values.js';
+import type { SqlTable } from '@casepilot/abstractions/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice, sqlJson } from '@casepilot/abstractions/typeorm';
 export const business_accountSchema = new EntitySchema<BusinessAccount>({
   name: 'BusinessAccount', target: BusinessAccount, tableName: 'business_accounts',
   columns: {
@@ -35,7 +35,8 @@ export const business_accountSchema = new EntitySchema<BusinessAccount>({
   ],
 });
 export const business_accountTable: SqlTable<BusinessAccount> = {
-  schema: business_accountSchema, tableName: 'business_accounts', tenant: false,
+  schema: business_accountSchema, tableName: 'business_accounts', scopeColumn: null,
+  idColumn: 'id', versionColumn: 'version', immutableColumns: ['id', 'created_at', 'business_account_id'],
   columns: [
     { property: 'id', name: 'id', value: entity => entity.id },
     { property: 'createdAt', name: 'created_at', value: entity => entity.createdAt },

@@ -1,5 +1,5 @@
 import type { TimeEntryResponse } from '../../application/time-entries/time-entry.models.js';
-import { PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class TimeEntryHttpResponse {
   constructor(

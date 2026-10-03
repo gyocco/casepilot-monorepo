@@ -1,6 +1,6 @@
 import type { Deadline } from '../../domain/entities/deadline.js';
 import type { ReferenceRepository } from '../../domain/repositories/reference.repository.js';
-import type { FieldRule } from '../shared/crud-validation.js';
+import type { FieldRule } from '@casepilot/validation';
 
 import { validateReference } from '../shared/crud-relations.js';
 export const deadlineFields: readonly FieldRule[] = [

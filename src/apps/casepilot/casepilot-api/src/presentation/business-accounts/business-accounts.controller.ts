@@ -5,7 +5,7 @@ import { UpdateBusinessAccountHandler } from '../../application/business-account
 import { DeleteBusinessAccountHandler } from '../../application/business-accounts/delete-business-account.handler.js';
 import { ListBusinessAccountsHandler } from '../../application/business-accounts/list-business-accounts.handler.js';
 import { CreateBusinessAccountRequest, GetBusinessAccountRequest, UpdateBusinessAccountRequest, DeleteBusinessAccountRequest, ListBusinessAccountsRequest } from '../../application/business-accounts/business-account.models.js';
-import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, choiceValue, optionalChoice, nullableJson, PageMetadataHttpResponse } from '../shared/crud-http.js';
+import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, choiceValue, optionalChoice, nullableJson, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { BusinessAccountItemHttpResponse, BusinessAccountsPageHttpResponse, DeleteBusinessAccountHttpResponse, toBusinessAccountHttpResponse } from './business-account-http.response.js';
 
 @Controller('business-accounts')
