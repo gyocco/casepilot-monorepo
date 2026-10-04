@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmPaymentRepository } from '../../infrastructure/persistence/repositories/typeorm-payment.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreatePaymentHandler } from '../../application/payments/create-payment.handler.js';
-import { GetPaymentHandler } from '../../application/payments/get-payment.handler.js';
-import { UpdatePaymentHandler } from '../../application/payments/update-payment.handler.js';
-import { DeletePaymentHandler } from '../../application/payments/delete-payment.handler.js';
-import { ListPaymentsHandler } from '../../application/payments/list-payments.handler.js';
+import { CreatePaymentHandler } from '../../application/payments/create-payment/create-payment.handler.js';
+import { GetPaymentHandler } from '../../application/payments/get-payment/get-payment.handler.js';
+import { UpdatePaymentHandler } from '../../application/payments/update-payment/update-payment.handler.js';
+import { DeletePaymentHandler } from '../../application/payments/delete-payment/delete-payment.handler.js';
+import { ListPaymentsHandler } from '../../application/payments/list-payments/list-payments.handler.js';
 import { PaymentsController } from './payments.controller.js';
 const WORK = Symbol('Payments_WORK');
 @Module({

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCustomFieldDefinitionRepository } from '../../infrastructure/persistence/repositories/typeorm-custom-field-definition.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/create-custom-field-definition.handler.js';
-import { GetCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/get-custom-field-definition.handler.js';
-import { UpdateCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/update-custom-field-definition.handler.js';
-import { DeleteCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/delete-custom-field-definition.handler.js';
-import { ListCustomFieldDefinitionsHandler } from '../../application/custom-field-definitions/list-custom-field-definitions.handler.js';
+import { CreateCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/create-custom-field-definition/create-custom-field-definition.handler.js';
+import { GetCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/get-custom-field-definition/get-custom-field-definition.handler.js';
+import { UpdateCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/update-custom-field-definition/update-custom-field-definition.handler.js';
+import { DeleteCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/delete-custom-field-definition/delete-custom-field-definition.handler.js';
+import { ListCustomFieldDefinitionsHandler } from '../../application/custom-field-definitions/list-custom-field-definitions/list-custom-field-definitions.handler.js';
 import { CustomFieldDefinitionsController } from './custom-field-definitions.controller.js';
 const WORK = Symbol('CustomFieldDefinitions_WORK');
 @Module({

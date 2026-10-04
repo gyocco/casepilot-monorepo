@@ -1,4 +1,4 @@
-import type { WorkflowResponse } from '../../application/workflows/workflow.models.js';
+import type { WorkflowResponse } from '../../application/workflows/shared/workflow.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class WorkflowHttpResponse {

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmDeadlineRepository } from '../../infrastructure/persistence/repositories/typeorm-deadline.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateDeadlineHandler } from '../../application/deadlines/create-deadline.handler.js';
-import { GetDeadlineHandler } from '../../application/deadlines/get-deadline.handler.js';
-import { UpdateDeadlineHandler } from '../../application/deadlines/update-deadline.handler.js';
-import { DeleteDeadlineHandler } from '../../application/deadlines/delete-deadline.handler.js';
-import { ListDeadlinesHandler } from '../../application/deadlines/list-deadlines.handler.js';
+import { CreateDeadlineHandler } from '../../application/deadlines/create-deadline/create-deadline.handler.js';
+import { GetDeadlineHandler } from '../../application/deadlines/get-deadline/get-deadline.handler.js';
+import { UpdateDeadlineHandler } from '../../application/deadlines/update-deadline/update-deadline.handler.js';
+import { DeleteDeadlineHandler } from '../../application/deadlines/delete-deadline/delete-deadline.handler.js';
+import { ListDeadlinesHandler } from '../../application/deadlines/list-deadlines/list-deadlines.handler.js';
 import { DeadlinesController } from './deadlines.controller.js';
 const WORK = Symbol('Deadlines_WORK');
 @Module({

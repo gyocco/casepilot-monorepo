@@ -8,7 +8,7 @@ La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health c
 
 El backend usa un dominio compartido por aplicación y las capas `application/`, `domain/`, `infrastructure/` y `presentation/` directamente bajo su `src/`. La conexión, DataSource y migraciones viven en `infrastructure/database/`. Decisión: [ADR 0008](docs/adr/0008-application-wide-backend-layers.md).
 
-Application de la API agrupa sus casos de uso por recurso, actualmente `application/health/`, conforme a [CPA-001](docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y al [ADR 0009](docs/adr/0009-resource-organized-application.md).
+Application de la API agrupa sus casos de uso por recurso y operación, con archivos handler/request/response obligatorios y datos/reglas reutilizados en `<recurso>/shared/`, conforme a [BCK-023](docs/architecture/backend-architecture-baseline-rules.md#bck-023--application-organizada-por-recurso-y-operacion), [CPA-001](docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y al [ADR 0017](docs/adr/0017-operation-organized-application.md). Health vive en `application/health/get-health-check-objects/`; los 28 recursos CRUD usan la misma estructura.
 
 Los casos de uso implementan `Handler<Request, Response>` de `@casepilot/cqrs`, con modelos que heredan de sus bases y ejecución directa. Regla [CPA-002](docs/architecture/casepilot-backend-architecture.md#cpa-002--contratos-cqrs-compartidos-e-invocacion-directa) y [ADR 0010](docs/adr/0010-shared-cqrs-contracts.md).
 

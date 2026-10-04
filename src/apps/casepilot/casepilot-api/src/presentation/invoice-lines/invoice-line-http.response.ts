@@ -1,4 +1,4 @@
-import type { InvoiceLineResponse } from '../../application/invoice-lines/invoice-line.models.js';
+import type { InvoiceLineResponse } from '../../application/invoice-lines/shared/invoice-line.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class InvoiceLineHttpResponse {

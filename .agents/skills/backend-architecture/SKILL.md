@@ -26,7 +26,7 @@ Si ya cargaste esas fuentes vigentes en esta tarea, reutiliza su contexto. Las i
 - Revisa `git status --short`, el `AGENTS.md` más cercano y los patrones existentes con `rg`.
 - Identifica aplicación/proyecto propietario, transportes, casos de uso, contratos, persistencia, librerías, consumidores y pruebas afectados. Usa las capas compartidas de esa aplicación; no crees contextos, capas repetidas por feature ni paquetes vacíos.
 - Distingue decisiones del producto de mecanismos técnicos. En CasePilot el nombre Domain no permite ubicar allí comportamiento de negocio: la decisión explícita es Application como propietario exclusivo.
-- Para cada command/query afectado, define su única clase request, su única clase response y el handler; incluye todos los inputs, también identidad/contexto verificado, dentro del request.
+- Para cada command/query afectado, define su única clase request, su única clase response y el handler; incluye todos los inputs, también identidad/contexto verificado, dentro del request. Consulta BCK-023 para su carpeta por operación, archivos obligatorios y ubicación de datos/reglas compartidos; no concentres contratos de varias operaciones en un archivo de modelos.
 - Descompón la persistencia necesaria en operaciones individuales. Haz visible en Application cualquier secuencia, regla, escritura relacionada y límite transaccional.
 - Si propones compartir negocio entre hosts, comprueba la frontera de paquetes vigente. No lo coloques en `libs/backend` ni importes una app desde otra para evitar una decisión arquitectónica.
 

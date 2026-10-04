@@ -1,4 +1,4 @@
-import type { ExternalPartyResponse } from '../../application/external-parties/external-party.models.js';
+import type { ExternalPartyResponse } from '../../application/external-parties/shared/external-party.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class ExternalPartyHttpResponse {

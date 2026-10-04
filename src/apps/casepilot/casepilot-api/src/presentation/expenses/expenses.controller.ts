@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateExpenseHandler } from '../../application/expenses/create-expense.handler.js';
-import { GetExpenseHandler } from '../../application/expenses/get-expense.handler.js';
-import { UpdateExpenseHandler } from '../../application/expenses/update-expense.handler.js';
-import { DeleteExpenseHandler } from '../../application/expenses/delete-expense.handler.js';
-import { ListExpensesHandler } from '../../application/expenses/list-expenses.handler.js';
-import { CreateExpenseRequest, GetExpenseRequest, UpdateExpenseRequest, DeleteExpenseRequest, ListExpensesRequest } from '../../application/expenses/expense.models.js';
+import { CreateExpenseHandler } from '../../application/expenses/create-expense/create-expense.handler.js';
+import { GetExpenseHandler } from '../../application/expenses/get-expense/get-expense.handler.js';
+import { UpdateExpenseHandler } from '../../application/expenses/update-expense/update-expense.handler.js';
+import { DeleteExpenseHandler } from '../../application/expenses/delete-expense/delete-expense.handler.js';
+import { ListExpensesHandler } from '../../application/expenses/list-expenses/list-expenses.handler.js';
+import { CreateExpenseRequest } from '../../application/expenses/create-expense/create-expense.request.js';
+import { GetExpenseRequest } from '../../application/expenses/get-expense/get-expense.request.js';
+import { UpdateExpenseRequest } from '../../application/expenses/update-expense/update-expense.request.js';
+import { DeleteExpenseRequest } from '../../application/expenses/delete-expense/delete-expense.request.js';
+import { ListExpensesRequest } from '../../application/expenses/list-expenses/list-expenses.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { ExpenseItemHttpResponse, ExpensesPageHttpResponse, DeleteExpenseHttpResponse, toExpenseHttpResponse } from './expense-http.response.js';
 

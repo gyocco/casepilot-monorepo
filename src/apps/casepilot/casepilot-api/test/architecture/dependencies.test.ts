@@ -9,6 +9,36 @@ import { fileURLToPath } from 'node:url';
 const apiDirectory = fileURLToPath(new URL('../../', import.meta.url));
 const cli = fileURLToPath(new URL('../../bin/dependency-cruiser.mjs', import.meta.resolve('dependency-cruiser')));
 
+void test('BCK-023 allows operation dependencies on resource/global shared data and rules', () => {
+  const result = cruise({
+    'src/application/cases/read-case/read-case.handler.ts': "import { limit } from '../shared/case.rules.js'; import type { CaseData } from '../shared/case-data.js'; export const value: CaseData = { id: String(limit) };",
+    'src/application/cases/shared/case.rules.ts': "export { limit } from '../../shared/policy.js';",
+    'src/application/cases/shared/case-data.ts': 'export interface CaseData { id: string; }',
+    'src/application/shared/policy.ts': 'export const limit = 10;',
+    'src/application/ports/clock.ts': 'export interface Clock { now(): string; }',
+  });
+  assert.equal(result.status, 0, result.output);
+});
+
+void test('BCK-023 rejects shared dependencies on operations through types, aliases and reexports', () => {
+  for (const shared of ['src/application/cases/shared/policy.ts', 'src/application/shared/policy.ts', 'src/application/ports/contract.ts']) {
+    for (const code of [
+      "import type { ReadCaseData as Input } from '../../cases/read-case/read-case.request.js'; export type Data = Input;",
+      "export { ReadCaseData } from '../../cases/read-case/read-case.request.js';",
+      "export * from '../../cases/read-case/bridge.js';",
+    ]) {
+      const result = cruise({
+        [shared]: code.replaceAll('../../cases/', shared.includes('/cases/shared/') ? '../../cases/' : '../cases/'),
+        'src/application/cases/read-case/read-case.request.ts': 'export interface ReadCaseData { id: string; }',
+        'src/application/cases/read-case/bridge.ts': "export type { ReadCaseData } from './read-case.request.js';",
+      });
+      assert.notEqual(result.status, 0, result.output);
+      assert.match(result.output, /BCK-023-shared-no-operations/);
+      assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
+    }
+  }
+});
+
 function cruise(files: Readonly<Record<string, string>>): { status: number | null; output: string } {
   const buildDirectory = join(apiDirectory, 'build');
   mkdirSync(buildDirectory, { recursive: true });

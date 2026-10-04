@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCaseMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-case-member.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateCaseMemberHandler } from '../../application/case-members/create-case-member.handler.js';
-import { GetCaseMemberHandler } from '../../application/case-members/get-case-member.handler.js';
-import { UpdateCaseMemberHandler } from '../../application/case-members/update-case-member.handler.js';
-import { DeleteCaseMemberHandler } from '../../application/case-members/delete-case-member.handler.js';
-import { ListCaseMembersHandler } from '../../application/case-members/list-case-members.handler.js';
+import { CreateCaseMemberHandler } from '../../application/case-members/create-case-member/create-case-member.handler.js';
+import { GetCaseMemberHandler } from '../../application/case-members/get-case-member/get-case-member.handler.js';
+import { UpdateCaseMemberHandler } from '../../application/case-members/update-case-member/update-case-member.handler.js';
+import { DeleteCaseMemberHandler } from '../../application/case-members/delete-case-member/delete-case-member.handler.js';
+import { ListCaseMembersHandler } from '../../application/case-members/list-case-members/list-case-members.handler.js';
 import { CaseMembersController } from './case-members.controller.js';
 const WORK = Symbol('CaseMembers_WORK');
 @Module({

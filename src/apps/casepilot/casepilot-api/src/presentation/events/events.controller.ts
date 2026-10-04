@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateEventHandler } from '../../application/events/create-event.handler.js';
-import { GetEventHandler } from '../../application/events/get-event.handler.js';
-import { UpdateEventHandler } from '../../application/events/update-event.handler.js';
-import { DeleteEventHandler } from '../../application/events/delete-event.handler.js';
-import { ListEventsHandler } from '../../application/events/list-events.handler.js';
-import { CreateEventRequest, GetEventRequest, UpdateEventRequest, DeleteEventRequest, ListEventsRequest } from '../../application/events/event.models.js';
+import { CreateEventHandler } from '../../application/events/create-event/create-event.handler.js';
+import { GetEventHandler } from '../../application/events/get-event/get-event.handler.js';
+import { UpdateEventHandler } from '../../application/events/update-event/update-event.handler.js';
+import { DeleteEventHandler } from '../../application/events/delete-event/delete-event.handler.js';
+import { ListEventsHandler } from '../../application/events/list-events/list-events.handler.js';
+import { CreateEventRequest } from '../../application/events/create-event/create-event.request.js';
+import { GetEventRequest } from '../../application/events/get-event/get-event.request.js';
+import { UpdateEventRequest } from '../../application/events/update-event/update-event.request.js';
+import { DeleteEventRequest } from '../../application/events/delete-event/delete-event.request.js';
+import { ListEventsRequest } from '../../application/events/list-events/list-events.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { EventItemHttpResponse, EventsPageHttpResponse, DeleteEventHttpResponse, toEventHttpResponse } from './event-http.response.js';
 

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmTimeEntryRepository } from '../../infrastructure/persistence/repositories/typeorm-time-entry.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateTimeEntryHandler } from '../../application/time-entries/create-time-entry.handler.js';
-import { GetTimeEntryHandler } from '../../application/time-entries/get-time-entry.handler.js';
-import { UpdateTimeEntryHandler } from '../../application/time-entries/update-time-entry.handler.js';
-import { DeleteTimeEntryHandler } from '../../application/time-entries/delete-time-entry.handler.js';
-import { ListTimeEntriesHandler } from '../../application/time-entries/list-time-entries.handler.js';
+import { CreateTimeEntryHandler } from '../../application/time-entries/create-time-entry/create-time-entry.handler.js';
+import { GetTimeEntryHandler } from '../../application/time-entries/get-time-entry/get-time-entry.handler.js';
+import { UpdateTimeEntryHandler } from '../../application/time-entries/update-time-entry/update-time-entry.handler.js';
+import { DeleteTimeEntryHandler } from '../../application/time-entries/delete-time-entry/delete-time-entry.handler.js';
+import { ListTimeEntriesHandler } from '../../application/time-entries/list-time-entries/list-time-entries.handler.js';
 import { TimeEntriesController } from './time-entries.controller.js';
 const WORK = Symbol('TimeEntries_WORK');
 @Module({

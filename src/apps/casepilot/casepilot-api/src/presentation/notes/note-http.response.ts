@@ -1,4 +1,4 @@
-import type { NoteResponse } from '../../application/notes/note.models.js';
+import type { NoteResponse } from '../../application/notes/shared/note.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class NoteHttpResponse {

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmWorkflowStepRepository } from '../../infrastructure/persistence/repositories/typeorm-workflow-step.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateWorkflowStepHandler } from '../../application/workflow-steps/create-workflow-step.handler.js';
-import { GetWorkflowStepHandler } from '../../application/workflow-steps/get-workflow-step.handler.js';
-import { UpdateWorkflowStepHandler } from '../../application/workflow-steps/update-workflow-step.handler.js';
-import { DeleteWorkflowStepHandler } from '../../application/workflow-steps/delete-workflow-step.handler.js';
-import { ListWorkflowStepsHandler } from '../../application/workflow-steps/list-workflow-steps.handler.js';
+import { CreateWorkflowStepHandler } from '../../application/workflow-steps/create-workflow-step/create-workflow-step.handler.js';
+import { GetWorkflowStepHandler } from '../../application/workflow-steps/get-workflow-step/get-workflow-step.handler.js';
+import { UpdateWorkflowStepHandler } from '../../application/workflow-steps/update-workflow-step/update-workflow-step.handler.js';
+import { DeleteWorkflowStepHandler } from '../../application/workflow-steps/delete-workflow-step/delete-workflow-step.handler.js';
+import { ListWorkflowStepsHandler } from '../../application/workflow-steps/list-workflow-steps/list-workflow-steps.handler.js';
 import { WorkflowStepsController } from './workflow-steps.controller.js';
 const WORK = Symbol('WorkflowSteps_WORK');
 @Module({

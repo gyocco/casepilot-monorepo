@@ -31,7 +31,7 @@
     "check:dependencies": "pnpm build:contracts && depcruise --config dependency-cruiser.config.mjs --output-type err-long src",
     "check:structure": "pnpm build:contracts && tsx tools/architecture/check-structure.ts",
     "check:architecture": "pnpm typecheck && pnpm lint && pnpm check:dependencies && pnpm check:structure",
-    "test:architecture": "pnpm build:contracts && tsx --test test/architecture/dependencies.test.ts test/architecture/eslint.test.ts test/architecture/structure.test.ts test/architecture/data-access.test.ts",
+    "test:architecture": "pnpm build:contracts && tsx --test test/architecture/dependencies.test.ts test/architecture/eslint.test.ts test/architecture/structure.test.ts test/architecture/application-operations.test.ts test/architecture/data-access.test.ts",
     "test": "pnpm build:contracts && tsc -p tsconfig.test.json && node --test build/test/test/unit/configuration.test.js build/test/test/unit/health.test.js build/test/test/unit/error-handling.test.js build/test/test/unit/crud.test.js && pnpm test:architecture",
     "test:integration": "pnpm build:contracts && tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
     "migration:run": "pnpm build && typeorm migration:run -d dist/infrastructure/database/data-source.js",

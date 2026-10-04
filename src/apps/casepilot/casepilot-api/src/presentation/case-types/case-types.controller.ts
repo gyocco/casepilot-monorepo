@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateCaseTypeHandler } from '../../application/case-types/create-case-type.handler.js';
-import { GetCaseTypeHandler } from '../../application/case-types/get-case-type.handler.js';
-import { UpdateCaseTypeHandler } from '../../application/case-types/update-case-type.handler.js';
-import { DeleteCaseTypeHandler } from '../../application/case-types/delete-case-type.handler.js';
-import { ListCaseTypesHandler } from '../../application/case-types/list-case-types.handler.js';
-import { CreateCaseTypeRequest, GetCaseTypeRequest, UpdateCaseTypeRequest, DeleteCaseTypeRequest, ListCaseTypesRequest } from '../../application/case-types/case-type.models.js';
+import { CreateCaseTypeHandler } from '../../application/case-types/create-case-type/create-case-type.handler.js';
+import { GetCaseTypeHandler } from '../../application/case-types/get-case-type/get-case-type.handler.js';
+import { UpdateCaseTypeHandler } from '../../application/case-types/update-case-type/update-case-type.handler.js';
+import { DeleteCaseTypeHandler } from '../../application/case-types/delete-case-type/delete-case-type.handler.js';
+import { ListCaseTypesHandler } from '../../application/case-types/list-case-types/list-case-types.handler.js';
+import { CreateCaseTypeRequest } from '../../application/case-types/create-case-type/create-case-type.request.js';
+import { GetCaseTypeRequest } from '../../application/case-types/get-case-type/get-case-type.request.js';
+import { UpdateCaseTypeRequest } from '../../application/case-types/update-case-type/update-case-type.request.js';
+import { DeleteCaseTypeRequest } from '../../application/case-types/delete-case-type/delete-case-type.request.js';
+import { ListCaseTypesRequest } from '../../application/case-types/list-case-types/list-case-types.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CaseTypeItemHttpResponse, CaseTypesPageHttpResponse, DeleteCaseTypeHttpResponse, toCaseTypeHttpResponse } from './case-type-http.response.js';
 

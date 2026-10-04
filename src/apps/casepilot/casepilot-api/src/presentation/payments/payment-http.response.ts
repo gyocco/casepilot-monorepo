@@ -1,4 +1,4 @@
-import type { PaymentResponse } from '../../application/payments/payment.models.js';
+import type { PaymentResponse } from '../../application/payments/shared/payment.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class PaymentHttpResponse {

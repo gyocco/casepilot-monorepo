@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateCaseExternalPartyHandler } from '../../application/case-external-parties/create-case-external-party.handler.js';
-import { GetCaseExternalPartyHandler } from '../../application/case-external-parties/get-case-external-party.handler.js';
-import { UpdateCaseExternalPartyHandler } from '../../application/case-external-parties/update-case-external-party.handler.js';
-import { DeleteCaseExternalPartyHandler } from '../../application/case-external-parties/delete-case-external-party.handler.js';
-import { ListCaseExternalPartiesHandler } from '../../application/case-external-parties/list-case-external-parties.handler.js';
-import { CreateCaseExternalPartyRequest, GetCaseExternalPartyRequest, UpdateCaseExternalPartyRequest, DeleteCaseExternalPartyRequest, ListCaseExternalPartiesRequest } from '../../application/case-external-parties/case-external-party.models.js';
+import { CreateCaseExternalPartyHandler } from '../../application/case-external-parties/create-case-external-party/create-case-external-party.handler.js';
+import { GetCaseExternalPartyHandler } from '../../application/case-external-parties/get-case-external-party/get-case-external-party.handler.js';
+import { UpdateCaseExternalPartyHandler } from '../../application/case-external-parties/update-case-external-party/update-case-external-party.handler.js';
+import { DeleteCaseExternalPartyHandler } from '../../application/case-external-parties/delete-case-external-party/delete-case-external-party.handler.js';
+import { ListCaseExternalPartiesHandler } from '../../application/case-external-parties/list-case-external-parties/list-case-external-parties.handler.js';
+import { CreateCaseExternalPartyRequest } from '../../application/case-external-parties/create-case-external-party/create-case-external-party.request.js';
+import { GetCaseExternalPartyRequest } from '../../application/case-external-parties/get-case-external-party/get-case-external-party.request.js';
+import { UpdateCaseExternalPartyRequest } from '../../application/case-external-parties/update-case-external-party/update-case-external-party.request.js';
+import { DeleteCaseExternalPartyRequest } from '../../application/case-external-parties/delete-case-external-party/delete-case-external-party.request.js';
+import { ListCaseExternalPartiesRequest } from '../../application/case-external-parties/list-case-external-parties/list-case-external-parties.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, booleanValue, optionalBoolean, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CaseExternalPartyItemHttpResponse, CaseExternalPartiesPageHttpResponse, DeleteCaseExternalPartyHttpResponse, toCaseExternalPartyHttpResponse } from './case-external-party-http.response.js';
 

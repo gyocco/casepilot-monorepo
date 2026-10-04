@@ -5,6 +5,12 @@ const resourceModule = '^src/presentation/([^/]+)/\\1\\.module\\.ts$';
 const configuration = {
   forbidden: [
     {
+      name: 'BCK-023-shared-no-operations', severity: 'error',
+      comment: 'Shared data, rules and ports cannot depend on operations, including through type imports or reexports.',
+      from: { path: '^src/application/(?:shared/|ports/|[^/]+/shared/)' },
+      to: { path: '^src/application/(?!shared/|ports/)[^/]+/(?!shared/)[^/]+/', reachable: true },
+    },
+    {
       name: 'BCK-008-errors-core-no-nestjs', severity: 'error',
       comment: 'Core layers use pure errors and cannot reach the NestJS transport adapter through barrels.',
       from: { path: '^src/(domain|application)/' },

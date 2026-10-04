@@ -1,4 +1,4 @@
-import type { TimeEntryResponse } from '../../application/time-entries/time-entry.models.js';
+import type { TimeEntryResponse } from '../../application/time-entries/shared/time-entry.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class TimeEntryHttpResponse {

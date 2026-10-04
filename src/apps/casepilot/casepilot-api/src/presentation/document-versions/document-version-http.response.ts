@@ -1,4 +1,4 @@
-import type { DocumentVersionResponse } from '../../application/document-versions/document-version.models.js';
+import type { DocumentVersionResponse } from '../../application/document-versions/shared/document-version.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class DocumentVersionHttpResponse {

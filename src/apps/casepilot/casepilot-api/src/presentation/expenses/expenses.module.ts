@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmExpenseRepository } from '../../infrastructure/persistence/repositories/typeorm-expense.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateExpenseHandler } from '../../application/expenses/create-expense.handler.js';
-import { GetExpenseHandler } from '../../application/expenses/get-expense.handler.js';
-import { UpdateExpenseHandler } from '../../application/expenses/update-expense.handler.js';
-import { DeleteExpenseHandler } from '../../application/expenses/delete-expense.handler.js';
-import { ListExpensesHandler } from '../../application/expenses/list-expenses.handler.js';
+import { CreateExpenseHandler } from '../../application/expenses/create-expense/create-expense.handler.js';
+import { GetExpenseHandler } from '../../application/expenses/get-expense/get-expense.handler.js';
+import { UpdateExpenseHandler } from '../../application/expenses/update-expense/update-expense.handler.js';
+import { DeleteExpenseHandler } from '../../application/expenses/delete-expense/delete-expense.handler.js';
+import { ListExpensesHandler } from '../../application/expenses/list-expenses/list-expenses.handler.js';
 import { ExpensesController } from './expenses.controller.js';
 const WORK = Symbol('Expenses_WORK');
 @Module({

@@ -14,6 +14,7 @@
 - [ADR 0007 — Validación automatizada de la API](adr/0007-automated-api-architecture-validation.md): herramientas y convenciones verificables del paquete API.
 - [ADR 0008 — Dominio compartido y capas por aplicación](adr/0008-application-wide-backend-layers.md): elimina la división por contextos y ubica database/configuración en Infrastructure.
 - [ADR 0009 — Application por recurso](adr/0009-resource-organized-application.md): agrupa los casos de uso por recurso, con regla CPA-001 y validación de firmas en toda Application.
+- [ADR 0017 — Application por operación](adr/0017-operation-organized-application.md): BCK-023, trío handler/request/response obligatorio y datos/reglas reutilizados en shared, con validadores y pruebas.
 - [ADR 0010 — Request, Response y Handler compartidos](adr/0010-shared-cqrs-contracts.md): librería CQRS, invocación directa y regla CPA-002 para modelos y handlers de Application.
 - [Librería CQRS](../src/libs/backend/cqrs/README.md): API pública, ejemplos, límites y comandos de `@casepilot/cqrs`.
 - [Manejo HTTP de errores](../src/libs/backend/exception-handler/README.md): filtro HTTP NestJS configurable con Problem Details.

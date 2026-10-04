@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateDeadlineHandler } from '../../application/deadlines/create-deadline.handler.js';
-import { GetDeadlineHandler } from '../../application/deadlines/get-deadline.handler.js';
-import { UpdateDeadlineHandler } from '../../application/deadlines/update-deadline.handler.js';
-import { DeleteDeadlineHandler } from '../../application/deadlines/delete-deadline.handler.js';
-import { ListDeadlinesHandler } from '../../application/deadlines/list-deadlines.handler.js';
-import { CreateDeadlineRequest, GetDeadlineRequest, UpdateDeadlineRequest, DeleteDeadlineRequest, ListDeadlinesRequest } from '../../application/deadlines/deadline.models.js';
+import { CreateDeadlineHandler } from '../../application/deadlines/create-deadline/create-deadline.handler.js';
+import { GetDeadlineHandler } from '../../application/deadlines/get-deadline/get-deadline.handler.js';
+import { UpdateDeadlineHandler } from '../../application/deadlines/update-deadline/update-deadline.handler.js';
+import { DeleteDeadlineHandler } from '../../application/deadlines/delete-deadline/delete-deadline.handler.js';
+import { ListDeadlinesHandler } from '../../application/deadlines/list-deadlines/list-deadlines.handler.js';
+import { CreateDeadlineRequest } from '../../application/deadlines/create-deadline/create-deadline.request.js';
+import { GetDeadlineRequest } from '../../application/deadlines/get-deadline/get-deadline.request.js';
+import { UpdateDeadlineRequest } from '../../application/deadlines/update-deadline/update-deadline.request.js';
+import { DeleteDeadlineRequest } from '../../application/deadlines/delete-deadline/delete-deadline.request.js';
+import { ListDeadlinesRequest } from '../../application/deadlines/list-deadlines/list-deadlines.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, choiceValue, optionalChoice, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { DeadlineItemHttpResponse, DeadlinesPageHttpResponse, DeleteDeadlineHttpResponse, toDeadlineHttpResponse } from './deadline-http.response.js';
 

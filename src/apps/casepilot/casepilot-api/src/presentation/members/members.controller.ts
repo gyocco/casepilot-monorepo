@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateMemberHandler } from '../../application/members/create-member.handler.js';
-import { GetMemberHandler } from '../../application/members/get-member.handler.js';
-import { UpdateMemberHandler } from '../../application/members/update-member.handler.js';
-import { DeleteMemberHandler } from '../../application/members/delete-member.handler.js';
-import { ListMembersHandler } from '../../application/members/list-members.handler.js';
-import { CreateMemberRequest, GetMemberRequest, UpdateMemberRequest, DeleteMemberRequest, ListMembersRequest } from '../../application/members/member.models.js';
+import { CreateMemberHandler } from '../../application/members/create-member/create-member.handler.js';
+import { GetMemberHandler } from '../../application/members/get-member/get-member.handler.js';
+import { UpdateMemberHandler } from '../../application/members/update-member/update-member.handler.js';
+import { DeleteMemberHandler } from '../../application/members/delete-member/delete-member.handler.js';
+import { ListMembersHandler } from '../../application/members/list-members/list-members.handler.js';
+import { CreateMemberRequest } from '../../application/members/create-member/create-member.request.js';
+import { GetMemberRequest } from '../../application/members/get-member/get-member.request.js';
+import { UpdateMemberRequest } from '../../application/members/update-member/update-member.request.js';
+import { DeleteMemberRequest } from '../../application/members/delete-member/delete-member.request.js';
+import { ListMembersRequest } from '../../application/members/list-members/list-members.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, choiceValue, optionalChoice, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { MemberItemHttpResponse, MembersPageHttpResponse, DeleteMemberHttpResponse, toMemberHttpResponse } from './member-http.response.js';
 

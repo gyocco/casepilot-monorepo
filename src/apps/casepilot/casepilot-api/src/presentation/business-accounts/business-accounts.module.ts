@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmBusinessAccountRepository } from '../../infrastructure/persistence/repositories/typeorm-business-account.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateBusinessAccountHandler } from '../../application/business-accounts/create-business-account.handler.js';
-import { GetBusinessAccountHandler } from '../../application/business-accounts/get-business-account.handler.js';
-import { UpdateBusinessAccountHandler } from '../../application/business-accounts/update-business-account.handler.js';
-import { DeleteBusinessAccountHandler } from '../../application/business-accounts/delete-business-account.handler.js';
-import { ListBusinessAccountsHandler } from '../../application/business-accounts/list-business-accounts.handler.js';
+import { CreateBusinessAccountHandler } from '../../application/business-accounts/create-business-account/create-business-account.handler.js';
+import { GetBusinessAccountHandler } from '../../application/business-accounts/get-business-account/get-business-account.handler.js';
+import { UpdateBusinessAccountHandler } from '../../application/business-accounts/update-business-account/update-business-account.handler.js';
+import { DeleteBusinessAccountHandler } from '../../application/business-accounts/delete-business-account/delete-business-account.handler.js';
+import { ListBusinessAccountsHandler } from '../../application/business-accounts/list-business-accounts/list-business-accounts.handler.js';
 import { BusinessAccountsController } from './business-accounts.controller.js';
 const WORK = Symbol('BusinessAccounts_WORK');
 @Module({

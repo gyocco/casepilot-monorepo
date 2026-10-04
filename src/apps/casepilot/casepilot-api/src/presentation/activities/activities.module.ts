@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmActivityRepository } from '../../infrastructure/persistence/repositories/typeorm-activity.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateActivityHandler } from '../../application/activities/create-activity.handler.js';
-import { GetActivityHandler } from '../../application/activities/get-activity.handler.js';
-import { UpdateActivityHandler } from '../../application/activities/update-activity.handler.js';
-import { DeleteActivityHandler } from '../../application/activities/delete-activity.handler.js';
-import { ListActivitiesHandler } from '../../application/activities/list-activities.handler.js';
+import { CreateActivityHandler } from '../../application/activities/create-activity/create-activity.handler.js';
+import { GetActivityHandler } from '../../application/activities/get-activity/get-activity.handler.js';
+import { UpdateActivityHandler } from '../../application/activities/update-activity/update-activity.handler.js';
+import { DeleteActivityHandler } from '../../application/activities/delete-activity/delete-activity.handler.js';
+import { ListActivitiesHandler } from '../../application/activities/list-activities/list-activities.handler.js';
 import { ActivitiesController } from './activities.controller.js';
 const WORK = Symbol('Activities_WORK');
 @Module({

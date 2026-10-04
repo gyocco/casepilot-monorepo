@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmExternalPartyRepository } from '../../infrastructure/persistence/repositories/typeorm-external-party.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateExternalPartyHandler } from '../../application/external-parties/create-external-party.handler.js';
-import { GetExternalPartyHandler } from '../../application/external-parties/get-external-party.handler.js';
-import { UpdateExternalPartyHandler } from '../../application/external-parties/update-external-party.handler.js';
-import { DeleteExternalPartyHandler } from '../../application/external-parties/delete-external-party.handler.js';
-import { ListExternalPartiesHandler } from '../../application/external-parties/list-external-parties.handler.js';
+import { CreateExternalPartyHandler } from '../../application/external-parties/create-external-party/create-external-party.handler.js';
+import { GetExternalPartyHandler } from '../../application/external-parties/get-external-party/get-external-party.handler.js';
+import { UpdateExternalPartyHandler } from '../../application/external-parties/update-external-party/update-external-party.handler.js';
+import { DeleteExternalPartyHandler } from '../../application/external-parties/delete-external-party/delete-external-party.handler.js';
+import { ListExternalPartiesHandler } from '../../application/external-parties/list-external-parties/list-external-parties.handler.js';
 import { ExternalPartiesController } from './external-parties.controller.js';
 const WORK = Symbol('ExternalParties_WORK');
 @Module({

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { UnexpectedError } from '@casepilot/abstractions';
-import { GetHealthCheckObjectsHandler } from '../../src/application/health/get-health-check-objects.handler.js';
-import { GetHealthCheckObjectsRequest } from '../../src/application/health/get-health-check-objects.request.js';
-import { GetHealthCheckObjectsResponse } from '../../src/application/health/get-health-check-objects.response.js';
+import { GetHealthCheckObjectsHandler } from '../../src/application/health/get-health-check-objects/get-health-check-objects.handler.js';
+import { GetHealthCheckObjectsRequest } from '../../src/application/health/get-health-check-objects/get-health-check-objects.request.js';
+import { GetHealthCheckObjectsResponse } from '../../src/application/health/get-health-check-objects/get-health-check-objects.response.js';
 import { HealthCheckObject } from '../../src/domain/entities/health-check-object.js';
 import { HealthCheckObjectRepositoryUnavailableError } from '../../src/domain/repositories/health-check-object.repository.js';
 

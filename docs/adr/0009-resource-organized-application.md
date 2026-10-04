@@ -1,6 +1,6 @@
 # 0009 — Application organizada por recurso en CasePilot API
 
-- Estado: aceptada e implementada; las bases y nomenclatura común de handlers evolucionan mediante el [ADR 0010](0010-shared-cqrs-contracts.md).
+- Estado: aceptada e implementada; las bases y nomenclatura común de handlers evolucionan mediante el [ADR 0010](0010-shared-cqrs-contracts.md). El [ADR 0017](0017-operation-organized-application.md) sustituye la carpeta opcional por el trío obligatorio por operación y shared para datos/reglas reutilizados.
 - Fecha: 2026-10-02.
 - Alcance: organización interna de Application y validadores de CasePilot API.
 - Evoluciona: la ubicación de handlers del [ADR 0007](0007-automated-api-architecture-validation.md); conserva las capas únicas del [ADR 0008](0008-application-wide-backend-layers.md).

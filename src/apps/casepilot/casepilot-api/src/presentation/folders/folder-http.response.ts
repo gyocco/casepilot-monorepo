@@ -1,4 +1,4 @@
-import type { FolderResponse } from '../../application/folders/folder.models.js';
+import type { FolderResponse } from '../../application/folders/shared/folder.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class FolderHttpResponse {

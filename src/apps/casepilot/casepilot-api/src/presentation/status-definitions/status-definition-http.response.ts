@@ -1,4 +1,4 @@
-import type { StatusDefinitionResponse } from '../../application/status-definitions/status-definition.models.js';
+import type { StatusDefinitionResponse } from '../../application/status-definitions/shared/status-definition.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class StatusDefinitionHttpResponse {

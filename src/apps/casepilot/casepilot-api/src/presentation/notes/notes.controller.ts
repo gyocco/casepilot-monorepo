@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateNoteHandler } from '../../application/notes/create-note.handler.js';
-import { GetNoteHandler } from '../../application/notes/get-note.handler.js';
-import { UpdateNoteHandler } from '../../application/notes/update-note.handler.js';
-import { DeleteNoteHandler } from '../../application/notes/delete-note.handler.js';
-import { ListNotesHandler } from '../../application/notes/list-notes.handler.js';
-import { CreateNoteRequest, GetNoteRequest, UpdateNoteRequest, DeleteNoteRequest, ListNotesRequest } from '../../application/notes/note.models.js';
+import { CreateNoteHandler } from '../../application/notes/create-note/create-note.handler.js';
+import { GetNoteHandler } from '../../application/notes/get-note/get-note.handler.js';
+import { UpdateNoteHandler } from '../../application/notes/update-note/update-note.handler.js';
+import { DeleteNoteHandler } from '../../application/notes/delete-note/delete-note.handler.js';
+import { ListNotesHandler } from '../../application/notes/list-notes/list-notes.handler.js';
+import { CreateNoteRequest } from '../../application/notes/create-note/create-note.request.js';
+import { GetNoteRequest } from '../../application/notes/get-note/get-note.request.js';
+import { UpdateNoteRequest } from '../../application/notes/update-note/update-note.request.js';
+import { DeleteNoteRequest } from '../../application/notes/delete-note/delete-note.request.js';
+import { ListNotesRequest } from '../../application/notes/list-notes/list-notes.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { NoteItemHttpResponse, NotesPageHttpResponse, DeleteNoteHttpResponse, toNoteHttpResponse } from './note-http.response.js';
 

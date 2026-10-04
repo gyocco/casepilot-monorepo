@@ -1,4 +1,4 @@
-import type { ExpenseResponse } from '../../application/expenses/expense.models.js';
+import type { ExpenseResponse } from '../../application/expenses/shared/expense.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class ExpenseHttpResponse {

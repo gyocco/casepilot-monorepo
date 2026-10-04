@@ -1,6 +1,6 @@
 import { Controller, Get, Header, Inject } from '@nestjs/common';
-import { GetHealthCheckObjectsHandler } from '../../application/health/get-health-check-objects.handler.js';
-import { GetHealthCheckObjectsRequest } from '../../application/health/get-health-check-objects.request.js';
+import { GetHealthCheckObjectsHandler } from '../../application/health/get-health-check-objects/get-health-check-objects.handler.js';
+import { GetHealthCheckObjectsRequest } from '../../application/health/get-health-check-objects/get-health-check-objects.request.js';
 import {
   ApiHealthHttpResponse,
   DatabaseHealthHttpResponse,

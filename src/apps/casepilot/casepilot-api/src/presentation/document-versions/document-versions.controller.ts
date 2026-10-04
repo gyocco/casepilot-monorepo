@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateDocumentVersionHandler } from '../../application/document-versions/create-document-version.handler.js';
-import { GetDocumentVersionHandler } from '../../application/document-versions/get-document-version.handler.js';
-import { UpdateDocumentVersionHandler } from '../../application/document-versions/update-document-version.handler.js';
-import { DeleteDocumentVersionHandler } from '../../application/document-versions/delete-document-version.handler.js';
-import { ListDocumentVersionsHandler } from '../../application/document-versions/list-document-versions.handler.js';
-import { CreateDocumentVersionRequest, GetDocumentVersionRequest, UpdateDocumentVersionRequest, DeleteDocumentVersionRequest, ListDocumentVersionsRequest } from '../../application/document-versions/document-version.models.js';
+import { CreateDocumentVersionHandler } from '../../application/document-versions/create-document-version/create-document-version.handler.js';
+import { GetDocumentVersionHandler } from '../../application/document-versions/get-document-version/get-document-version.handler.js';
+import { UpdateDocumentVersionHandler } from '../../application/document-versions/update-document-version/update-document-version.handler.js';
+import { DeleteDocumentVersionHandler } from '../../application/document-versions/delete-document-version/delete-document-version.handler.js';
+import { ListDocumentVersionsHandler } from '../../application/document-versions/list-document-versions/list-document-versions.handler.js';
+import { CreateDocumentVersionRequest } from '../../application/document-versions/create-document-version/create-document-version.request.js';
+import { GetDocumentVersionRequest } from '../../application/document-versions/get-document-version/get-document-version.request.js';
+import { UpdateDocumentVersionRequest } from '../../application/document-versions/update-document-version/update-document-version.request.js';
+import { DeleteDocumentVersionRequest } from '../../application/document-versions/delete-document-version/delete-document-version.request.js';
+import { ListDocumentVersionsRequest } from '../../application/document-versions/list-document-versions/list-document-versions.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, optionalNumber, nullableString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { DocumentVersionItemHttpResponse, DocumentVersionsPageHttpResponse, DeleteDocumentVersionHttpResponse, toDocumentVersionHttpResponse } from './document-version-http.response.js';
 

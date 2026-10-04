@@ -1,4 +1,4 @@
-import type { CustomFieldDefinitionResponse } from '../../application/custom-field-definitions/custom-field-definition.models.js';
+import type { CustomFieldDefinitionResponse } from '../../application/custom-field-definitions/shared/custom-field-definition.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import type { JsonValue } from '@casepilot/abstractions';
 export class CustomFieldDefinitionHttpResponse {

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCaseRepository } from '../../infrastructure/persistence/repositories/typeorm-case.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateCaseHandler } from '../../application/cases/create-case.handler.js';
-import { GetCaseHandler } from '../../application/cases/get-case.handler.js';
-import { UpdateCaseHandler } from '../../application/cases/update-case.handler.js';
-import { DeleteCaseHandler } from '../../application/cases/delete-case.handler.js';
-import { ListCasesHandler } from '../../application/cases/list-cases.handler.js';
+import { CreateCaseHandler } from '../../application/cases/create-case/create-case.handler.js';
+import { GetCaseHandler } from '../../application/cases/get-case/get-case.handler.js';
+import { UpdateCaseHandler } from '../../application/cases/update-case/update-case.handler.js';
+import { DeleteCaseHandler } from '../../application/cases/delete-case/delete-case.handler.js';
+import { ListCasesHandler } from '../../application/cases/list-cases/list-cases.handler.js';
 import { CasesController } from './cases.controller.js';
 const WORK = Symbol('Cases_WORK');
 @Module({

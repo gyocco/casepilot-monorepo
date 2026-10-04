@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCommunicationRepository } from '../../infrastructure/persistence/repositories/typeorm-communication.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateCommunicationHandler } from '../../application/communications/create-communication.handler.js';
-import { GetCommunicationHandler } from '../../application/communications/get-communication.handler.js';
-import { UpdateCommunicationHandler } from '../../application/communications/update-communication.handler.js';
-import { DeleteCommunicationHandler } from '../../application/communications/delete-communication.handler.js';
-import { ListCommunicationsHandler } from '../../application/communications/list-communications.handler.js';
+import { CreateCommunicationHandler } from '../../application/communications/create-communication/create-communication.handler.js';
+import { GetCommunicationHandler } from '../../application/communications/get-communication/get-communication.handler.js';
+import { UpdateCommunicationHandler } from '../../application/communications/update-communication/update-communication.handler.js';
+import { DeleteCommunicationHandler } from '../../application/communications/delete-communication/delete-communication.handler.js';
+import { ListCommunicationsHandler } from '../../application/communications/list-communications/list-communications.handler.js';
 import { CommunicationsController } from './communications.controller.js';
 const WORK = Symbol('Communications_WORK');
 @Module({

@@ -1,0 +1,24 @@
+import type { Handler } from '@casepilot/cqrs';
+import { type UnitOfWork, NotFoundError } from '@casepilot/abstractions';
+import type { StatusDefinition } from '../../../domain/entities/status-definition.js';
+import { GetStatusDefinitionResponse } from './get-status-definition.response.js';
+import { toStatusDefinitionResponse } from '../shared/status-definition.response.js';
+import { type GetStatusDefinitionRequest } from './get-status-definition.request.js';
+import type { CrudScope } from '../../shared/crud-models.js';
+import { runCrudPersistence } from '../../shared/crud-persistence.js';
+import { validateTenant } from '../../shared/crud-relations.js';
+import { validateId } from '@casepilot/validation';
+
+export class GetStatusDefinitionHandler implements Handler<GetStatusDefinitionRequest, GetStatusDefinitionResponse> {
+  constructor(private readonly work: UnitOfWork<CrudScope<StatusDefinition>>) {}
+
+  async execute(request: GetStatusDefinitionRequest): Promise<GetStatusDefinitionResponse> {
+    return runCrudPersistence(() => this.work.execute(async scope => {
+      await validateTenant(scope.references, request.businessAccountId, true);
+      validateId(request.id);
+      const entity = await scope.resource.getById(request.id, request.businessAccountId);
+      if (!entity) throw new NotFoundError();
+      return new GetStatusDefinitionResponse(toStatusDefinitionResponse(entity));
+    }, 'REPEATABLE READ'));
+  }
+}

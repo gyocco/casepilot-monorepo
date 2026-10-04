@@ -1,4 +1,4 @@
-import type { CommunicationResponse } from '../../application/communications/communication.models.js';
+import type { CommunicationResponse } from '../../application/communications/shared/communication.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class CommunicationHttpResponse {

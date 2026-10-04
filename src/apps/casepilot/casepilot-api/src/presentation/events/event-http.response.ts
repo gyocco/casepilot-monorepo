@@ -1,4 +1,4 @@
-import type { EventResponse } from '../../application/events/event.models.js';
+import type { EventResponse } from '../../application/events/shared/event.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class EventHttpResponse {

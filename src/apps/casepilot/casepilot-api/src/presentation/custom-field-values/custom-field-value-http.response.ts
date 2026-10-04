@@ -1,4 +1,4 @@
-import type { CustomFieldValueResponse } from '../../application/custom-field-values/custom-field-value.models.js';
+import type { CustomFieldValueResponse } from '../../application/custom-field-values/shared/custom-field-value.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import type { JsonValue } from '@casepilot/abstractions';
 export class CustomFieldValueHttpResponse {

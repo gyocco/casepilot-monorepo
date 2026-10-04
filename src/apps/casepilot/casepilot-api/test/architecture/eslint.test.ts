@@ -18,8 +18,8 @@ const typedEslint = new ESLint({ cwd: apiDirectory });
 
 void test('BCK-019 typed ESLint resolves Health response bases and shared error constructors', async () => {
   const paths = [
-    'src/application/health/get-health-check-objects.response.ts',
-    'src/application/health/get-health-check-objects.handler.ts',
+    'src/application/health/get-health-check-objects/get-health-check-objects.response.ts',
+    'src/application/health/get-health-check-objects/get-health-check-objects.handler.ts',
   ];
   const results = await typedEslint.lintFiles(paths);
   assert.equal(results.length, paths.length);
@@ -27,7 +27,7 @@ void test('BCK-019 typed ESLint resolves Health response bases and shared error 
 });
 
 void test('BCK-019 typed ESLint rejects unsafe calls, construction and unresolved base types', async () => {
-  const path = join(apiDirectory, 'src/application/health/get-health-check-objects.response.ts');
+  const path = join(apiDirectory, 'src/application/health/get-health-check-objects/get-health-check-objects.response.ts');
   for (const code of [
     'declare const operation: any; export const result = operation();',
     'declare const Constructor: any; export const result = new Constructor();',

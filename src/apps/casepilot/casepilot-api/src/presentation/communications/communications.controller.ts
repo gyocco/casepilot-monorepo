@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateCommunicationHandler } from '../../application/communications/create-communication.handler.js';
-import { GetCommunicationHandler } from '../../application/communications/get-communication.handler.js';
-import { UpdateCommunicationHandler } from '../../application/communications/update-communication.handler.js';
-import { DeleteCommunicationHandler } from '../../application/communications/delete-communication.handler.js';
-import { ListCommunicationsHandler } from '../../application/communications/list-communications.handler.js';
-import { CreateCommunicationRequest, GetCommunicationRequest, UpdateCommunicationRequest, DeleteCommunicationRequest, ListCommunicationsRequest } from '../../application/communications/communication.models.js';
+import { CreateCommunicationHandler } from '../../application/communications/create-communication/create-communication.handler.js';
+import { GetCommunicationHandler } from '../../application/communications/get-communication/get-communication.handler.js';
+import { UpdateCommunicationHandler } from '../../application/communications/update-communication/update-communication.handler.js';
+import { DeleteCommunicationHandler } from '../../application/communications/delete-communication/delete-communication.handler.js';
+import { ListCommunicationsHandler } from '../../application/communications/list-communications/list-communications.handler.js';
+import { CreateCommunicationRequest } from '../../application/communications/create-communication/create-communication.request.js';
+import { GetCommunicationRequest } from '../../application/communications/get-communication/get-communication.request.js';
+import { UpdateCommunicationRequest } from '../../application/communications/update-communication/update-communication.request.js';
+import { DeleteCommunicationRequest } from '../../application/communications/delete-communication/delete-communication.request.js';
+import { ListCommunicationsRequest } from '../../application/communications/list-communications/list-communications.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, choiceValue, optionalChoice, nullableChoice, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CommunicationItemHttpResponse, CommunicationsPageHttpResponse, DeleteCommunicationHttpResponse, toCommunicationHttpResponse } from './communication-http.response.js';
 

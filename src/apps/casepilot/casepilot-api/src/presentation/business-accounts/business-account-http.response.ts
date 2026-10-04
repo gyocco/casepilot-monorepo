@@ -1,4 +1,4 @@
-import type { BusinessAccountResponse } from '../../application/business-accounts/business-account.models.js';
+import type { BusinessAccountResponse } from '../../application/business-accounts/shared/business-account.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import type { JsonValue } from '@casepilot/abstractions';
 export class BusinessAccountHttpResponse {

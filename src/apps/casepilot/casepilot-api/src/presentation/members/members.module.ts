@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateMemberHandler } from '../../application/members/create-member.handler.js';
-import { GetMemberHandler } from '../../application/members/get-member.handler.js';
-import { UpdateMemberHandler } from '../../application/members/update-member.handler.js';
-import { DeleteMemberHandler } from '../../application/members/delete-member.handler.js';
-import { ListMembersHandler } from '../../application/members/list-members.handler.js';
+import { CreateMemberHandler } from '../../application/members/create-member/create-member.handler.js';
+import { GetMemberHandler } from '../../application/members/get-member/get-member.handler.js';
+import { UpdateMemberHandler } from '../../application/members/update-member/update-member.handler.js';
+import { DeleteMemberHandler } from '../../application/members/delete-member/delete-member.handler.js';
+import { ListMembersHandler } from '../../application/members/list-members/list-members.handler.js';
 import { MembersController } from './members.controller.js';
 const WORK = Symbol('Members_WORK');
 @Module({

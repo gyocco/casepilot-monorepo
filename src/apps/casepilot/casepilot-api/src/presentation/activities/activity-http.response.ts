@@ -1,4 +1,4 @@
-import type { ActivityResponse } from '../../application/activities/activity.models.js';
+import type { ActivityResponse } from '../../application/activities/shared/activity.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import type { JsonValue } from '@casepilot/abstractions';
 export class ActivityHttpResponse {

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmStatusDefinitionRepository } from '../../infrastructure/persistence/repositories/typeorm-status-definition.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateStatusDefinitionHandler } from '../../application/status-definitions/create-status-definition.handler.js';
-import { GetStatusDefinitionHandler } from '../../application/status-definitions/get-status-definition.handler.js';
-import { UpdateStatusDefinitionHandler } from '../../application/status-definitions/update-status-definition.handler.js';
-import { DeleteStatusDefinitionHandler } from '../../application/status-definitions/delete-status-definition.handler.js';
-import { ListStatusDefinitionsHandler } from '../../application/status-definitions/list-status-definitions.handler.js';
+import { CreateStatusDefinitionHandler } from '../../application/status-definitions/create-status-definition/create-status-definition.handler.js';
+import { GetStatusDefinitionHandler } from '../../application/status-definitions/get-status-definition/get-status-definition.handler.js';
+import { UpdateStatusDefinitionHandler } from '../../application/status-definitions/update-status-definition/update-status-definition.handler.js';
+import { DeleteStatusDefinitionHandler } from '../../application/status-definitions/delete-status-definition/delete-status-definition.handler.js';
+import { ListStatusDefinitionsHandler } from '../../application/status-definitions/list-status-definitions/list-status-definitions.handler.js';
 import { StatusDefinitionsController } from './status-definitions.controller.js';
 const WORK = Symbol('StatusDefinitions_WORK');
 @Module({

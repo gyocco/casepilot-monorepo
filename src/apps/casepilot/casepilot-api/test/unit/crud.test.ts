@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { NotFoundError, ValidationError, type UnitOfWork } from '@casepilot/abstractions';
-import { CreateNoteHandler } from '../../src/application/notes/create-note.handler.js';
-import { CreateNoteRequest } from '../../src/application/notes/note.models.js';
-import { UpdateNoteHandler } from '../../src/application/notes/update-note.handler.js';
-import { UpdateNoteRequest } from '../../src/application/notes/note.models.js';
-import { ListNotesHandler } from '../../src/application/notes/list-notes.handler.js';
-import { ListNotesRequest } from '../../src/application/notes/note.models.js';
+import { CreateNoteHandler } from '../../src/application/notes/create-note/create-note.handler.js';
+import { CreateNoteRequest } from '../../src/application/notes/create-note/create-note.request.js';
+import { UpdateNoteHandler } from '../../src/application/notes/update-note/update-note.handler.js';
+import { UpdateNoteRequest } from '../../src/application/notes/update-note/update-note.request.js';
+import { ListNotesHandler } from '../../src/application/notes/list-notes/list-notes.handler.js';
+import { ListNotesRequest } from '../../src/application/notes/list-notes/list-notes.request.js';
 import { ConflictError } from '@casepilot/abstractions';
 import type { CrudScope } from '../../src/application/shared/crud-models.js';
 import type { ScopedDataRepository as DataRepository } from '@casepilot/abstractions';

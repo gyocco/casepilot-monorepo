@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmDocumentRepository } from '../../infrastructure/persistence/repositories/typeorm-document.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateDocumentHandler } from '../../application/documents/create-document.handler.js';
-import { GetDocumentHandler } from '../../application/documents/get-document.handler.js';
-import { UpdateDocumentHandler } from '../../application/documents/update-document.handler.js';
-import { DeleteDocumentHandler } from '../../application/documents/delete-document.handler.js';
-import { ListDocumentsHandler } from '../../application/documents/list-documents.handler.js';
+import { CreateDocumentHandler } from '../../application/documents/create-document/create-document.handler.js';
+import { GetDocumentHandler } from '../../application/documents/get-document/get-document.handler.js';
+import { UpdateDocumentHandler } from '../../application/documents/update-document/update-document.handler.js';
+import { DeleteDocumentHandler } from '../../application/documents/delete-document/delete-document.handler.js';
+import { ListDocumentsHandler } from '../../application/documents/list-documents/list-documents.handler.js';
 import { DocumentsController } from './documents.controller.js';
 const WORK = Symbol('Documents_WORK');
 @Module({

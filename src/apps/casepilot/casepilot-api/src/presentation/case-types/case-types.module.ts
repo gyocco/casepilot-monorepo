@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCaseTypeRepository } from '../../infrastructure/persistence/repositories/typeorm-case-type.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateCaseTypeHandler } from '../../application/case-types/create-case-type.handler.js';
-import { GetCaseTypeHandler } from '../../application/case-types/get-case-type.handler.js';
-import { UpdateCaseTypeHandler } from '../../application/case-types/update-case-type.handler.js';
-import { DeleteCaseTypeHandler } from '../../application/case-types/delete-case-type.handler.js';
-import { ListCaseTypesHandler } from '../../application/case-types/list-case-types.handler.js';
+import { CreateCaseTypeHandler } from '../../application/case-types/create-case-type/create-case-type.handler.js';
+import { GetCaseTypeHandler } from '../../application/case-types/get-case-type/get-case-type.handler.js';
+import { UpdateCaseTypeHandler } from '../../application/case-types/update-case-type/update-case-type.handler.js';
+import { DeleteCaseTypeHandler } from '../../application/case-types/delete-case-type/delete-case-type.handler.js';
+import { ListCaseTypesHandler } from '../../application/case-types/list-case-types/list-case-types.handler.js';
 import { CaseTypesController } from './case-types.controller.js';
 const WORK = Symbol('CaseTypes_WORK');
 @Module({

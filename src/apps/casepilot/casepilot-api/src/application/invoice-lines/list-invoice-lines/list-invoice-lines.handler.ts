@@ -1,0 +1,27 @@
+import type { Handler } from '@casepilot/cqrs';
+import { type UnitOfWork, PageResponse } from '@casepilot/abstractions';
+import type { InvoiceLine } from '../../../domain/entities/invoice-line.js';
+import { ListInvoiceLinesResponse } from './list-invoice-lines.response.js';
+import { toInvoiceLineResponse } from '../shared/invoice-line.response.js';
+import { type ListInvoiceLinesRequest } from './list-invoice-lines.request.js';
+import { type CrudScope } from '../../shared/crud-models.js';
+import { PageMetadataResponse } from '@casepilot/cqrs';
+import { runCrudPersistence } from '../../shared/crud-persistence.js';
+import { validateTenant } from '../../shared/crud-relations.js';
+import { validatePage } from '../../shared/crud-pagination.js';
+import { invoice_lineSortFields } from '../shared/invoice-line.rules.js';
+
+export class ListInvoiceLinesHandler implements Handler<ListInvoiceLinesRequest, ListInvoiceLinesResponse> {
+  constructor(private readonly work: UnitOfWork<CrudScope<InvoiceLine>>) {}
+
+  async execute(request: ListInvoiceLinesRequest): Promise<ListInvoiceLinesResponse> {
+    return runCrudPersistence(() => this.work.execute(async scope => {
+      await validateTenant(scope.references, request.businessAccountId, true);
+      const page = validatePage(request.pageNumber, request.pageSize, request.sortBy, request.sortDirection, invoice_lineSortFields);
+      const items = await scope.resource.getPage(page, request.businessAccountId);
+      const total = await scope.resource.count(request.businessAccountId);
+      const result = new PageResponse(page, items, total);
+      return new ListInvoiceLinesResponse(items.map(toInvoiceLineResponse), new PageMetadataResponse(result.pageNumber, result.pageSize, result.totalCount, result.totalPages, result.hasNextPage, result.hasPreviousPage));
+    }, 'REPEATABLE READ'));
+  }
+}

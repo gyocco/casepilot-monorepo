@@ -18,6 +18,8 @@ Concretar dos convenciones verificables compatibles con la base: handlers de cla
 
 Estas ubicaciones corresponden a la decisión inicial: los ADRs 0008 y 0009 sustituyen las convenciones de paths. Actualmente el scanner recorre toda Application organizada por recurso y el checker de layout verifica CPA-001, conservando los contratos de handlers y las herramientas decididas aquí.
 
+El [ADR 0017](0017-operation-organized-application.md) añade BCK-023: carpeta obligatoria por operación, trío handler/request/response y shared por recurso. Un checker ts-morph específico valida sus archivos y símbolos; el grafo rechaza dependencias de shared hacia operaciones. Las herramientas originales mantienen sus responsabilidades.
+
 El [ADR 0010](0010-shared-cqrs-contracts.md) añade CPA-002: Request/Response con herencia compartida y `<Operation>Handler` con el contrato único de CQRS; las herramientas verifican los símbolos reales y su adopción en Application.
 
 La [documentación local de validación](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md) es la fuente canónica de comandos, versiones, cobertura por ID, límites y mantenimiento. El catálogo BCK permanece sin modificaciones.

@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateTimeEntryHandler } from '../../application/time-entries/create-time-entry.handler.js';
-import { GetTimeEntryHandler } from '../../application/time-entries/get-time-entry.handler.js';
-import { UpdateTimeEntryHandler } from '../../application/time-entries/update-time-entry.handler.js';
-import { DeleteTimeEntryHandler } from '../../application/time-entries/delete-time-entry.handler.js';
-import { ListTimeEntriesHandler } from '../../application/time-entries/list-time-entries.handler.js';
-import { CreateTimeEntryRequest, GetTimeEntryRequest, UpdateTimeEntryRequest, DeleteTimeEntryRequest, ListTimeEntriesRequest } from '../../application/time-entries/time-entry.models.js';
+import { CreateTimeEntryHandler } from '../../application/time-entries/create-time-entry/create-time-entry.handler.js';
+import { GetTimeEntryHandler } from '../../application/time-entries/get-time-entry/get-time-entry.handler.js';
+import { UpdateTimeEntryHandler } from '../../application/time-entries/update-time-entry/update-time-entry.handler.js';
+import { DeleteTimeEntryHandler } from '../../application/time-entries/delete-time-entry/delete-time-entry.handler.js';
+import { ListTimeEntriesHandler } from '../../application/time-entries/list-time-entries/list-time-entries.handler.js';
+import { CreateTimeEntryRequest } from '../../application/time-entries/create-time-entry/create-time-entry.request.js';
+import { GetTimeEntryRequest } from '../../application/time-entries/get-time-entry/get-time-entry.request.js';
+import { UpdateTimeEntryRequest } from '../../application/time-entries/update-time-entry/update-time-entry.request.js';
+import { DeleteTimeEntryRequest } from '../../application/time-entries/delete-time-entry/delete-time-entry.request.js';
+import { ListTimeEntriesRequest } from '../../application/time-entries/list-time-entries/list-time-entries.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { TimeEntryItemHttpResponse, TimeEntriesPageHttpResponse, DeleteTimeEntryHttpResponse, toTimeEntryHttpResponse } from './time-entry-http.response.js';
 

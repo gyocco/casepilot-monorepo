@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateExternalPartyHandler } from '../../application/external-parties/create-external-party.handler.js';
-import { GetExternalPartyHandler } from '../../application/external-parties/get-external-party.handler.js';
-import { UpdateExternalPartyHandler } from '../../application/external-parties/update-external-party.handler.js';
-import { DeleteExternalPartyHandler } from '../../application/external-parties/delete-external-party.handler.js';
-import { ListExternalPartiesHandler } from '../../application/external-parties/list-external-parties.handler.js';
-import { CreateExternalPartyRequest, GetExternalPartyRequest, UpdateExternalPartyRequest, DeleteExternalPartyRequest, ListExternalPartiesRequest } from '../../application/external-parties/external-party.models.js';
+import { CreateExternalPartyHandler } from '../../application/external-parties/create-external-party/create-external-party.handler.js';
+import { GetExternalPartyHandler } from '../../application/external-parties/get-external-party/get-external-party.handler.js';
+import { UpdateExternalPartyHandler } from '../../application/external-parties/update-external-party/update-external-party.handler.js';
+import { DeleteExternalPartyHandler } from '../../application/external-parties/delete-external-party/delete-external-party.handler.js';
+import { ListExternalPartiesHandler } from '../../application/external-parties/list-external-parties/list-external-parties.handler.js';
+import { CreateExternalPartyRequest } from '../../application/external-parties/create-external-party/create-external-party.request.js';
+import { GetExternalPartyRequest } from '../../application/external-parties/get-external-party/get-external-party.request.js';
+import { UpdateExternalPartyRequest } from '../../application/external-parties/update-external-party/update-external-party.request.js';
+import { DeleteExternalPartyRequest } from '../../application/external-parties/delete-external-party/delete-external-party.request.js';
+import { ListExternalPartiesRequest } from '../../application/external-parties/list-external-parties/list-external-parties.request.js';
 import { readBody, numberValue, numberQuery, textQuery, choiceValue, optionalChoice, stringValue, optionalString, nullableString, nullableChoice, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { ExternalPartyItemHttpResponse, ExternalPartiesPageHttpResponse, DeleteExternalPartyHttpResponse, toExternalPartyHttpResponse } from './external-party-http.response.js';
 

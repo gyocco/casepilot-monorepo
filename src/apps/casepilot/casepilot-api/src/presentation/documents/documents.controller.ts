@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateDocumentHandler } from '../../application/documents/create-document.handler.js';
-import { GetDocumentHandler } from '../../application/documents/get-document.handler.js';
-import { UpdateDocumentHandler } from '../../application/documents/update-document.handler.js';
-import { DeleteDocumentHandler } from '../../application/documents/delete-document.handler.js';
-import { ListDocumentsHandler } from '../../application/documents/list-documents.handler.js';
-import { CreateDocumentRequest, GetDocumentRequest, UpdateDocumentRequest, DeleteDocumentRequest, ListDocumentsRequest } from '../../application/documents/document.models.js';
+import { CreateDocumentHandler } from '../../application/documents/create-document/create-document.handler.js';
+import { GetDocumentHandler } from '../../application/documents/get-document/get-document.handler.js';
+import { UpdateDocumentHandler } from '../../application/documents/update-document/update-document.handler.js';
+import { DeleteDocumentHandler } from '../../application/documents/delete-document/delete-document.handler.js';
+import { ListDocumentsHandler } from '../../application/documents/list-documents/list-documents.handler.js';
+import { CreateDocumentRequest } from '../../application/documents/create-document/create-document.request.js';
+import { GetDocumentRequest } from '../../application/documents/get-document/get-document.request.js';
+import { UpdateDocumentRequest } from '../../application/documents/update-document/update-document.request.js';
+import { DeleteDocumentRequest } from '../../application/documents/delete-document/delete-document.request.js';
+import { ListDocumentsRequest } from '../../application/documents/list-documents/list-documents.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { DocumentItemHttpResponse, DocumentsPageHttpResponse, DeleteDocumentHttpResponse, toDocumentHttpResponse } from './document-http.response.js';
 

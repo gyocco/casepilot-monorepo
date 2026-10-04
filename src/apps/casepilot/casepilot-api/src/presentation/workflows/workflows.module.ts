@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmWorkflowRepository } from '../../infrastructure/persistence/repositories/typeorm-workflow.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateWorkflowHandler } from '../../application/workflows/create-workflow.handler.js';
-import { GetWorkflowHandler } from '../../application/workflows/get-workflow.handler.js';
-import { UpdateWorkflowHandler } from '../../application/workflows/update-workflow.handler.js';
-import { DeleteWorkflowHandler } from '../../application/workflows/delete-workflow.handler.js';
-import { ListWorkflowsHandler } from '../../application/workflows/list-workflows.handler.js';
+import { CreateWorkflowHandler } from '../../application/workflows/create-workflow/create-workflow.handler.js';
+import { GetWorkflowHandler } from '../../application/workflows/get-workflow/get-workflow.handler.js';
+import { UpdateWorkflowHandler } from '../../application/workflows/update-workflow/update-workflow.handler.js';
+import { DeleteWorkflowHandler } from '../../application/workflows/delete-workflow/delete-workflow.handler.js';
+import { ListWorkflowsHandler } from '../../application/workflows/list-workflows/list-workflows.handler.js';
 import { WorkflowsController } from './workflows.controller.js';
 const WORK = Symbol('Workflows_WORK');
 @Module({

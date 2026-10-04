@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateFolderHandler } from '../../application/folders/create-folder.handler.js';
-import { GetFolderHandler } from '../../application/folders/get-folder.handler.js';
-import { UpdateFolderHandler } from '../../application/folders/update-folder.handler.js';
-import { DeleteFolderHandler } from '../../application/folders/delete-folder.handler.js';
-import { ListFoldersHandler } from '../../application/folders/list-folders.handler.js';
-import { CreateFolderRequest, GetFolderRequest, UpdateFolderRequest, DeleteFolderRequest, ListFoldersRequest } from '../../application/folders/folder.models.js';
+import { CreateFolderHandler } from '../../application/folders/create-folder/create-folder.handler.js';
+import { GetFolderHandler } from '../../application/folders/get-folder/get-folder.handler.js';
+import { UpdateFolderHandler } from '../../application/folders/update-folder/update-folder.handler.js';
+import { DeleteFolderHandler } from '../../application/folders/delete-folder/delete-folder.handler.js';
+import { ListFoldersHandler } from '../../application/folders/list-folders/list-folders.handler.js';
+import { CreateFolderRequest } from '../../application/folders/create-folder/create-folder.request.js';
+import { GetFolderRequest } from '../../application/folders/get-folder/get-folder.request.js';
+import { UpdateFolderRequest } from '../../application/folders/update-folder/update-folder.request.js';
+import { DeleteFolderRequest } from '../../application/folders/delete-folder/delete-folder.request.js';
+import { ListFoldersRequest } from '../../application/folders/list-folders/list-folders.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { FolderItemHttpResponse, FoldersPageHttpResponse, DeleteFolderHttpResponse, toFolderHttpResponse } from './folder-http.response.js';
 

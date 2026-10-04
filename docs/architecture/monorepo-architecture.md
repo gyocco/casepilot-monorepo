@@ -164,7 +164,8 @@ casepilot-api/
 ├── README.md
 ├── src/
 │   ├── application/
-│   │   └── health/                 # casos de uso y modelos por recurso
+│   │   └── health/
+│   │       └── get-health-check-objects/ # handler/request/response de la operación
 │   ├── domain/
 │   ├── infrastructure/
 │   │   ├── config/
@@ -184,7 +185,7 @@ casepilot-api/
 
 `test/unit/` y `test/integration/` tienen el mismo propietario. Un proyecto puede añadir otras suites propias cuando existan; no necesita carpetas vacías. `dist/`, `build/` y otros artefactos de compilación se generan según su configuración y permanecen ignorados por Git.
 
-Application de la API agrupa su contenido por recurso o responsabilidad lógica conforme a [CPA-001](casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y al [ADR 0009](../adr/0009-resource-organized-application.md). `health/` contiene la implementación actual; futuros `users/`, `orders/` o `payments/` se incorporan cuando tengan contenido.
+Application de la API agrupa su contenido por recurso y operación conforme a [BCK-023](backend-architecture-baseline-rules.md#bck-023--application-organizada-por-recurso-y-operacion) y [CPA-001](casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso). Cada operación tiene handler/request/response; los datos y reglas usados por varias operaciones van a `<recurso>/shared/`. Los colaboradores de producto entre recursos conservan `application/shared/`. La API implementa Health y 28 recursos CRUD; no se crean recursos futuros sin contenido. Evolución: [ADR 0009](../adr/0009-resource-organized-application.md) y [ADR 0017](../adr/0017-operation-organized-application.md).
 
 Presentation agrupa módulos de composición, controllers y modelos de transporte en `presentation/<recurso>/`, con `<recurso>.module.ts` directamente en esa carpeta, conforme a [CPA-004](casepilot-backend-architecture.md#cpa-004--presentation-organizada-por-modulo-de-recurso) y al [ADR 0014](../adr/0014-resource-organized-presentation.md). La raíz conserva AppModule/ApiModule; módulos técnicos como DatabaseModule permanecen en Infrastructure. Esto ordena composición y transporte dentro de la API, sin repetir capas por recurso.
 

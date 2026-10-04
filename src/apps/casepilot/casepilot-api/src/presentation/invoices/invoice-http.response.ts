@@ -1,4 +1,4 @@
-import type { InvoiceResponse } from '../../application/invoices/invoice.models.js';
+import type { InvoiceResponse } from '../../application/invoices/shared/invoice.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class InvoiceHttpResponse {

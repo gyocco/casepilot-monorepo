@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmTaskRepository } from '../../infrastructure/persistence/repositories/typeorm-task.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateTaskHandler } from '../../application/tasks/create-task.handler.js';
-import { GetTaskHandler } from '../../application/tasks/get-task.handler.js';
-import { UpdateTaskHandler } from '../../application/tasks/update-task.handler.js';
-import { DeleteTaskHandler } from '../../application/tasks/delete-task.handler.js';
-import { ListTasksHandler } from '../../application/tasks/list-tasks.handler.js';
+import { CreateTaskHandler } from '../../application/tasks/create-task/create-task.handler.js';
+import { GetTaskHandler } from '../../application/tasks/get-task/get-task.handler.js';
+import { UpdateTaskHandler } from '../../application/tasks/update-task/update-task.handler.js';
+import { DeleteTaskHandler } from '../../application/tasks/delete-task/delete-task.handler.js';
+import { ListTasksHandler } from '../../application/tasks/list-tasks/list-tasks.handler.js';
 import { TasksController } from './tasks.controller.js';
 const WORK = Symbol('Tasks_WORK');
 @Module({

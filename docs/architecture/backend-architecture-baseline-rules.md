@@ -1,7 +1,7 @@
 # Reglas obligatorias de la arquitectura base backend
 
 - Estado: base normativa reutilizable; obligatoria en cada proyecto que la adopte explícitamente.
-- Revisión: 2026-10-02.
+- Revisión: 2026-10-03.
 - Fecha inicial: 2026-09-30.
 - Alcance: APIs, workers, schedulers, adaptadores y librerías backend de los proyectos que adopten esta base NestJS/TypeScript con TypeORM.
 - Diseño explicado: [Arquitectura base backend](backend-architecture-baseline.md).
@@ -251,6 +251,21 @@ Las reglas se identifican con `BCK-NNN`. Los identificadores no se reutilizan ni
 - El aislamiento se expresa como un valor primitivo del contrato; Application determina su necesidad y el tratamiento de conflictos. No se prometen transacciones distribuidas ni rollback de efectos externos.
 
 **Verificación:** TypeScript comprueba el conjunto tipado, el análisis estático detecta contratos/símbolos y usos directos indebidos; integración con la base real acredita commit, rollback e independencia entre ejecuciones concurrentes. Revisar fábricas, escapes, llamadas indirectas, operaciones sin await, SQL y efectos externos.
+
+<a id="bck-023--application-organizada-por-recurso-y-operacion"></a>
+
+## BCK-023 — Application organizada por recurso y operación
+
+**Cada caso de uso DEBE tener una carpeta `application/<recurso>/<operacion>/` con su handler, request y response obligatorios en tres archivos separados: `<operacion>.handler.ts`, `<operacion>.request.ts` y `<operacion>.response.ts`.** Recurso y operación usan kebab-case. Complementa BCK-004/BCK-005/BCK-014; decisión: [ADR 0017](../adr/0017-operation-organized-application.md).
+
+- El handler y las clases concretas `<Operation>Request` y `<Operation>Response` se declaran y exportan en sus archivos respectivos. La firma de ejecución usa esas mismas clases por identidad de símbolo; un archivo vacío, un reexport o un modelo declarado en otro archivo no satisface la obligación.
+- Los contratos de operación son exclusivos de su carpeta. NO se concentran requests/responses de distintas operaciones en un archivo `.models.ts`, en `shared/` ni en la raíz del recurso. Los datos auxiliares exclusivos, como `CreateActivityData`, permanecen junto al request que los posee.
+- Los modelos de datos compuestos, mappers, errores, reglas y colaboradores utilizados por varias operaciones del mismo recurso DEBEN vivir en `application/<recurso>/shared/`. Los responses pueden componer esos modelos comunes, conservando su response concreto obligatorio. `shared/` NO declara handlers ni depende de archivos de operación, directamente o mediante reexports.
+- El código de producto compartido entre recursos permanece en `application/shared/`; los puertos transversales pueden vivir en `application/ports/`. Estas carpetas NO alojan casos de uso ni contratos concretos de operación. Las bases abstractas de Request pueden compartirse, pero los requests concretos siguen siendo exclusivos de una operación. Los mecanismos generales siguen perteneciendo a librerías backend conforme a BCK-015.
+- No se dejan archivos sueltos directamente en Application o en la raíz de un recurso, ni carpetas de operación sin su trío completo. Una operación puede contener colaboradores exclusivos y subcarpetas, pero sus tres archivos obligatorios quedan directamente bajo la carpeta de la operación. No se repiten capas ni se crean recursos vacíos.
+- Reutilizar un colaborador ubicado en una operación desde otra operación requiere trasladarlo a `shared/`. La invocación explícita de otro handler para componer casos de uso sigue sujeta a las reglas de Application; no convierte sus requests/responses en modelos de datos comunes.
+
+**Verificación:** comprobar paths, existencia y declaraciones exportadas del trío, identidad de los modelos usados por `execute`, y dependencias de carpetas compartidas. Las dependencias estáticas entre operaciones permiten identificar colaboradores que deben moverse a `shared/`; reconocer duplicaciones de datos o reglas y justificar su recurso propietario requiere revisión semántica. Cada proyecto documenta el ámbito y los límites reales de su checker.
 
 ## Incorporación de reglas futuras
 

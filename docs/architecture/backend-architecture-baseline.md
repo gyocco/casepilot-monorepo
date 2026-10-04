@@ -2,7 +2,7 @@
 
 - Estado: base reutilizable, disponible para adopción explícita por distintos productos y proyectos.
 - Fecha inicial: 2026-09-30.
-- Revisión: 2026-10-02.
+- Revisión: 2026-10-03.
 - Alcance: backend NestJS/TypeScript con TypeORM; independiente del nombre, rutas y despliegue de un producto.
 - Reglas normativas: [Reglas obligatorias de la arquitectura base backend](backend-architecture-baseline-rules.md).
 
@@ -41,14 +41,19 @@ src/
 ├── main.ts / app.module.ts
 ├── application/
 │   ├── orders/
-│   │   ├── create-order.command.ts
-│   │   ├── create-order.request.ts
-│   │   ├── create-order.response.ts
-│   │   └── get-order/             # agrupación opcional por operación
-│   │       ├── get-order.query.ts
-│   │       ├── get-order.request.ts
-│   │       └── get-order.response.ts
+│   │   ├── create-order/
+│   │   │   ├── create-order.handler.ts
+│   │   │   ├── create-order.request.ts
+│   │   │   └── create-order.response.ts
+│   │   ├── get-order/
+│   │   │   ├── get-order.handler.ts
+│   │   │   ├── get-order.request.ts
+│   │   │   └── get-order.response.ts
+│   │   └── shared/                # datos, mappers y reglas usados por varias operaciones
+│   │       ├── order.rules.ts
+│   │       └── order.response.ts
 │   ├── users/
+│   ├── shared/                    # colaboradores del producto entre recursos
 │   └── ports/
 ├── domain/
 │   ├── entities/
@@ -67,7 +72,7 @@ src/
 
 Esta organización describe responsabilidades internas. Las carpetas globales del repositorio, la raíz de cada paquete y la ubicación física de sus pruebas pertenecen a la documentación de estructura del repositorio adoptante.
 
-El ejemplo agrupa Application por recurso. Commands y queries conservan sus contratos y diferencias de comportamiento dentro de cada recurso. La obligatoriedad de esta convención en CasePilot API se define en [CPA-001 de su arquitectura particular](casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso); BCK-014 permite organizar subcarpetas sin repetir capas.
+El ejemplo aplica [BCK-023](backend-architecture-baseline-rules.md#bck-023--application-organizada-por-recurso-y-operacion): cada recurso agrupa operaciones con su trío obligatorio y shared para contenido reutilizado. Commands y queries conservan sus diferencias de comportamiento; las carpetas no repiten capas ni crean contextos. [CPA-001](casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) añade la prohibición particular de carpetas commands/queries en CasePilot API.
 
 ## 3. Dependencias y composición con NestJS
 
@@ -106,7 +111,11 @@ Los contratos de repositorios aquí describen entrada/salida de entidades y sus 
 
 ## 5. Application: commands, queries y modelos obligatorios
 
-Cada operación de negocio tiene un handler responsable y dos clases concretas: `<Operation>Request` y `<Operation>Response`. La firma de ejecución tiene exactamente un parámetro requerido y devuelve exactamente un objeto response:
+Cada operación de negocio tiene un handler responsable y dos clases concretas: `<Operation>Request` y `<Operation>Response`.
+
+Los tres archivos pertenecen obligatoriamente a `application/<recurso>/<operacion>/`, con el mismo prefijo de operación en kebab-case, conforme a BCK-023. Sus clases se declaran en sus respectivos archivos; un reexport no sustituye esa declaración. Datos exclusivos permanecen con la operación. Los datos compuestos y reglas reutilizados por varias operaciones se ubican en `<recurso>/shared/`; los responses concretos componen esos datos sin perder su identidad propia. Shared no declara casos de uso ni depende de operaciones. Los modelos auxiliares usados por una sola operación, como los items de Health, pueden permanecer con su response.
+
+La firma de ejecución tiene exactamente un parámetro requerido y devuelve exactamente un objeto response:
 
 ```typescript
 execute(request: CompleteWorkItemRequest): Promise<CompleteWorkItemResponse>

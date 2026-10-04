@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmEventRepository } from '../../infrastructure/persistence/repositories/typeorm-event.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateEventHandler } from '../../application/events/create-event.handler.js';
-import { GetEventHandler } from '../../application/events/get-event.handler.js';
-import { UpdateEventHandler } from '../../application/events/update-event.handler.js';
-import { DeleteEventHandler } from '../../application/events/delete-event.handler.js';
-import { ListEventsHandler } from '../../application/events/list-events.handler.js';
+import { CreateEventHandler } from '../../application/events/create-event/create-event.handler.js';
+import { GetEventHandler } from '../../application/events/get-event/get-event.handler.js';
+import { UpdateEventHandler } from '../../application/events/update-event/update-event.handler.js';
+import { DeleteEventHandler } from '../../application/events/delete-event/delete-event.handler.js';
+import { ListEventsHandler } from '../../application/events/list-events/list-events.handler.js';
 import { EventsController } from './events.controller.js';
 const WORK = Symbol('Events_WORK');
 @Module({

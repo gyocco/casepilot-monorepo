@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateCommentHandler } from '../../application/comments/create-comment.handler.js';
-import { GetCommentHandler } from '../../application/comments/get-comment.handler.js';
-import { UpdateCommentHandler } from '../../application/comments/update-comment.handler.js';
-import { DeleteCommentHandler } from '../../application/comments/delete-comment.handler.js';
-import { ListCommentsHandler } from '../../application/comments/list-comments.handler.js';
-import { CreateCommentRequest, GetCommentRequest, UpdateCommentRequest, DeleteCommentRequest, ListCommentsRequest } from '../../application/comments/comment.models.js';
+import { CreateCommentHandler } from '../../application/comments/create-comment/create-comment.handler.js';
+import { GetCommentHandler } from '../../application/comments/get-comment/get-comment.handler.js';
+import { UpdateCommentHandler } from '../../application/comments/update-comment/update-comment.handler.js';
+import { DeleteCommentHandler } from '../../application/comments/delete-comment/delete-comment.handler.js';
+import { ListCommentsHandler } from '../../application/comments/list-comments/list-comments.handler.js';
+import { CreateCommentRequest } from '../../application/comments/create-comment/create-comment.request.js';
+import { GetCommentRequest } from '../../application/comments/get-comment/get-comment.request.js';
+import { UpdateCommentRequest } from '../../application/comments/update-comment/update-comment.request.js';
+import { DeleteCommentRequest } from '../../application/comments/delete-comment/delete-comment.request.js';
+import { ListCommentsRequest } from '../../application/comments/list-comments/list-comments.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CommentItemHttpResponse, CommentsPageHttpResponse, DeleteCommentHttpResponse, toCommentHttpResponse } from './comment-http.response.js';
 

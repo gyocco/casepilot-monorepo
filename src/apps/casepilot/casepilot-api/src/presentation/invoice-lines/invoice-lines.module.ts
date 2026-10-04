@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmInvoiceLineRepository } from '../../infrastructure/persistence/repositories/typeorm-invoice-line.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateInvoiceLineHandler } from '../../application/invoice-lines/create-invoice-line.handler.js';
-import { GetInvoiceLineHandler } from '../../application/invoice-lines/get-invoice-line.handler.js';
-import { UpdateInvoiceLineHandler } from '../../application/invoice-lines/update-invoice-line.handler.js';
-import { DeleteInvoiceLineHandler } from '../../application/invoice-lines/delete-invoice-line.handler.js';
-import { ListInvoiceLinesHandler } from '../../application/invoice-lines/list-invoice-lines.handler.js';
+import { CreateInvoiceLineHandler } from '../../application/invoice-lines/create-invoice-line/create-invoice-line.handler.js';
+import { GetInvoiceLineHandler } from '../../application/invoice-lines/get-invoice-line/get-invoice-line.handler.js';
+import { UpdateInvoiceLineHandler } from '../../application/invoice-lines/update-invoice-line/update-invoice-line.handler.js';
+import { DeleteInvoiceLineHandler } from '../../application/invoice-lines/delete-invoice-line/delete-invoice-line.handler.js';
+import { ListInvoiceLinesHandler } from '../../application/invoice-lines/list-invoice-lines/list-invoice-lines.handler.js';
 import { InvoiceLinesController } from './invoice-lines.controller.js';
 const WORK = Symbol('InvoiceLines_WORK');
 @Module({

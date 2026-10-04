@@ -1,4 +1,4 @@
-import type { CaseResponse } from '../../application/cases/case.models.js';
+import type { CaseResponse } from '../../application/cases/shared/case.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class CaseHttpResponse {

@@ -46,7 +46,8 @@ src/
 ├── main.ts / create-app.ts / app.module.ts
 ├── api.module.ts                   # registro de módulos de composición por recurso
 ├── application/
-│   └── health/                     # GetHealthCheckObjectsRequest/Handler/Response
+│   └── health/
+│       └── get-health-check-objects/ # GetHealthCheckObjectsRequest/Handler/Response
 ├── domain/
 │   ├── entities/                   # HealthCheckObject: datos, sin lógica
 │   └── repositories/               # contrato getAll y error técnico
@@ -73,7 +74,24 @@ src/
 
 Los modelos Request/Response de Application heredan de las bases correspondientes de [`@casepilot/cqrs`](../../../libs/backend/cqrs/README.md). Cada `<Operation>Handler`, en `.handler.ts`, implementa `Handler<OperationRequest, OperationResponse>` y devuelve una Promise; `Handler` se importa como tipo y las bases como valores por la entrada pública. El controller llama directamente a `handler.execute(request)`. Regla [CPA-002](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-002--contratos-cqrs-compartidos-e-invocacion-directa) y [ADR 0010](../../../../docs/adr/0010-shared-cqrs-contracts.md).
 
-Application se organiza por recurso o responsabilidad lógica según [CPA-001](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y el [ADR 0009](../../../../docs/adr/0009-resource-organized-application.md). Commands, queries y sus modelos conviven en `application/<recurso>/`, con subcarpetas opcionales por operación; no se crean carpetas `commands`/`queries` ni archivos sueltos en la raíz de Application. `users/`, `cases/` y `payments/` contienen sus casos de uso de producto.
+Application se organiza por recurso y operación según [BCK-023](../../../../docs/architecture/backend-architecture-baseline-rules.md#bck-023--application-organizada-por-recurso-y-operacion), [CPA-001](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-001--application-de-la-api-organizada-por-recurso) y el [ADR 0017](../../../../docs/adr/0017-operation-organized-application.md). Cada carpeta `application/<recurso>/<operacion>/` contiene `<operacion>.handler.ts`, `<operacion>.request.ts` y `<operacion>.response.ts`, con las clases concretas declaradas y exportadas allí. Los datos auxiliares exclusivos permanecen con el request; los modelos de datos, mappers y reglas reutilizados van a `<recurso>/shared/`. Los colaboradores de producto entre recursos conservan `application/shared/`. No se crean carpetas `commands`/`queries` ni archivos sueltos en Application o la raíz de un recurso.
+
+```text
+application/activities/
+├── create-activity/
+│   ├── create-activity.handler.ts
+│   ├── create-activity.request.ts  # CreateActivityRequest y CreateActivityData
+│   └── create-activity.response.ts # CreateActivityResponse compone ActivityResponse
+├── get-activity/                   # mismo trío obligatorio
+├── update-activity/
+├── delete-activity/
+├── list-activities/
+└── shared/
+    ├── activity.response.ts        # ActivityResponse y su mapper reutilizados
+    └── activity.rules.ts           # campos, orden y reglas de relaciones
+```
+
+El gate verifica existencia del trío, declaraciones concretas, identidad de los modelos usados por el handler y dependencias de shared. No se conservan archivos `.models.ts` que agrupen contratos de distintas operaciones. Los modelos auxiliares usados solo por una operación, como HealthCheckObjectResponse, permanecen junto a ella. Elegir qué datos o reglas deben compartirse conserva revisión semántica.
 
 La conexión se inicializa al primer acceso a datos, comparte la inicialización entre llamadas concurrentes y permite un nuevo intento después de un fallo. El arranque HTTP no necesita una conexión disponible. Esto no elimina la obligación de configurar correctamente las credenciales antes de arrancar. No se crean transacciones de casos de uso, escrituras, hooks ni cascadas en esta query.
 
@@ -83,7 +101,7 @@ Los helpers de conexión/configuración tienen un único consumidor y permanecen
 
 `AppModule` configura la conexión y el filtro global de errores, e importa `ApiModule`. `ApiModule` es el registro explícito de módulos de composición. `HealthModule`, su controller y sus responses HTTP conviven en `presentation/health/`, según [CPA-004](../../../../docs/architecture/casepilot-backend-architecture.md#cpa-004--presentation-organizada-por-modulo-de-recurso) y el [ADR 0014](../../../../docs/adr/0014-resource-organized-presentation.md). El módulo reúne las factories de repositorio/handler; esos detalles ya no pertenecen a la raíz.
 
-1. Para una operación de un recurso existente, agrega su Request/Handler/Response en `application/<recurso>/`, la ruta en su controller y los bindings nuevos en el módulo de ese recurso. No cambia `AppModule` ni `ApiModule`.
+1. Para una operación de un recurso existente, crea `application/<recurso>/<operacion>/` con su Request/Handler/Response en los tres archivos obligatorios del mismo prefijo. Extrae datos/reglas usados por varias operaciones a `<recurso>/shared/`. Agrega la ruta en su controller y los bindings nuevos en el módulo de ese recurso. No cambia `AppModule` ni `ApiModule`.
 2. Si agregas otro controller del mismo recurso, inclúyelo en `controllers` de ese módulo.
 3. Para un recurso nuevo, crea `presentation/<recurso>/<recurso>.module.ts` y coloca sus controllers/modelos HTTP en esa carpeta. Registra el módulo una sola vez en `imports` de `api.module.ts`. Por ejemplo, Cases tendrá `presentation/cases/cases.module.ts` y el registro será `imports: [HealthModule, CasesModule]`. Sus siguientes endpoints solo afectan a Cases.
 4. Si otro módulo necesita un handler, expórtalo desde su módulo propietario e importa ese módulo en el consumidor; no dupliques sus providers. Los contratos internos siguen compartidos por la aplicación.

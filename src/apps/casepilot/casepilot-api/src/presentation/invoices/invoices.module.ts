@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmInvoiceRepository } from '../../infrastructure/persistence/repositories/typeorm-invoice.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateInvoiceHandler } from '../../application/invoices/create-invoice.handler.js';
-import { GetInvoiceHandler } from '../../application/invoices/get-invoice.handler.js';
-import { UpdateInvoiceHandler } from '../../application/invoices/update-invoice.handler.js';
-import { DeleteInvoiceHandler } from '../../application/invoices/delete-invoice.handler.js';
-import { ListInvoicesHandler } from '../../application/invoices/list-invoices.handler.js';
+import { CreateInvoiceHandler } from '../../application/invoices/create-invoice/create-invoice.handler.js';
+import { GetInvoiceHandler } from '../../application/invoices/get-invoice/get-invoice.handler.js';
+import { UpdateInvoiceHandler } from '../../application/invoices/update-invoice/update-invoice.handler.js';
+import { DeleteInvoiceHandler } from '../../application/invoices/delete-invoice/delete-invoice.handler.js';
+import { ListInvoicesHandler } from '../../application/invoices/list-invoices/list-invoices.handler.js';
 import { InvoicesController } from './invoices.controller.js';
 const WORK = Symbol('Invoices_WORK');
 @Module({

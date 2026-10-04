@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCommentRepository } from '../../infrastructure/persistence/repositories/typeorm-comment.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateCommentHandler } from '../../application/comments/create-comment.handler.js';
-import { GetCommentHandler } from '../../application/comments/get-comment.handler.js';
-import { UpdateCommentHandler } from '../../application/comments/update-comment.handler.js';
-import { DeleteCommentHandler } from '../../application/comments/delete-comment.handler.js';
-import { ListCommentsHandler } from '../../application/comments/list-comments.handler.js';
+import { CreateCommentHandler } from '../../application/comments/create-comment/create-comment.handler.js';
+import { GetCommentHandler } from '../../application/comments/get-comment/get-comment.handler.js';
+import { UpdateCommentHandler } from '../../application/comments/update-comment/update-comment.handler.js';
+import { DeleteCommentHandler } from '../../application/comments/delete-comment/delete-comment.handler.js';
+import { ListCommentsHandler } from '../../application/comments/list-comments/list-comments.handler.js';
 import { CommentsController } from './comments.controller.js';
 const WORK = Symbol('Comments_WORK');
 @Module({

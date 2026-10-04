@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmNoteRepository } from '../../infrastructure/persistence/repositories/typeorm-note.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateNoteHandler } from '../../application/notes/create-note.handler.js';
-import { GetNoteHandler } from '../../application/notes/get-note.handler.js';
-import { UpdateNoteHandler } from '../../application/notes/update-note.handler.js';
-import { DeleteNoteHandler } from '../../application/notes/delete-note.handler.js';
-import { ListNotesHandler } from '../../application/notes/list-notes.handler.js';
+import { CreateNoteHandler } from '../../application/notes/create-note/create-note.handler.js';
+import { GetNoteHandler } from '../../application/notes/get-note/get-note.handler.js';
+import { UpdateNoteHandler } from '../../application/notes/update-note/update-note.handler.js';
+import { DeleteNoteHandler } from '../../application/notes/delete-note/delete-note.handler.js';
+import { ListNotesHandler } from '../../application/notes/list-notes/list-notes.handler.js';
 import { NotesController } from './notes.controller.js';
 const WORK = Symbol('Notes_WORK');
 @Module({

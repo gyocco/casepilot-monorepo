@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateStatusDefinitionHandler } from '../../application/status-definitions/create-status-definition.handler.js';
-import { GetStatusDefinitionHandler } from '../../application/status-definitions/get-status-definition.handler.js';
-import { UpdateStatusDefinitionHandler } from '../../application/status-definitions/update-status-definition.handler.js';
-import { DeleteStatusDefinitionHandler } from '../../application/status-definitions/delete-status-definition.handler.js';
-import { ListStatusDefinitionsHandler } from '../../application/status-definitions/list-status-definitions.handler.js';
-import { CreateStatusDefinitionRequest, GetStatusDefinitionRequest, UpdateStatusDefinitionRequest, DeleteStatusDefinitionRequest, ListStatusDefinitionsRequest } from '../../application/status-definitions/status-definition.models.js';
+import { CreateStatusDefinitionHandler } from '../../application/status-definitions/create-status-definition/create-status-definition.handler.js';
+import { GetStatusDefinitionHandler } from '../../application/status-definitions/get-status-definition/get-status-definition.handler.js';
+import { UpdateStatusDefinitionHandler } from '../../application/status-definitions/update-status-definition/update-status-definition.handler.js';
+import { DeleteStatusDefinitionHandler } from '../../application/status-definitions/delete-status-definition/delete-status-definition.handler.js';
+import { ListStatusDefinitionsHandler } from '../../application/status-definitions/list-status-definitions/list-status-definitions.handler.js';
+import { CreateStatusDefinitionRequest } from '../../application/status-definitions/create-status-definition/create-status-definition.request.js';
+import { GetStatusDefinitionRequest } from '../../application/status-definitions/get-status-definition/get-status-definition.request.js';
+import { UpdateStatusDefinitionRequest } from '../../application/status-definitions/update-status-definition/update-status-definition.request.js';
+import { DeleteStatusDefinitionRequest } from '../../application/status-definitions/delete-status-definition/delete-status-definition.request.js';
+import { ListStatusDefinitionsRequest } from '../../application/status-definitions/list-status-definitions/list-status-definitions.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, optionalNumber, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { StatusDefinitionItemHttpResponse, StatusDefinitionsPageHttpResponse, DeleteStatusDefinitionHttpResponse, toStatusDefinitionHttpResponse } from './status-definition-http.response.js';
 

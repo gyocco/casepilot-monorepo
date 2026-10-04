@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { UnexpectedError } from '@casepilot/abstractions';
 import type { ProblemDetails } from '@casepilot/exception-handler/nestjs';
 import { createApp } from '../../src/create-app.js';
-import { GetHealthCheckObjectsHandler } from '../../src/application/health/get-health-check-objects.handler.js';
+import { GetHealthCheckObjectsHandler } from '../../src/application/health/get-health-check-objects/get-health-check-objects.handler.js';
 import { HealthModule } from '../../src/presentation/health/health.module.js';
 import type { BackendConfig } from '../../src/infrastructure/config/backend-config.js';
 

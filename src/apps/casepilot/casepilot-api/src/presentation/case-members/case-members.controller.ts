@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateCaseMemberHandler } from '../../application/case-members/create-case-member.handler.js';
-import { GetCaseMemberHandler } from '../../application/case-members/get-case-member.handler.js';
-import { UpdateCaseMemberHandler } from '../../application/case-members/update-case-member.handler.js';
-import { DeleteCaseMemberHandler } from '../../application/case-members/delete-case-member.handler.js';
-import { ListCaseMembersHandler } from '../../application/case-members/list-case-members.handler.js';
-import { CreateCaseMemberRequest, GetCaseMemberRequest, UpdateCaseMemberRequest, DeleteCaseMemberRequest, ListCaseMembersRequest } from '../../application/case-members/case-member.models.js';
+import { CreateCaseMemberHandler } from '../../application/case-members/create-case-member/create-case-member.handler.js';
+import { GetCaseMemberHandler } from '../../application/case-members/get-case-member/get-case-member.handler.js';
+import { UpdateCaseMemberHandler } from '../../application/case-members/update-case-member/update-case-member.handler.js';
+import { DeleteCaseMemberHandler } from '../../application/case-members/delete-case-member/delete-case-member.handler.js';
+import { ListCaseMembersHandler } from '../../application/case-members/list-case-members/list-case-members.handler.js';
+import { CreateCaseMemberRequest } from '../../application/case-members/create-case-member/create-case-member.request.js';
+import { GetCaseMemberRequest } from '../../application/case-members/get-case-member/get-case-member.request.js';
+import { UpdateCaseMemberRequest } from '../../application/case-members/update-case-member/update-case-member.request.js';
+import { DeleteCaseMemberRequest } from '../../application/case-members/delete-case-member/delete-case-member.request.js';
+import { ListCaseMembersRequest } from '../../application/case-members/list-case-members/list-case-members.request.js';
 import { readBody, numberValue, numberQuery, textQuery, stringValue, optionalString, nullableString, booleanValue, optionalBoolean, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CaseMemberItemHttpResponse, CaseMembersPageHttpResponse, DeleteCaseMemberHttpResponse, toCaseMemberHttpResponse } from './case-member-http.response.js';
 

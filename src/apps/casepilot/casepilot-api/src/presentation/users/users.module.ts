@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateUserHandler } from '../../application/users/create-user.handler.js';
-import { GetUserHandler } from '../../application/users/get-user.handler.js';
-import { UpdateUserHandler } from '../../application/users/update-user.handler.js';
-import { DeleteUserHandler } from '../../application/users/delete-user.handler.js';
-import { ListUsersHandler } from '../../application/users/list-users.handler.js';
+import { CreateUserHandler } from '../../application/users/create-user/create-user.handler.js';
+import { GetUserHandler } from '../../application/users/get-user/get-user.handler.js';
+import { UpdateUserHandler } from '../../application/users/update-user/update-user.handler.js';
+import { DeleteUserHandler } from '../../application/users/delete-user/delete-user.handler.js';
+import { ListUsersHandler } from '../../application/users/list-users/list-users.handler.js';
 import { UsersController } from './users.controller.js';
 const WORK = Symbol('Users_WORK');
 @Module({

@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmFolderRepository } from '../../infrastructure/persistence/repositories/typeorm-folder.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateFolderHandler } from '../../application/folders/create-folder.handler.js';
-import { GetFolderHandler } from '../../application/folders/get-folder.handler.js';
-import { UpdateFolderHandler } from '../../application/folders/update-folder.handler.js';
-import { DeleteFolderHandler } from '../../application/folders/delete-folder.handler.js';
-import { ListFoldersHandler } from '../../application/folders/list-folders.handler.js';
+import { CreateFolderHandler } from '../../application/folders/create-folder/create-folder.handler.js';
+import { GetFolderHandler } from '../../application/folders/get-folder/get-folder.handler.js';
+import { UpdateFolderHandler } from '../../application/folders/update-folder/update-folder.handler.js';
+import { DeleteFolderHandler } from '../../application/folders/delete-folder/delete-folder.handler.js';
+import { ListFoldersHandler } from '../../application/folders/list-folders/list-folders.handler.js';
 import { FoldersController } from './folders.controller.js';
 const WORK = Symbol('Folders_WORK');
 @Module({

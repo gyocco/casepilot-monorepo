@@ -1,4 +1,4 @@
-import type { TaskResponse } from '../../application/tasks/task.models.js';
+import type { TaskResponse } from '../../application/tasks/shared/task.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class TaskHttpResponse {

@@ -1,4 +1,4 @@
-import type { MemberResponse } from '../../application/members/member.models.js';
+import type { MemberResponse } from '../../application/members/shared/member.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class MemberHttpResponse {

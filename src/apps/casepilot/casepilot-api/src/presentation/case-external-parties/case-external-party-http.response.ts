@@ -1,4 +1,4 @@
-import type { CaseExternalPartyResponse } from '../../application/case-external-parties/case-external-party.models.js';
+import type { CaseExternalPartyResponse } from '../../application/case-external-parties/shared/case-external-party.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class CaseExternalPartyHttpResponse {

@@ -2,13 +2,13 @@
 
 - Estado: adoptada; API NestJS/TypeORM con dominio compartido, CRUD de 28 modelos y sondas Health implementadas.
 - Fecha: 2026-10-01.
-- Revisión: 2026-10-02.
+- Revisión: 2026-10-03.
 - Alcance: todo backend de CasePilot, incluidos APIs, workers, schedulers, adaptadores y librerías backend.
 - Decisiones: [ADR 0002](../adr/0002-backend-application-owned-business-logic.md), [ADR 0003](../adr/0003-base-api-and-health-checks.md), [ADR 0006](../adr/0006-reusable-backend-baseline.md), [ADR 0008](../adr/0008-application-wide-backend-layers.md), [ADR 0009](../adr/0009-resource-organized-application.md), [ADR 0010](../adr/0010-shared-cqrs-contracts.md), [ADR 0013](../adr/0013-resource-module-composition.md) y [ADR 0014](../adr/0014-resource-organized-presentation.md).
 
 ## Adopción de la arquitectura base
 
-CasePilot adopta íntegramente la [arquitectura base backend NestJS/TypeORM](backend-architecture-baseline.md) y todas las reglas activas del [catálogo obligatorio](backend-architecture-baseline-rules.md). Los IDs BCK-001 a BCK-022 permanecen activos; BCK-014 evoluciona a propiedad por aplicación y capas únicas, BCK-009 al ámbito autorizado de relaciones y BCK-017 sitúa database en Infrastructure según el ADR 0008. BCK-021/BCK-022 añaden firmas acotadas de repositorios y UnitOfWork con scopes tipados según el ADR 0011. La base es reutilizable por otros proyectos que la adopten explícitamente; su presencia no impone esta arquitectura a proyectos ajenos.
+CasePilot adopta íntegramente la [arquitectura base backend NestJS/TypeORM](backend-architecture-baseline.md) y todas las reglas activas del [catálogo obligatorio](backend-architecture-baseline-rules.md). Los IDs BCK-001 a BCK-023 permanecen activos; BCK-014 evoluciona a propiedad por aplicación y capas únicas, BCK-009 al ámbito autorizado de relaciones y BCK-017 sitúa database en Infrastructure según el ADR 0008. BCK-021/BCK-022 añaden firmas acotadas de repositorios y UnitOfWork con scopes tipados según el ADR 0011. BCK-023 exige agrupación por operación, trío de archivos y shared por recurso conforme al [ADR 0017](../adr/0017-operation-organized-application.md). La base es reutilizable por otros proyectos que la adopten explícitamente; su presencia no impone esta arquitectura a proyectos ajenos.
 
 Este documento registra decisiones particulares y evidencia implementada. No mantiene una copia del catálogo ni permite excepciones locales: las decisiones específicas deben ser compatibles con toda regla activa. Nuevas restricciones de producto se documentan explícitamente sin redefinir una regla de la base.
 
@@ -38,10 +38,12 @@ El [ADR 0012](../adr/0012-configurable-http-error-handler.md) incorpora la [libr
 
 - Cada command/query, sus requests, responses, errores y colaboradores específicos pertenecen a `application/<recurso>/`, por ejemplo `health/`, `users/`, `orders/` o `payments/`. Los archivos no se colocan directamente en la raíz de `application/`.
 - NO se crean carpetas llamadas `commands` o `queries` en ningún nivel de Application, tampoco dentro de un recurso. La distinción se conserva en el comportamiento exigido por BCK-013; los handlers usan la nomenclatura común y el sufijo `.handler.ts` conforme a CPA-002.
-- Dentro de un recurso se PUEDEN agrupar los archivos de una operación en su propia subcarpeta. Los contratos o colaboradores realmente compartidos pueden tener una responsabilidad explícita, como `application/ports/` o `application/shared/`; no se duplican capas ni se crean bounded contexts.
+- Dentro de cada recurso, BCK-023 exige una carpeta por operación con `<operacion>.handler.ts`, `<operacion>.request.ts` y `<operacion>.response.ts`. Los modelos de datos, mappers y reglas reutilizados entre operaciones van en `<recurso>/shared/`; los auxiliares exclusivos permanecen con su operación. `application/ports/` y `application/shared/` solo contienen puertos o colaboradores transversales; no se duplican capas ni se crean bounded contexts.
 - No se crean carpetas de recursos futuros sin implementación. Health vive actualmente en `application/health/`; `users/`, `orders/` y `payments/` son ejemplos.
 
-**Verificación:** el gate estructural rechaza archivos de Application sin agrupación y carpetas `commands`/`queries`, incluso sin imports. Las firmas BCK-004/BCK-005 se analizan en toda Application, incluidos recursos y subcarpetas de operaciones. La correspondencia semántica entre contenido y recurso, y la necesidad de colaboradores compartidos, requieren revisión. La evidencia y límites se mantienen en la [guía de validación de la API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
+**Evolución 2026-10-03:** la agrupación por operación deja de ser opcional conforme a BCK-023 y al [ADR 0017](../adr/0017-operation-organized-application.md). Se conserva CPA-001 para la agrupación por recurso y la prohibición de `commands`/`queries`.
+
+**Verificación:** el gate estructural rechaza archivos de Application sin agrupación y carpetas `commands`/`queries`, incluso sin imports. El checker de operaciones comprueba BCK-023, incluyendo el trío obligatorio y la identidad de los contratos. Las firmas BCK-004/BCK-005 se analizan en toda Application. La correspondencia semántica entre contenido y recurso, y las duplicaciones que requieren extracción a shared, conservan revisión. Evidencia y límites: [guía de validación de la API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
 
 <a id="cpa-002--contratos-cqrs-compartidos-e-invocacion-directa"></a>
 

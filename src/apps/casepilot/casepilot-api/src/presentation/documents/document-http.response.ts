@@ -1,4 +1,4 @@
-import type { DocumentResponse } from '../../application/documents/document.models.js';
+import type { DocumentResponse } from '../../application/documents/shared/document.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class DocumentHttpResponse {

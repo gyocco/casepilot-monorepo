@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateCaseHandler } from '../../application/cases/create-case.handler.js';
-import { GetCaseHandler } from '../../application/cases/get-case.handler.js';
-import { UpdateCaseHandler } from '../../application/cases/update-case.handler.js';
-import { DeleteCaseHandler } from '../../application/cases/delete-case.handler.js';
-import { ListCasesHandler } from '../../application/cases/list-cases.handler.js';
-import { CreateCaseRequest, GetCaseRequest, UpdateCaseRequest, DeleteCaseRequest, ListCasesRequest } from '../../application/cases/case.models.js';
+import { CreateCaseHandler } from '../../application/cases/create-case/create-case.handler.js';
+import { GetCaseHandler } from '../../application/cases/get-case/get-case.handler.js';
+import { UpdateCaseHandler } from '../../application/cases/update-case/update-case.handler.js';
+import { DeleteCaseHandler } from '../../application/cases/delete-case/delete-case.handler.js';
+import { ListCasesHandler } from '../../application/cases/list-cases/list-cases.handler.js';
+import { CreateCaseRequest } from '../../application/cases/create-case/create-case.request.js';
+import { GetCaseRequest } from '../../application/cases/get-case/get-case.request.js';
+import { UpdateCaseRequest } from '../../application/cases/update-case/update-case.request.js';
+import { DeleteCaseRequest } from '../../application/cases/delete-case/delete-case.request.js';
+import { ListCasesRequest } from '../../application/cases/list-cases/list-cases.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, nullableChoice, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { CaseItemHttpResponse, CasesPageHttpResponse, DeleteCaseHttpResponse, toCaseHttpResponse } from './case-http.response.js';
 

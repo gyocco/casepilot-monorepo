@@ -1,10 +1,14 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { CreateTaskHandler } from '../../application/tasks/create-task.handler.js';
-import { GetTaskHandler } from '../../application/tasks/get-task.handler.js';
-import { UpdateTaskHandler } from '../../application/tasks/update-task.handler.js';
-import { DeleteTaskHandler } from '../../application/tasks/delete-task.handler.js';
-import { ListTasksHandler } from '../../application/tasks/list-tasks.handler.js';
-import { CreateTaskRequest, GetTaskRequest, UpdateTaskRequest, DeleteTaskRequest, ListTasksRequest } from '../../application/tasks/task.models.js';
+import { CreateTaskHandler } from '../../application/tasks/create-task/create-task.handler.js';
+import { GetTaskHandler } from '../../application/tasks/get-task/get-task.handler.js';
+import { UpdateTaskHandler } from '../../application/tasks/update-task/update-task.handler.js';
+import { DeleteTaskHandler } from '../../application/tasks/delete-task/delete-task.handler.js';
+import { ListTasksHandler } from '../../application/tasks/list-tasks/list-tasks.handler.js';
+import { CreateTaskRequest } from '../../application/tasks/create-task/create-task.request.js';
+import { GetTaskRequest } from '../../application/tasks/get-task/get-task.request.js';
+import { UpdateTaskRequest } from '../../application/tasks/update-task/update-task.request.js';
+import { DeleteTaskRequest } from '../../application/tasks/delete-task/delete-task.request.js';
+import { ListTasksRequest } from '../../application/tasks/list-tasks/list-tasks.request.js';
 import { readBody, numberValue, numberQuery, textQuery, nullableString, stringValue, optionalString, PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 import { TaskItemHttpResponse, TasksPageHttpResponse, DeleteTaskHttpResponse, toTaskHttpResponse } from './task-http.response.js';
 

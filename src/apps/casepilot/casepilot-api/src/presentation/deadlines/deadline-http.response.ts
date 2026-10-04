@@ -1,4 +1,4 @@
-import type { DeadlineResponse } from '../../application/deadlines/deadline.models.js';
+import type { DeadlineResponse } from '../../application/deadlines/shared/deadline.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class DeadlineHttpResponse {

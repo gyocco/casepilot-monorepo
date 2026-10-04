@@ -1,4 +1,4 @@
-import type { CommentResponse } from '../../application/comments/comment.models.js';
+import type { CommentResponse } from '../../application/comments/shared/comment.response.js';
 import { PageMetadataHttpResponse } from '@casepilot/validation/nestjs';
 
 export class CommentHttpResponse {

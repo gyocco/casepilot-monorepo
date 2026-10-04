@@ -7,11 +7,11 @@ import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmDocumentVersionRepository } from '../../infrastructure/persistence/repositories/typeorm-document-version.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { CreateDocumentVersionHandler } from '../../application/document-versions/create-document-version.handler.js';
-import { GetDocumentVersionHandler } from '../../application/document-versions/get-document-version.handler.js';
-import { UpdateDocumentVersionHandler } from '../../application/document-versions/update-document-version.handler.js';
-import { DeleteDocumentVersionHandler } from '../../application/document-versions/delete-document-version.handler.js';
-import { ListDocumentVersionsHandler } from '../../application/document-versions/list-document-versions.handler.js';
+import { CreateDocumentVersionHandler } from '../../application/document-versions/create-document-version/create-document-version.handler.js';
+import { GetDocumentVersionHandler } from '../../application/document-versions/get-document-version/get-document-version.handler.js';
+import { UpdateDocumentVersionHandler } from '../../application/document-versions/update-document-version/update-document-version.handler.js';
+import { DeleteDocumentVersionHandler } from '../../application/document-versions/delete-document-version/delete-document-version.handler.js';
+import { ListDocumentVersionsHandler } from '../../application/document-versions/list-document-versions/list-document-versions.handler.js';
 import { DocumentVersionsController } from './document-versions.controller.js';
 const WORK = Symbol('DocumentVersions_WORK');
 @Module({

@@ -321,7 +321,7 @@ void test('source layout rejects contexts, feature layers and misplaced database
 void test('the real API sources include the relocated Health handler and its architecture checks', () => {
   const directory = fileURLToPath(new URL('../../', import.meta.url));
   const project = new Project({ tsConfigFilePath: resolve(directory, 'tsconfig.json') });
-  const handler = project.getSourceFileOrThrow(resolve(directory, 'src/application/health/get-health-check-objects.handler.ts'));
+  const handler = project.getSourceFileOrThrow(resolve(directory, 'src/application/health/get-health-check-objects/get-health-check-objects.handler.ts'));
   assert.deepEqual(validateSourceLayout(project, directory), []);
   assert.deepEqual(validateUseCases(project, directory), []);
   const health = handler.getClassOrThrow('GetHealthCheckObjectsHandler');
