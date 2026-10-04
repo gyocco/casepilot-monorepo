@@ -1,0 +1,35 @@
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((typography: system-ui, density: 0));
+  @include mat.theme-overrides((
+    primary: var(--pilot-color-primary), on-primary: var(--pilot-color-on-primary),
+    primary-container: var(--pilot-color-primary-container), on-primary-container: var(--pilot-color-on-primary-container),
+    primary-fixed: var(--pilot-color-primary-container), primary-fixed-dim: var(--pilot-color-primary),
+    on-primary-fixed: var(--pilot-color-on-primary-container), on-primary-fixed-variant: var(--pilot-color-on-primary-container),
+    secondary: var(--pilot-color-secondary), on-secondary: var(--pilot-color-on-secondary),
+    secondary-container: var(--pilot-color-secondary-container), on-secondary-container: var(--pilot-color-on-secondary-container),
+    secondary-fixed: var(--pilot-color-secondary-container), secondary-fixed-dim: var(--pilot-color-secondary),
+    on-secondary-fixed: var(--pilot-color-on-secondary-container), on-secondary-fixed-variant: var(--pilot-color-on-secondary-container),
+    tertiary: var(--pilot-color-tertiary), on-tertiary: var(--pilot-color-on-tertiary),
+    tertiary-container: var(--pilot-color-tertiary-container), on-tertiary-container: var(--pilot-color-on-tertiary-container),
+    tertiary-fixed: var(--pilot-color-tertiary-container), tertiary-fixed-dim: var(--pilot-color-tertiary),
+    on-tertiary-fixed: var(--pilot-color-on-tertiary-container), on-tertiary-fixed-variant: var(--pilot-color-on-tertiary-container),
+    background: var(--pilot-color-background), on-background: var(--pilot-color-on-background),
+    surface: var(--pilot-color-surface), surface-variant: var(--pilot-color-surface-variant),
+    on-surface: var(--pilot-color-on-surface), on-surface-variant: var(--pilot-color-on-surface-variant),
+    surface-bright: var(--pilot-color-surface), surface-dim: var(--pilot-color-surface-variant),
+    surface-container: var(--pilot-color-surface), surface-container-low: var(--pilot-color-surface),
+    surface-container-lowest: var(--pilot-color-surface), surface-container-high: var(--pilot-color-surface-variant),
+    surface-container-highest: var(--pilot-color-surface-variant), surface-tint: var(--pilot-color-primary),
+    outline: var(--pilot-color-outline), outline-variant: var(--pilot-color-outline-variant),
+    error: var(--pilot-color-error), on-error: var(--pilot-color-on-error),
+    error-container: var(--pilot-color-error-container), on-error-container: var(--pilot-color-on-error-container),
+    inverse-surface: var(--pilot-color-inverse-surface), inverse-on-surface: var(--pilot-color-inverse-on-surface),
+    inverse-primary: var(--pilot-color-inverse-primary), shadow: var(--pilot-color-shadow), scrim: var(--pilot-color-scrim),
+    level0: none,
+    level1: 0 1px 3px var(--pilot-color-shadow), level2: 0 2px 6px var(--pilot-color-shadow),
+    level3: 0 4px 12px var(--pilot-color-shadow), level4: 0 6px 18px var(--pilot-color-shadow),
+    level5: 0 8px 24px var(--pilot-color-shadow),
+  ));
+}

@@ -2,7 +2,15 @@
 
 ## Documentos disponibles
 
+- [Arquitectura frontend](architecture/frontend-architecture.md): SPA por features, Material, UI kit, temas y recursos configurables por nombre.
+- [Reglas obligatorias frontend FRT-001 a FRT-012](architecture/frontend-architecture-rules.md): fronteras, Angular, tokens, recursos, configuración y calidad.
+- [Validación frontend](../tools/frontend-architecture/README.md): checkers, regresiones y alcance acreditado por regla.
+- [ADR 0020 — Base frontend y temas](adr/0020-frontend-foundation-and-theming.md): Angular 21 LTS, Material, Tailwind y kit; sustituye Ionic Angular para la SPA.
+
 - [Arquitectura del monorepo](architecture/monorepo-architecture.md): organización de `src/apps/` y `src/libs/`, responsabilidades por runtime, dirección de dependencias y ubicación de contratos, tests, infraestructura y CI/CD.
+- [Infraestructura, proveedores y ambientes](architecture/infrastructure-providers.md): proveedores aceptados, PostgreSQL independiente del proveedor, coexistencia Neon/Cloud SQL por ambiente y automatización futura con GitHub Actions.
+- [ADR 0018 — Proveedores de infraestructura y PostgreSQL por ambiente](adr/0018-infrastructure-providers-and-environments.md): Firebase Authentication, Cloud Run, Firebase Hosting, Neon inicialmente, Cloud SQL como opción por ambiente y GitHub Actions.
+- [ADR 0019 — SPA Angular y TypeScript](adr/0019-angular-spa.md): elección inicial Angular; su propuesta de Ionic evoluciona a Material mediante ADR 0020.
 - [Arquitectura base backend](architecture/backend-architecture-baseline.md): diseño NestJS/TypeORM reutilizable con negocio exclusivo en Application, adoptable por múltiples proyectos.
 - [Reglas obligatorias de la arquitectura base backend](architecture/backend-architecture-baseline-rules.md): catálogo obligatorio para cada proyecto adoptante, con IDs estables.
 - [Arquitectura particular de CasePilot](architecture/casepilot-backend-architecture.md): adopción íntegra de la base, decisiones específicas y verificaciones implementadas.

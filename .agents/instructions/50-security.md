@@ -3,7 +3,7 @@
 ## Secretos y configuración
 
 - Nunca escribas secretos en código, commits, logs, screenshots, fixtures o documentación.
-- Variables `VITE_*` son públicas porque Vite las embebe en el bundle. Solo contienen configuración segura para el cliente.
+- La configuración incorporada al build Angular mediante environments o servida al cliente en runtime es pública. Solo contiene valores seguros para el cliente; ninguna variable se vuelve secreta por su nombre.
 - Las claves administrativas, passwords de base de datos, tokens de terceros y signing keys viven en el entorno server-side o secret manager.
 - Usa `.env.example` con nombres y placeholders; no copies valores reales.
 - Si aparece un secreto en el working tree, detén el trabajo, no lo propagues y avisa de la necesidad de rotarlo.
@@ -19,7 +19,7 @@
 
 - Valida forma, tipos, tamaño, rango y autorización de todo input externo.
 - Usa queries parametrizadas/SDK; nunca concatentes SQL, HTML, URLs o comandos con input de usuario.
-- Trata contenido de usuarios como no confiable. Escapa output y no uses `dangerouslySetInnerHTML` salvo sanitización explícita y revisión.
+- Trata contenido de usuarios como no confiable. Conserva la sanitización Angular para bindings de HTML/URLs; no uses `bypassSecurityTrust*` para omitirla. Contenido remoto requiere validación, pruebas y revisión explícitas.
 - Minimiza PII, define retención y no registres datos sensibles innecesarios.
 - Redacta errores para usuarios y conserva detalles técnicos solo en logs protegidos.
 

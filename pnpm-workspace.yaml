@@ -3,7 +3,9 @@ packages:
   - "src/libs/backend/*"
   - "src/libs/frontend/*"
   - "src/libs/mobile/*"
+  - "tools/frontend-architecture"
 
-# tsx uses esbuild's platform binary; allow only this dependency's install hook.
+# Explicit install hooks for tsx/Angular's esbuild and Tailwind's native tooling.
 onlyBuiltDependencies:
   - "esbuild"
+  - "@tailwindcss/oxide"

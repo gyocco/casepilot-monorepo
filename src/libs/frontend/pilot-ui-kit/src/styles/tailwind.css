@@ -1,0 +1,23 @@
+@theme { --color-*: initial; }
+@theme inline {
+  --color-primary: var(--pilot-color-primary);
+  --color-on-primary: var(--pilot-color-on-primary);
+  --color-primary-container: var(--pilot-color-primary-container);
+  --color-on-primary-container: var(--pilot-color-on-primary-container);
+  --color-secondary: var(--pilot-color-secondary);
+  --color-on-secondary: var(--pilot-color-on-secondary);
+  --color-secondary-container: var(--pilot-color-secondary-container);
+  --color-on-secondary-container: var(--pilot-color-on-secondary-container);
+  --color-tertiary: var(--pilot-color-tertiary);
+  --color-on-tertiary: var(--pilot-color-on-tertiary);
+  --color-background: var(--pilot-color-background);
+  --color-on-background: var(--pilot-color-on-background);
+  --color-surface: var(--pilot-color-surface);
+  --color-surface-variant: var(--pilot-color-surface-variant);
+  --color-on-surface: var(--pilot-color-on-surface);
+  --color-on-surface-variant: var(--pilot-color-on-surface-variant);
+  --color-outline: var(--pilot-color-outline);
+  --color-outline-variant: var(--pilot-color-outline-variant);
+  --color-error: var(--pilot-color-error);
+  --color-on-error: var(--pilot-color-on-error);
+}

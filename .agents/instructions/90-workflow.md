@@ -20,16 +20,15 @@
 
 ## Verificación local
 
-La API y las librerías CQRS/abstractions/validation/exception-handler cuentan con manifest y verificaciones; web, mobile y las demás capacidades previstas siguen sin implementación. Para CQRS ejecuta `pnpm check:cqrs`; para abstractions, `pnpm check:abstractions` y, ante cambios transaccionales, `pnpm test:abstractions:integration` con Docker/PostgreSQL efímero; para exception-handler, `pnpm check:exception-handler`, con HTTP NestJS sin Docker. Los tests propios permanecen con la librería y la API construye las cuatro antes de sus checks. Para validation ejecuta `pnpm check:validation`. Para cambios de documentación o configuración, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre workspace y carpetas, y `git diff --check`.
+La API y las librerías CQRS/abstractions/validation/exception-handler cuentan con manifest y verificaciones; la SPA y el UI kit también tienen manifests, verificaciones y suites propias; mobile sigue pendiente. Para CQRS ejecuta `pnpm check:cqrs`; para abstractions, `pnpm check:abstractions` y, ante cambios transaccionales, `pnpm test:abstractions:integration` con Docker/PostgreSQL efímero; para exception-handler, `pnpm check:exception-handler`, con HTTP NestJS sin Docker. Los tests propios permanecen con la librería y la API construye las cuatro antes de sus checks. Para validation ejecuta `pnpm check:validation`. Para cambios de documentación o configuración, verifica enlaces locales, rutas, JSON/YAML, correspondencia entre workspace y carpetas, y `git diff --check`.
 
-Cuando `src/apps/casepilot/casepilot-web/` tenga un `package.json` con scripts `lint` y `build`, usa desde la raíz:
+Para frontend y sus reglas usa desde la raíz:
 
 ```bash
-pnpm lint:web
-pnpm build:web
+pnpm check:web
 ```
 
-Para la API NestJS usa `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. La integración levanta PostgreSQL efímero mediante Testcontainers: requiere Docker, no `infra:up` ni credenciales de producto, y nunca usa la base local persistente. Los checks de API incluyen fuentes, suites unitarias, integración y su lanzador. `tests/` global todavía no tiene suites ni paquete ejecutable; consulta el [README de integración de la API](../../src/apps/casepilot/casepilot-api/test/integration/README.md). Para mobile y librerías ejecuta los scripts cuando se implementen. No se asume infraestructura remota sin decisión y configuración versionada.
+Para la API NestJS usa `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. La integración levanta PostgreSQL efímero mediante Testcontainers: requiere Docker, no `infra:up` ni credenciales de producto, y nunca usa la base local persistente. Los checks de API incluyen fuentes, suites unitarias, integración y su lanzador. `tests/architecture/frontend/` contiene regresiones multiproyecto ejecutadas por `tools/frontend-architecture/`; consulta el [README de integración de la API](../../src/apps/casepilot/casepilot-api/test/integration/README.md). Para mobile y librerías ejecuta los scripts cuando se implementen. No se asume infraestructura remota sin decisión y configuración versionada.
 
 No ejecutes despliegues, publicación de apps ni cambios remotos como parte de una verificación implícita.
 

@@ -1,0 +1,8 @@
+{
+  "extends": "../../src/apps/casepilot/casepilot-web/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": { "@casepilot/pilot-ui-kit": ["src/libs/frontend/pilot-ui-kit/src/public-api.ts"] }
+  },
+  "include": ["../../src/apps/casepilot/casepilot-web/src/**/*.ts", "../../src/libs/frontend/pilot-ui-kit/src/**/*.ts"]
+}

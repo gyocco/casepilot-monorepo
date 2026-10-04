@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@casepilot/pilot-ui-kit/tailwind.css";
+@source "../../../../libs/frontend/pilot-ui-kit/src";
+
+html, body { margin: 0; min-height: 100%; }
+body { font-family: system-ui, sans-serif; background: var(--pilot-color-background); color: var(--pilot-color-on-background); }
+*, *::before, *::after { box-sizing: border-box; }
+:focus-visible { outline: 2px solid var(--pilot-color-primary); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto; animation-duration: .01ms; transition-duration: .01ms; }
+}

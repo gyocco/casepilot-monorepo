@@ -37,7 +37,7 @@ Esta skill no autoriza despliegues, operaciones remotas ni cambios destructivos.
 
 `src/apps/` contiene ejecutables y deployables. En la estructura actual, las aplicaciones principales son:
 
-- `src/apps/casepilot/casepilot-web/`: React/Vite/Ionic/Tailwind, rutas, páginas, features y tema propios de la web.
+- `src/apps/casepilot/casepilot-web/`: Angular/TypeScript/Material/Tailwind, rutas, shell, features, core/shared y temas propios de la web, conforme a [arquitectura frontend](../../../docs/architecture/frontend-architecture.md).
 - `src/apps/casepilot/casepilot-mobile/`: composición mobile y configuración Capacitor/Ionic propias de la app.
 - `src/apps/casepilot/casepilot-api/`: bootstrap, transporte, módulos, configuración y health checks del backend desplegable.
 
@@ -67,7 +67,7 @@ No hace falta crear una carpeta raíz `ci/` si `.github/workflows/` y `tools/ci/
 
 - `src/apps/*` puede consumir `src/libs/*` y `contracts/`.
 - `src/libs/*` no puede importar código desde `src/apps/*`.
-- La lógica de negocio no depende de React, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia.
+- La lógica de negocio no depende de Angular, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia.
 - La UI no accede directamente a persistencia; usa APIs, contratos y librerías/adaptadores permitidos.
 - Las APIs nativas y web se encapsulan detrás de adaptadores; las features de negocio no llaman plugins directamente.
 - Los secretos, tokens administrativos y credenciales permanecen fuera del código cliente, bundles, logs y documentación.

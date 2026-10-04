@@ -2,7 +2,7 @@
 
 ## Misión
 
-CasePilot es un monorepo orientado a una experiencia web y mobile con un único código de producto. Las aplicaciones se agrupan en `src/apps/casepilot/`: `casepilot-web` usará React, Vite, Ionic React y Tailwind CSS; `casepilot-mobile` usará Ionic/Capacitor y `casepilot-api` implementa la base NestJS/TypeScript con TypeORM. `src/libs/backend/cqrs/` y `src/libs/backend/abstractions/` implementan contratos compartidos; web, mobile y las demás capacidades previstas siguen sin implementación.
+CasePilot comparte código de producto web/mobile. `casepilot-web` implementa Angular 21 LTS, TypeScript, Material y Tailwind, con un layout y login placeholder; `casepilot-mobile` conserva la futura composición Capacitor y sigue pendiente. `casepilot-api` implementa NestJS/TypeORM; `cqrs` y `abstractions` proporcionan contratos backend. `pilot-ui-kit` implementa UI reusable, tokens CSS globales y recursos por nombre. Decisiones: [ADR 0019](../../docs/adr/0019-angular-spa.md) y [ADR 0020](../../docs/adr/0020-frontend-foundation-and-theming.md). Diseño: [arquitectura frontend](../../docs/architecture/frontend-architecture.md); obligaciones: [reglas FRT](../../docs/architecture/frontend-architecture-rules.md).
 
 El objetivo de plataforma es compartir la mayor cantidad posible de código entre:
 
@@ -19,6 +19,7 @@ CasePilot no usa Supabase. La persistencia, identidad, mensajería, observabilid
 - Estructura y límites del repositorio: [Arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md).
 - Estado actual, mapa breve y comandos raíz: [`README.md`](../../README.md).
 - Organización documental: [`docs/README.md`](../../docs/README.md).
+- Proveedores y ambientes: [Infraestructura, proveedores y ambientes](../../docs/architecture/infrastructure-providers.md), con Firebase Authentication, Cloud Run, Firebase Hosting, Neon inicialmente, Cloud SQL como opción por ambiente y GitHub Actions; implementación remota pendiente.
 
 Las demás áreas documentales son `docs/product/`, `docs/development/`, `docs/operations/`, `docs/reference/`, `docs/project-management/` y `docs/adr/`. Consulta el índice para saber cuáles existen; no asumas documentos implementados ni crees carpetas vacías.
 
@@ -26,7 +27,7 @@ Si dos documentos se contradicen, no elijas silenciosamente. Identifica la fuent
 
 ## Estado actual y evolución
 
-`src/apps/casepilot/casepilot-api/` contiene manifest, código, pruebas y README, con PostgreSQL local en Docker. `src/libs/backend/cqrs/` contiene bases Request/Response y Handler. `src/libs/backend/abstractions/` contiene Entity/paginación, Repository/CrudRepository y UnitOfWork con adaptador TypeORM separado. `src/libs/backend/exception-handler/` contiene errores puros y filtro HTTP NestJS configurable con Problem Details. `src/libs/backend/validation/` contiene helpers estructurales parametrizados y parsers HTTP en su entrada /nestjs. Los cuatro paquetes tienen pruebas, configuración y README propios. Web, mobile y las demás capacidades previstas incorporarán su propio paquete cuando se implementen. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`.
+`src/apps/casepilot/casepilot-api/` contiene manifest, código, pruebas y README, con PostgreSQL local en Docker. `src/libs/backend/cqrs/` contiene bases Request/Response y Handler. `src/libs/backend/abstractions/` contiene Entity/paginación, Repository/CrudRepository y UnitOfWork con adaptador TypeORM separado. `src/libs/backend/exception-handler/` contiene errores puros y filtro HTTP NestJS configurable con Problem Details. `src/libs/backend/validation/` contiene helpers estructurales parametrizados y parsers HTTP en su entrada /nestjs. Los cuatro paquetes tienen pruebas, configuración y README propios. La SPA y el UI kit ya tienen manifests, pruebas y checks propios; mobile y las demás capacidades previstas se incorporarán cuando exista implementación. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`.
 
 Las áreas del monorepo son:
 

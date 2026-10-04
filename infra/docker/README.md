@@ -44,7 +44,7 @@ La API NestJS ejecutada en el host lee este archivo automáticamente cuando `APP
 DATABASE_URL=postgresql://casepilot:REPLACE_WITH_LOCAL_PASSWORD@127.0.0.1:55432/casepilot
 ```
 
-La contraseña generada usa caracteres hexadecimales válidos en una URL. Si eliges una contraseña con caracteres especiales, codifícala como componente de URL. Una API dentro del mismo proyecto Compose usará `postgres:5432`. La web y mobile consumen la API; las credenciales nunca van en variables `VITE_*` ni en el cliente. Después de `infra:up`, ejecuta `pnpm migration:api:run` y `pnpm dev:api`. Configuración y migraciones: [README de la API](../../src/apps/casepilot/casepilot-api/README.md).
+La contraseña generada usa caracteres hexadecimales válidos en una URL. Si eliges una contraseña con caracteres especiales, codifícala como componente de URL. Una API dentro del mismo proyecto Compose usará `postgres:5432`. La web y mobile consumen la API; las credenciales nunca van en la configuración pública de Angular ni en el cliente. Después de `infra:up`, ejecuta `pnpm migration:api:run` y `pnpm dev:api`. Configuración y migraciones: [README de la API](../../src/apps/casepilot/casepilot-api/README.md).
 
 ## Comandos
 

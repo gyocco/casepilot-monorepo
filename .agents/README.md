@@ -36,7 +36,7 @@
 - `skills/` contiene procedimientos paso a paso para tareas que se repiten; una skill no reemplaza las restricciones de `instructions/`.
 - Las reglas del usuario y del sistema siempre tienen prioridad sobre estas reglas locales.
 - Todo trabajo backend carga la [arquitectura](../docs/architecture/backend-architecture-baseline.md), las [reglas obligatorias](../docs/architecture/backend-architecture-baseline-rules.md) y la skill [backend-architecture](skills/backend-architecture/SKILL.md). La [arquitectura particular de CasePilot](../docs/architecture/casepilot-backend-architecture.md) registra la adopción íntegra de esa base reutilizable. La skill consulta el catálogo vigente; no mantiene una copia de sus reglas.
-- Agregar, modificar o retirar reglas, y sincronizar documentación con verificaciones, requiere [architecture-rules-sync](skills/architecture-rules-sync/SKILL.md). Coordina las fuentes de arquitectura con los tres validadores de la API, sus pruebas y su cobertura real.
+- Agregar, modificar o retirar reglas, y sincronizar documentación con verificaciones, requiere [architecture-rules-sync](skills/architecture-rules-sync/SKILL.md). Coordina las fuentes con los validadores de API y frontend, sus pruebas y cobertura real. Para frontend carga [diseño](../docs/architecture/frontend-architecture.md), [reglas FRT](../docs/architecture/frontend-architecture-rules.md) y [cobertura](../tools/frontend-architecture/README.md).
 - Si una excepción es necesaria, el agente debe explicarla en el cambio, registrar un ADR cuando sea una decisión arquitectónica y actualizar la instrucción si la excepción se vuelve permanente.
 
 ## Documentación relacionada

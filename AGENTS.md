@@ -32,14 +32,18 @@ CasePilot comparte un único código de producto entre:
 - la API desplegable en `src/apps/casepilot/casepilot-api/`, implementada con NestJS y TypeScript;
 - la aplicación móvil en `src/apps/casepilot/casepilot-mobile/`, empaquetada con Capacitor/Ionic.
 
-La API ya contiene una base NestJS/TypeORM y health checks; web y mobile siguen como placeholders. Las capacidades técnicas reutilizables se agrupan por runtime en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. La guía detallada es [Arquitectura del monorepo](docs/architecture/monorepo-architecture.md); los comandos backend están en el [README de la API](src/apps/casepilot/casepilot-api/README.md).
+La API contiene una base NestJS/TypeORM y health checks; la web tiene una base Angular con login placeholder y mobile sigue pendiente. Las capacidades técnicas reutilizables se agrupan por runtime en `src/libs/backend/`, `src/libs/frontend/` y `src/libs/mobile/`. La guía detallada es [Arquitectura del monorepo](docs/architecture/monorepo-architecture.md); los comandos backend están en el [README de la API](src/apps/casepilot/casepilot-api/README.md).
+
+La SPA usa Angular 21 LTS y TypeScript, Angular Material mediante `pilot-ui-kit` y Tailwind CSS; la compatibilidad futura con Capacitor se conserva. Los proveedores elegidos son Firebase Authentication, Google Cloud Run, Firebase Hosting, Neon PostgreSQL inicialmente y GitHub Actions. Cloud SQL for PostgreSQL puede sustituir a Neon o coexistir en otros ambientes; conexión y uso de PostgreSQL deben ser independientes del proveedor. La fuente canónica es [Infraestructura, proveedores y ambientes](docs/architecture/infrastructure-providers.md); el aprovisionamiento y los pipelines de despliegue se implementarán en una tarea futura.
+
+Para trabajo frontend DEBE leer [arquitectura frontend](docs/architecture/frontend-architecture.md), [reglas obligatorias FRT](docs/architecture/frontend-architecture-rules.md) y [cobertura ejecutable](tools/frontend-architecture/README.md). Se prohíben colores y paths de recursos hardcoded en componentes: usa tokens y recursos por nombre del kit. Las reglas nuevas se sincronizan con los validadores y sus regresiones; `pnpm check:web` ejecuta el gate frontend completo.
 
 Por eso, toda decisión de UI y plataforma DEBE funcionar primero en una pantalla móvil estrecha y NO DEBE introducir una dependencia innecesaria del navegador o del sistema operativo. Las diferencias nativas deben aislarse detrás de adaptadores y mantenerse fuera de la lógica de dominio.
 
 ## Restricciones no negociables
 
-- No exponer secretos, claves privadas ni tokens de administrador en código cliente, bundles Vite, logs o documentación.
-- No acceder a persistencia directamente desde componentes React. La UI consume APIs NestJS y contratos tipados; los adaptadores técnicos compartidos de persistencia viven en `src/libs/backend/` y el acceso específico de una feature permanece en el módulo backend que la posee.
+- No exponer secretos, claves privadas ni tokens de administrador en código cliente, bundles Angular, logs o documentación.
+- No acceder a persistencia directamente desde componentes Angular. La UI consume APIs NestJS y contratos tipados; los adaptadores técnicos compartidos de persistencia viven en `src/libs/backend/` y el acceso específico de una feature permanece en el módulo backend que la posee.
 - No introducir Supabase como solución de datos, autenticación, storage, realtime o backend gestionado.
 - No poner código específico de una app dentro de `libs/`; las librerías deben ser reutilizables y no importar desde `apps/`.
 - No crear layouts desktop-first: las clases sin prefijo representan el mínimo móvil y las variantes responsive mejoran la experiencia en pantallas mayores.

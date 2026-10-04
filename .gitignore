@@ -28,3 +28,6 @@ pnpm-debug.log*
 .cache/
 .turbo/
 .nestjs/
+.angular/
+playwright-report/
+test-results/

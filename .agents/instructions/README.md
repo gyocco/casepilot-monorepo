@@ -10,7 +10,7 @@ Las rutas y fronteras se basan en [Arquitectura del monorepo](../../docs/archite
 | --- | --- |
 | `00-project-context.md` | contexto, objetivo de plataforma y fuentes de verdad |
 | `10-architecture.md` | capas, dependencias y ubicación del código |
-| `20-frontend-platform.md` | React, Vite, Tailwind, Ionic y Capacitor |
+| `20-frontend-platform.md` | Angular LTS, Material, Tailwind, UI kit, temas y Capacitor |
 | `40-quality-testing.md` | calidad, pruebas, accesibilidad y performance |
 | `50-security.md` | secretos, permisos, datos sensibles y seguridad de cliente |
 | `60-documentation.md` | documentación, ADRs y sincronización con el código |

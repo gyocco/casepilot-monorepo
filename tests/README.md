@@ -4,7 +4,7 @@ Esta carpeta global se reserva exclusivamente para pruebas cuyo alcance involucr
 
 Ejemplos: un recorrido web + API, colaboración entre dos servicios, compatibilidad de contratos entre proyectos o dependencias permitidas en todo el monorepo.
 
-Actualmente no hay suites ejecutables ni paquete de workspace aquí. Se incorporarán cuando exista una necesidad real; no se crean carpetas vacías por adelantado.
+`architecture/frontend/` contiene regresiones ejecutables de los límites entre SPA/kit, estilos, recursos, configuración Angular y grafo. Usa los checkers reales de [frontend-architecture](../tools/frontend-architecture/README.md) y se ejecuta con `pnpm test:frontend:architecture`; el paquete propietario del tooling está en `tools/`, no es un proyecto de producto. La suite no mueve las pruebas locales ni crea carpetas vacías.
 
 Todas las pruebas específicas de una app o librería permanecen en su proyecto, incluidas unitarias, integración y endpoints completos. Atravesar capas de una API o usar PostgreSQL/Testcontainers no convierte una suite en transversal. Los proyectos de producto no dependen de esta carpeta.
 

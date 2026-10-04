@@ -4,7 +4,9 @@ Monorepo de CasePilot. `src/apps/` agrupa las aplicaciones ejecutables y despleg
 
 ## Estado actual
 
-La API ya contiene una base NestJS/TypeScript con TypeORM, migración y health checks. La librería [CQRS](src/libs/backend/cqrs/README.md) proporciona bases Request/Response y Handler; [abstractions](src/libs/backend/abstractions/README.md) proporciona errores puros, Entity, paginación, repositorios genéricos y UnitOfWork con adaptador TypeORM separado. Web, mobile y las demás capacidades previstas siguen sin implementación. La web prevista usará React, Vite, Ionic React y Tailwind CSS; mobile se empaquetará con Ionic/Capacitor.
+La API contiene una base NestJS/TypeScript con TypeORM, migración y health checks. La librería [CQRS](src/libs/backend/cqrs/README.md) proporciona bases Request/Response y Handler; [abstractions](src/libs/backend/abstractions/README.md) proporciona errores puros, Entity, paginación, repositorios genéricos y UnitOfWork con adaptador TypeORM separado. La [SPA](src/apps/casepilot/casepilot-web/README.md) implementa Angular 21 LTS, TypeScript, Material y Tailwind, con layout y login placeholder. El [UI kit](src/libs/frontend/pilot-ui-kit/README.md) proporciona componentes reutilizables, tokens CSS globales y recursos por nombre. Mobile conserva la futura composición Capacitor y sigue pendiente. Decisiones: [ADR 0019](docs/adr/0019-angular-spa.md) y [ADR 0020](docs/adr/0020-frontend-foundation-and-theming.md).
+
+Los proveedores elegidos son Firebase Authentication, Google Cloud Run para la API, Firebase Hosting para la SPA, Neon PostgreSQL inicialmente y GitHub Actions. Cloud SQL for PostgreSQL puede ser un destino futuro o el proveedor de otros ambientes, con configuración independiente por ambiente y persistencia agnóstica al proveedor. El montaje remoto y su automatización están pendientes; decisiones y ejemplo DEV/QA/Prod en [Infraestructura, proveedores y ambientes](docs/architecture/infrastructure-providers.md).
 
 El backend usa un dominio compartido por aplicación y las capas `application/`, `domain/`, `infrastructure/` y `presentation/` directamente bajo su `src/`. La conexión, DataSource y migraciones viven en `infrastructure/database/`. Decisión: [ADR 0008](docs/adr/0008-application-wide-backend-layers.md).
 
@@ -26,7 +28,7 @@ La [librería exception-handler](src/libs/backend/exception-handler/README.md) a
 │   │   └── casepilot/
 │   │       ├── casepilot-api/       # backend desplegable
 │   │       ├── casepilot-mobile/    # aplicación Ionic/Capacitor
-│   │       └── casepilot-web/       # aplicación React/Vite/Ionic
+│   │       └── casepilot-web/       # aplicación Angular/TypeScript/Material
 │   └── libs/
 │       ├── backend/                 # capacidades server-side compartidas
 │       │   ├── abstractions/       # errores, modelos, repositorios y UnitOfWork
@@ -65,7 +67,7 @@ La [librería exception-handler](src/libs/backend/exception-handler/README.md) a
 
 ## Workspace y comandos
 
-`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*`, librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`. Cada proyecto tiene su propio manifest cuando se implementa, fuentes y pruebas; Testcontainers pertenece a devDependencies de API y abstractions para sus suites propias. `tests/` global no es un paquete activo por ahora.
+`pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*`, librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`, y `tools/frontend-architecture`. Cada proyecto conserva manifest, fuentes y pruebas; Testcontainers pertenece a API y abstractions. `tests/architecture/frontend/` contiene regresiones multiproyecto ejecutadas por el paquete de tooling; `tests/` global no es un paquete de producto.
 
 Para ejecutar la API local desde la raíz:
 
@@ -84,9 +86,10 @@ Los scripts de la web apuntan a `src/apps/casepilot/casepilot-web/`:
 pnpm dev:web
 pnpm lint:web
 pnpm build:web
+pnpm check:web
 ```
 
-Estos comandos web estarán disponibles cuando esa app tenga un `package.json` con scripts `dev`, `lint` y `build`. La API ya dispone de `lint:api`, `typecheck:api`, `build:api`, `test:api` y `test:api:integration`.
+La web se sirve en `http://127.0.0.1:4200`; antes de e2e instala Chromium como indica su README. `check:web` verifica kit/SPA, reglas FRT, sus regresiones y e2e móvil/escritorio con axe. Fuentes: [arquitectura frontend](docs/architecture/frontend-architecture.md), [catálogo FRT](docs/architecture/frontend-architecture-rules.md) y [cobertura](tools/frontend-architecture/README.md). El [workflow frontend](.github/workflows/frontend-quality.yml) ejecutará ese mismo gate al incorporarse a GitHub; no realiza despliegues. La API dispone de `lint:api`, `typecheck:api`, `build:api`, `test:api` y `test:api:integration`.
 
 `pnpm check:cqrs` verifica tipos, lint, pruebas y build de CQRS; `pnpm build:cqrs` y `pnpm test:cqrs` permiten ejecutar pasos separados. Los scripts de verificaciones/tests/build de la API compilan primero sus declaraciones, también desde la carpeta API.
 

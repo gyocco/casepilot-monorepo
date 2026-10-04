@@ -3,7 +3,9 @@
 - Estado: guía estructural vigente
 - Alcance: organización del repositorio, límites entre aplicaciones y librerías, documentación y CI/CD
 
-La API ya implementa una base NestJS/TypeORM, con configuración por entorno, health checks y migración PostgreSQL. La librería `src/libs/backend/cqrs/` implementa Request, Response y Handler; web, mobile y las demás capacidades previstas siguen sin implementación. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`; los comandos de la API, en su [README](../../src/apps/casepilot/casepilot-api/README.md).
+La API implementa una base NestJS/TypeORM, con configuración por entorno, health checks y migración PostgreSQL. La librería `src/libs/backend/cqrs/` implementa Request, Response y Handler; la SPA y el UI kit tienen su base Angular implementada, mientras mobile y otras capacidades previstas siguen pendientes. El contrato HTTP está en `contracts/openapi/casepilot-api.yaml`; los comandos de la API, en su [README](../../src/apps/casepilot/casepilot-api/README.md).
+
+La SPA usa Angular/TypeScript con Material y Tailwind CSS, conforme al [ADR 0019](../adr/0019-angular-spa.md) y su evolución en [ADR 0020](../adr/0020-frontend-foundation-and-theming.md). Diseño interno en [arquitectura frontend](frontend-architecture.md), obligaciones en [catálogo FRT](frontend-architecture-rules.md) y checks en [validadores frontend](../../tools/frontend-architecture/README.md). Los proveedores y la independencia de PostgreSQL por ambiente se documentan en [infraestructura](infrastructure-providers.md); el aprovisionamiento y workflows de despliegue siguen pendientes. El workflow de calidad frontend está definido localmente.
 
 `src/libs/backend/abstractions/` implementa errores puros, contratos de data access, modelos genéricos y UnitOfWork. Su [README](../../src/libs/backend/abstractions/README.md) define API, pruebas y límites; las entidades/repositorios del producto permanecen en la app propietaria.
 
@@ -46,7 +48,7 @@ La decisión y sus alternativas se registran en el [ADR 0005](../adr/0005-projec
 │   │   └── casepilot/
 │   │       ├── casepilot-api/       # aplicación backend desplegable
 │   │       ├── casepilot-mobile/    # aplicación mobile Capacitor/Ionic
-│   │       └── casepilot-web/       # aplicación web React/Vite/Ionic
+│   │       └── casepilot-web/       # aplicación web Angular/TypeScript/Material
 │   └── libs/
 │       ├── backend/                 # capacidades server-side compartidas
 │       │   ├── abstractions/       # errores, dataaccess/models, repositorios y UnitOfWork
@@ -111,13 +113,13 @@ Agrupa las aplicaciones que forman parte del producto CasePilot. Esta carpeta pe
 
 ### `src/apps/casepilot/casepilot-web/`
 
-Aplicación browser basada en React, Vite, Ionic React y Tailwind CSS. Aquí viven, según sean necesarios:
+Aplicación browser basada en Angular LTS, TypeScript, Material y Tailwind CSS. Aquí viven, según sean necesarios:
 
-- bootstrap de React/Ionic y providers de la aplicación;
+- bootstrap de Angular y providers de la aplicación;
 - rutas, páginas y composición de features;
-- componentes, hooks y mapeadores que solo sirven a esta aplicación;
+- componentes, servicios de composición y mapeadores que solo sirven a esta aplicación;
 - tema, tokens y assets locales;
-- configuración de Vite y variables públicas del cliente;
+- configuración de Angular CLI y configuración pública del cliente por ambiente;
 - README local con comandos, requisitos y configuración no sensible.
 
 Una pantalla debe orquestar el flujo. El acceso a APIs, persistencia o autorización no debe estar escondido dentro de un componente visual. La UI consume APIs y contratos tipados; no accede directamente a persistencia.
@@ -145,7 +147,7 @@ No es necesario crear todas las subcarpetas por adelantado. Cuando el código ex
 │   ├── routes/                     # navegación y rutas
 │   ├── features/                   # features propias de esta aplicación
 │   ├── components/                 # UI local, no reusable entre apps
-│   ├── hooks/                      # hooks de composición local
+│   ├── services/                   # servicios de composición/integración local
 │   ├── config/                     # configuración validada del runtime
 │   └── theme/                      # tema y tokens locales, si aplica
 ├── public/                         # archivos públicos, solo en apps que los sirvan
@@ -154,6 +156,8 @@ No es necesario crear todas las subcarpetas por adelantado. Cuando el código ex
 ```
 
 La estructura interna puede variar entre web, mobile y API. La regla importante es que la aplicación componga su experiencia y no se convierta en una librería compartida por otra aplicación.
+
+La SPA concreta esta guía con `src/app/` para composición, `src/shell/` para layout, `src/features/<feature>/` para grupos de páginas/casos de uso, y `src/core/`/`src/shared/` para capacidades transversales cuando exista contenido. La fuente canónica de ese diseño es [frontend-architecture.md](frontend-architecture.md); no se crean carpetas vacías para completar su árbol.
 
 Por ejemplo, la raíz del proyecto API mantiene separados fuentes, pruebas y configuración:
 
@@ -225,9 +229,9 @@ Estas librerías pueden depender de runtime backend, pero no deben llegar a un b
 
 ### `src/libs/frontend/`
 
-Capacidades reutilizables para aplicaciones web. `pilot-ui-kit/` es el lugar previsto para componentes visuales, tokens, patrones de formularios y estados accesibles que puedan ser utilizados por más de una app web.
+Capacidades reutilizables para aplicaciones web. [`pilot-ui-kit/`](../../src/libs/frontend/pilot-ui-kit/README.md) implementa componentes Angular/Material, roles de color con variables CSS globales y recursos configurables por nombre. Se consume por su paquete público `@casepilot/pilot-ui-kit`; manifiestos y archivos específicos permanecen en la app. Tests y build Angular Package Format pertenecen al kit.
 
-Un componente que solo sirve a una pantalla permanece en la aplicación. El kit no debe conocer rutas, queries, permisos concretos ni reglas de negocio; recibe datos y callbacks mediante props o contratos explícitos.
+Un componente que solo sirve a una pantalla permanece en la aplicación. El kit no debe conocer rutas, queries, permisos concretos ni reglas de negocio; recibe datos e interacción mediante inputs/outputs y contratos explícitos.
 
 ### `src/libs/mobile/`
 
@@ -268,7 +272,7 @@ Pruebas cuyo alcance involucra varios proyectos del monorepo:
 
 Las unitarias, integración de persistencia y full endpoint tests de una sola app permanecen en su `test/`, aunque utilicen Docker, HTTP o una base externa. No se guarda aquí una suite específica de una API solo por llamarse integration o e2e. Una verificación de contrato de un solo propietario sigue siendo local; la compatibilidad entre proyectos sí puede ser transversal.
 
-El contenido versionado actual de `tests/` es únicamente su [README](../../tests/README.md): no es un paquete activo del workspace ni tiene suites ejecutables. Se agregará configuración propia cuando exista una necesidad real de varias aplicaciones, sin mover automáticamente pruebas locales.
+`tests/architecture/frontend/` contiene regresiones que verifican SPA y kit con los checkers reales de `tools/frontend-architecture/`. Ese tooling es un paquete del workspace y ejecuta la suite transversal; `tests/` no es un paquete de producto. Su [README](../../tests/README.md) documenta alcance y comandos; las unitarias/e2e propias siguen en SPA/kit.
 
 No se guardan credenciales reales, volcados de producción ni datos personales innecesarios. Los proyectos de producto no importan desde esta carpeta. Procedimiento concreto de las pruebas API: [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md).
 
@@ -337,7 +341,7 @@ Reglas de frontera:
 
 - una aplicación puede consumir librerías y contratos;
 - una librería puede depender de otras librerías de menor nivel, pero no de una app concreta;
-- la lógica de negocio no depende de React, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia;
+- la lógica de negocio no depende de Angular, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia;
 - la UI no accede directamente a persistencia;
 - las diferencias web/native se aíslan en adaptadores reutilizables;
 - no se crean dependencias circulares ni barrels que oculten ciclos.

@@ -4,6 +4,8 @@
 
 La guía canónica es [Arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md).
 
+Para frontend aplica [arquitectura frontend](../../docs/architecture/frontend-architecture.md), el [catálogo FRT](../../docs/architecture/frontend-architecture-rules.md) y su [cobertura ejecutable](../../tools/frontend-architecture/README.md). La SPA organiza features, shell, core y shared; el kit visual mantiene su entrada pública, tokens y recursos por nombre.
+
 Para backend, la fuente de diseño es [Arquitectura base backend](../../docs/architecture/backend-architecture-baseline.md) y la fuente normativa es [Reglas obligatorias de la arquitectura base backend](../../docs/architecture/backend-architecture-baseline-rules.md). La [arquitectura particular de CasePilot](../../docs/architecture/casepilot-backend-architecture.md) registra su adopción. DEBE aplicar la skill [backend-architecture](../skills/backend-architecture/SKILL.md) y todas las reglas activas. En el backend, toda lógica de negocio y de casos de uso vive exclusivamente en Application; Domain contiene datos y contratos sin comportamiento de negocio. La decisión se registra en el [ADR 0002](../../docs/adr/0002-backend-application-owned-business-logic.md).
 
 Mantén una dirección de dependencias simple:
@@ -26,7 +28,7 @@ contracts/
   └── events
 ```
 
-Las aplicaciones pueden consumir librerías y contratos. Las librerías no deben importar código desde `apps/`. La lógica de negocio no debe depender de React, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia. En backend se implementa en Application; modelos de Domain y contratos internos mantienen la misma independencia.
+Las aplicaciones pueden consumir librerías y contratos. Las librerías no deben importar código desde `apps/`. La lógica de negocio no debe depender de Angular, Ionic, NestJS, APIs del navegador ni una implementación concreta de persistencia. En backend se implementa en Application; modelos de Domain y contratos internos mantienen la misma independencia.
 
 ## Dónde colocar cada cosa
 

@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.lib.json",
+  "compilerOptions": { "rootDir": ".", "noEmit": true, "declaration": false, "types": ["node", "vitest/globals"] },
+  "angularCompilerOptions": { "compilationMode": "full" },
+  "include": ["src/**/*.ts", "test/**/*.ts"]
+}

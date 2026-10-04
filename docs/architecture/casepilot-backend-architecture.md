@@ -2,7 +2,7 @@
 
 - Estado: adoptada; API NestJS/TypeORM con dominio compartido, CRUD de 28 modelos y sondas Health implementadas.
 - Fecha: 2026-10-01.
-- Revisión: 2026-10-03.
+- Revisión: 2026-10-04.
 - Alcance: todo backend de CasePilot, incluidos APIs, workers, schedulers, adaptadores y librerías backend.
 - Decisiones: [ADR 0002](../adr/0002-backend-application-owned-business-logic.md), [ADR 0003](../adr/0003-base-api-and-health-checks.md), [ADR 0006](../adr/0006-reusable-backend-baseline.md), [ADR 0008](../adr/0008-application-wide-backend-layers.md), [ADR 0009](../adr/0009-resource-organized-application.md), [ADR 0010](../adr/0010-shared-cqrs-contracts.md), [ADR 0013](../adr/0013-resource-module-composition.md) y [ADR 0014](../adr/0014-resource-organized-presentation.md).
 
@@ -107,6 +107,8 @@ El entorno de desarrollo utiliza PostgreSQL persistente en Docker conforme al [A
 Las pruebas utilizan PostgreSQL efímero exclusivo de Testcontainers, sin leer credenciales, migrar, consultar ni apagar la base de desarrollo. El aislamiento técnico decidido en el [ADR 0004](../adr/0004-isolated-endpoint-tests.md) se conserva; la propiedad y ubicación actuales se registran en el [ADR 0005](../adr/0005-project-owned-tests.md).
 
 CasePilot excluye Supabase conforme a las instrucciones del repositorio. Esa restricción del producto no forma parte de la base reutilizable. Otros entornos tienen configuración preparada; no existen recursos de producción provisionados por esta documentación.
+
+Los proveedores aceptados y sus ambientes se definen en [Infraestructura, proveedores y ambientes](infrastructure-providers.md), conforme al [ADR 0018](../adr/0018-infrastructure-providers-and-environments.md): Firebase Authentication para identidad, Cloud Run para la API, Neon PostgreSQL inicialmente y Cloud SQL como opción futura o de otros ambientes. Conexión y uso de PostgreSQL deben permitir cambiar de proveedor en ambas direcciones y coexistir por ambiente sin modificar el núcleo backend. GitHub Actions automatizará el montaje y los releases en una tarea futura. La configuración genérica existente no acredita todavía compatibilidad remota probada ni autenticación implementada.
 
 ## Estructura y pruebas del proyecto
 

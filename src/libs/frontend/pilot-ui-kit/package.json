@@ -1,0 +1,52 @@
+{
+  "name": "@casepilot/pilot-ui-kit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable Angular Material UI, semantic themes and named assets",
+  "engines": { "node": "^22.12.0 || ^24.0.0" },
+  "exports": {
+    ".": { "types": "./dist/types/casepilot-pilot-ui-kit.d.ts", "default": "./dist/fesm2022/casepilot-pilot-ui-kit.mjs" },
+    "./theme.scss": { "sass": "./dist/styles/theme.scss", "default": "./dist/styles/theme.scss" },
+    "./tailwind.css": "./dist/styles/tailwind.css"
+  },
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json -c tsconfig.lib.json && node tools/finalize-package.mjs",
+    "watch": "ng-packagr -p ng-package.json -c tsconfig.lib.json --watch",
+    "typecheck": "pnpm build && ngc -p tsconfig.lib.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src test tools *.mjs --max-warnings 0",
+    "test": "pnpm build && vitest run",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "dependencies": { "tslib": "2.8.1" },
+  "peerDependencies": {
+    "@angular/common": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/cdk": "^21.0.0",
+    "@angular/material": "^21.0.0",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@angular/cdk": "21.2.14",
+    "@angular/common": "21.2.25",
+    "@angular/compiler": "21.2.25",
+    "@angular/compiler-cli": "21.2.25",
+    "@angular/core": "21.2.25",
+    "@angular/forms": "21.2.25",
+    "@angular/material": "21.2.14",
+    "@angular/platform-browser": "21.2.25",
+    "@casepilot/frontend-architecture": "workspace:*",
+    "@eslint/js": "9.39.5",
+    "@types/node": "22.12.0",
+    "angular-eslint": "21.4.0",
+    "eslint": "9.39.5",
+    "jsdom": "27.4.0",
+    "ng-packagr": "21.2.7",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0",
+    "vitest": "4.1.11"
+  }
+}

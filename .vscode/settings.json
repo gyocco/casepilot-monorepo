@@ -2,7 +2,9 @@
   "eslint.useFlatConfig": true,
   "eslint.workingDirectories": [
     { "pattern": "./src/apps/*/*/" },
-    { "pattern": "./src/libs/backend/*/" }
+    { "pattern": "./src/libs/backend/*/" },
+    { "pattern": "./src/libs/frontend/*/" },
+    { "directory": "./tools/frontend-architecture/" }
   ],
   "typescript.tsdk": "src/apps/casepilot/casepilot-api/node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,

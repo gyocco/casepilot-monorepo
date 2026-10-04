@@ -16,8 +16,8 @@ Usa esta skill cuando una funcionalidad atraviese dos o más capas: pantalla, fe
    - mecanismos técnicos backend generales en `src/libs/backend/<capability>/`;
    - contratos entre procesos en `contracts/`;
    - adaptadores de dispositivo y plataforma generales en `src/libs/mobile/`, o junto a la app si solo tienen un consumidor.
-4. Define primero contratos y modelos tipados. Mantén la lógica de negocio fuera de React, Ionic, NestJS y proveedores concretos; en backend implementa todas las reglas y casos de uso exclusivamente en Application, con Domain limitado a modelos y contratos.
-5. Implementa la experiencia móvil primero con `IonPage` y componentes Ionic apropiados. Añade mejoras responsive para pantallas grandes.
+4. Define primero contratos y modelos tipados. Mantén la lógica de negocio fuera de Angular, Ionic, NestJS y proveedores concretos; en backend implementa todas las reglas y casos de uso exclusivamente en Application, con Domain limitado a modelos y contratos.
+5. Implementa la experiencia móvil primero con HTML semántico, Angular Router y componentes del UI kit sobre Material, conforme a [arquitectura frontend](../../../docs/architecture/frontend-architecture.md) y [reglas FRT](../../../docs/architecture/frontend-architecture-rules.md). Usa tokens y recursos por nombre; añade mejoras responsive para pantallas grandes.
 6. Implementa carga, errores recuperables, validación de entrada, autorización y feedback accesible.
 7. Añade pruebas unitarias de reglas y mapeos, integración de datos/permisos y e2e del flujo crítico cuando corresponda.
 8. Actualiza README local, `docs/` y ADRs si cambió una decisión, contrato, variable o procedimiento.

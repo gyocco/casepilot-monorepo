@@ -11,7 +11,7 @@ Todo cambio de código debe pasar, como mínimo, las verificaciones relevantes:
 - pruebas e2e para flujos críticos de usuario;
 - revisión manual de viewport móvil, teclado, focus, estados de error y navegación.
 
-La API dispone de `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. Todas las pruebas de la API viven en su `test/`: unitarias e integración, con sus dependencias de desarrollo y checks del paquete API. Los full endpoint tests usan PostgreSQL efímero con Testcontainers; requieren Docker y nunca utilizan la base persistente de desarrollo. Consulta el [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md) y el [README de la API](../../src/apps/casepilot/casepilot-api/README.md). La [librería CQRS](../../src/libs/backend/cqrs/README.md) tiene `pnpm check:cqrs` y pruebas propias de tipos/ejecución en su `test/`. Web y las demás capacidades previstas tendrán scripts cuando existan sus manifests.
+La API dispone de `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm test:api` y `pnpm test:api:integration`. Todas las pruebas de la API viven en su `test/`: unitarias e integración, con sus dependencias de desarrollo y checks del paquete API. Los full endpoint tests usan PostgreSQL efímero con Testcontainers; requieren Docker y nunca utilizan la base persistente de desarrollo. Consulta el [README de integración](../../src/apps/casepilot/casepilot-api/test/integration/README.md) y el [README de la API](../../src/apps/casepilot/casepilot-api/README.md). La [librería CQRS](../../src/libs/backend/cqrs/README.md) tiene `pnpm check:cqrs` y pruebas propias de tipos/ejecución en su `test/`. El frontend y UI kit tienen `pnpm check:web`, con tipos, lint, builds, reglas FRT/regresiones y pruebas Playwright/axe. Comandos y Chromium: [README web](../../src/apps/casepilot/casepilot-web/README.md); cobertura: [validadores frontend](../../tools/frontend-architecture/README.md). Mobile y otras capacidades previstas incorporarán sus checks al implementarse.
 
 Para cambios solo de documentación o configuración del scaffold, valida enlaces, rutas, manifests, workspace y diff. Deja constancia de que type-check, lint, build, tests de producto y revisión de viewport/accesibilidad no aplican o no están disponibles.
 
@@ -38,7 +38,7 @@ Todas las pruebas específicas de una app o paquete, incluidas integración y en
 
 ## Accesibilidad
 
-- Usa HTML semántico y componentes Ionic adecuados.
+- Usa HTML semántico y componentes accesibles del UI kit sobre Material en la SPA.
 - Todos los controles tienen nombre accesible, estados y feedback entendibles.
 - El flujo funciona con teclado, focus visible, lector de pantalla y touch.
 - No uses color como única señal. Revisa contraste, tamaños, errores de formularios y reduced motion.

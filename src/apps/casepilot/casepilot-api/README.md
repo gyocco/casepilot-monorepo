@@ -2,6 +2,8 @@
 
 API REST NestJS/TypeScript con TypeORM y PostgreSQL. Es el host backend inicial de CasePilot; comparte un dominio y cuatro capas para todos sus modelos y casos de uso. Las [reglas backend](../../../../docs/architecture/backend-architecture-baseline-rules.md) y la [arquitectura](../../../../docs/architecture/backend-architecture-baseline.md) son obligatorias por la [adopción particular de CasePilot](../../../../docs/architecture/casepilot-backend-architecture.md).
 
+El destino elegido para la API es Google Cloud Run, con Firebase Authentication para identidad y Neon PostgreSQL inicialmente. Cloud SQL podrá usarse en otros ambientes o como destino de migración; conexión y persistencia deben mantener independencia del proveedor. La SPA consumidora usará Angular/TypeScript y Firebase Hosting; GitHub Actions automatizará la infraestructura y los releases. El aprovisionamiento y la integración de identidad siguen pendientes. Fuente canónica: [Infraestructura, proveedores y ambientes](../../../../docs/architecture/infrastructure-providers.md).
+
 ## Arranque local
 
 Requisitos: Node.js **22.12 o superior**, pnpm **10.13.1** y Docker con contenedores Linux. Desde la raíz del monorepo:
@@ -126,7 +128,7 @@ Puedes copiar `.env.example` a `.env` para overrides locales. Los archivos con v
 | --- | --- |
 | `API_HOST` / `API_PORT` | `127.0.0.1:3000` en local/test; `0.0.0.0:3000` en otros entornos. |
 | `API_ERROR_DETAILS` | Booleano estricto `true`/`false`. Default true en local/test/development, false en staging/production. Permite override con la precedencia existente. |
-| `CORS_ORIGINS` | Lista de origins HTTP/HTTPS separados por coma, sin paths; vacía = sin cabeceras CORS. Ejemplo local: `http://localhost:5173`. Sin wildcard ni cookies CORS. |
+| `CORS_ORIGINS` | Lista de origins HTTP/HTTPS separados por coma, sin paths; vacía = sin cabeceras CORS. Ejemplo para Angular local: `http://localhost:4200`. Sin wildcard ni cookies CORS. |
 | `DATABASE_URL` | URL `postgresql://usuario:password@host:puerto/base`; si existe reemplaza los cinco campos discretos. Codificar componentes especiales; sin query parameters. |
 | `DATABASE_HOST` / `DATABASE_PORT` | Host/puerto; local lee el puerto Docker, otros entornos usan `5432` si no se especifica. |
 | `DATABASE_NAME` / `DATABASE_USER` / `DATABASE_PASSWORD` | Credenciales server-side; local utiliza las variables `CASEPILOT_POSTGRES_*` de Docker como fallback. |
@@ -137,6 +139,8 @@ Puedes copiar `.env.example` a `.env` para overrides locales. Los archivos con v
 | `DATABASE_POOL_SIZE` | `5` conexiones por proceso; ajustar según réplicas y capacidad del servidor. |
 
 La misma carga de configuración y fábrica de opciones se usan en runtime y CLI. No se imprimen valores de configuración ni SQL en requests. El bootstrap devuelve un mensaje genérico si la configuración o el puerto impiden iniciar.
+
+Estas opciones son independientes de Neon/Cloud SQL; la elección y credenciales de cada ambiente se inyectan externamente. La URL actual no admite parámetros como `sslmode`; usa los campos discretos y las opciones TLS soportadas o adapta explícitamente la URL al contrato vigente. La compatibilidad de endpoints, certificados, permisos, migraciones y pool se probará al montar cada proveedor. Un cambio de conexión no migra datos; criterios y ejemplo DEV con Neon/QA y Prod con Cloud SQL en el [documento de infraestructura](../../../../docs/architecture/infrastructure-providers.md).
 
 ## Esquema y migraciones
 

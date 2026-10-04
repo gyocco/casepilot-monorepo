@@ -24,6 +24,8 @@ Comienza por `AGENTS.md` y las instrucciones aplicables. Aplica [monorepo-code-p
 | [monorepo-architecture.md](../../../docs/architecture/monorepo-architecture.md) | Propiedad de proyectos, apps/libs, runtimes y ubicación de código, tests y automatización. |
 | [casepilot-backend-architecture.md](../../../docs/architecture/casepilot-backend-architecture.md) | Adopción de la base y decisiones particulares de CasePilot. |
 | [Validación de CasePilot API](../../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md) | Comandos reales, cobertura por regla, versiones, alcance y límites de los checks implementados. |
+| [Arquitectura frontend](../../../docs/architecture/frontend-architecture.md) y [reglas FRT](../../../docs/architecture/frontend-architecture-rules.md) | Diseño y obligaciones frontend de SPA/kit; son fuentes propias, sin imponer convenciones backend a Angular. |
+| [Validadores frontend](../../../tools/frontend-architecture/README.md) | Gate multiproyecto de TS/templates/estilos/grafo/config, regresiones y límites por FRT. |
 | [ADR 0007](../../../docs/adr/0007-automated-api-architecture-validation.md) y ADRs relacionados | Decisiones que justifican herramientas, fronteras y convenciones verificables. |
 
 Revisa `git status --short` y busca con `rg` las referencias de cada regla, sección, checker y prueba afectados. Conserva cambios preexistentes. Inspecciona el código de los validadores y los scripts de los manifests; una descripción o un ID en un comentario no prueba que exista enforcement.
@@ -68,6 +70,8 @@ Conserva TypeScript nativo como primer paso del gate: el análisis de ts-morph n
 
 Los checks de la API comienzan en su `src/`: no certifican el monorepo completo. Si una regla exige analizar otras apps o librerías, incorpora el alcance real y sus comandos con el propietario adecuado. Las verificaciones de una API permanecen en ella; solo las verificaciones genuinamente multiproyecto van a `tests/` y la automatización transversal a `tools/`. No crees paquetes o carpetas de placeholders para simular esa cobertura.
 
+Para frontend usa los checkers reales de `tools/frontend-architecture/` y las regresiones de `tests/architecture/frontend/`, además de las configuraciones ESLint de SPA/kit. Analiza templates Angular, estilos y recursos con sus ASTs; no derives reglas de color o responsabilidades de UI exclusivamente del grafo de imports. Conserva la matriz FRT y evidencia de comportamiento del kit/SPA.
+
 Cuando una obligación no pueda demostrarse estáticamente, automatiza la parte verificable y especifica la evidencia restante: por ejemplo, integración de rollback/concurrencia o pruebas de permisos del caso de uso. Documenta por qué no existe un check genérico y dónde se acredita el comportamiento; no escribas un checker superficial para marcar la regla como cubierta.
 
 ## 4. Probar el contrato de cada checker
@@ -96,7 +100,7 @@ No marques como cumplida una garantía de SQL, autorización, negocio o efectos 
 
 ## 6. Verificar y entregar
 
-Consulta los manifests actuales antes de ejecutar. Para cambios en los validadores o en la arquitectura implementada de la API, desde la raíz:
+Consulta los manifests actuales antes de ejecutar. Para frontend/kit ejecuta `pnpm check:web`; incluye los validadores, sus regresiones y los checks de producto. Chromium es un requisito local de e2e, documentado en el README web. Los comandos siguientes corresponden solo a cambios en los validadores o arquitectura implementada de la API, desde la raíz:
 
 ```bash
 pnpm check:api:architecture

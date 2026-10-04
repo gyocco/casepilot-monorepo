@@ -1,81 +1,46 @@
-# 20 — Frontend, React, Vite, Tailwind, Ionic y Capacitor
+# 20 — Frontend Angular, Material, Tailwind y Capacitor
 
-## React y TypeScript
+## Fuentes obligatorias
 
-- Usa componentes funcionales y hooks; no introduzcas class components.
-- Respeta las Rules of Hooks: hooks solo en el nivel superior de componentes o custom hooks, nunca en condiciones, loops, callbacks ni después de un return temprano.
-- Usa `useEffect` para sincronizar con sistemas externos: suscripciones, timers, APIs del navegador o widgets no React. No lo uses para calcular valores derivados ni para encadenar el flujo normal de datos.
-- Prefiere props explícitas, composición y componentes pequeños frente a componentes monolíticos con muchos booleanos.
-- Mantén TypeScript estricto. Usa tipos de dominio, `unknown` con type guards y uniones discriminadas. `any`, `@ts-ignore` y `as` sin una razón verificable requieren justificación.
-- Usa keys estables de dominio; no uses el índice del array si el orden o la identidad pueden cambiar.
-- Mantén el estado lo más cerca posible de su consumidor. Usa contexto solo para dependencias verdaderamente transversales y no conviertas contexto en un store global accidental.
-- No dupliques estado derivado. Calcula a partir de la fuente de verdad o usa un selector memoizado cuando exista una medición real.
+Para trabajo frontend DEBE leer [arquitectura frontend](../../docs/architecture/frontend-architecture.md), [reglas FRT-001 a FRT-012](../../docs/architecture/frontend-architecture-rules.md) y [cobertura de los validadores](../../tools/frontend-architecture/README.md). El catálogo FRT es la fuente normativa; esta instrucción organiza su aplicación. La ubicación global sigue [arquitectura del monorepo](../../docs/architecture/monorepo-architecture.md).
 
-Referencias: [Rules of Hooks](https://react.dev/reference/rules/rules-of-hooks) y [`useEffect`](https://react.dev/reference/react/useEffect).
+La SPA implementa Angular 21 LTS/TypeScript, Angular Material y Tailwind. Material se consume mediante `@casepilot/pilot-ui-kit`. La decisión del [ADR 0020](../../docs/adr/0020-frontend-foundation-and-theming.md) sustituye Ionic Angular para la SPA; mobile conserva la futura composición Capacitor y sus adaptadores sin imponer ahora un segundo sistema de componentes.
 
-## Estructura de la app
+## Organización y componentes
 
-En `src/apps/casepilot/casepilot-web/src/` y `src/apps/casepilot/casepilot-mobile/src/`, separa navegación, features, componentes locales, hooks de composición, integración y tema. Una pantalla debe orquestar; un componente de UI no debe conocer credenciales, queries o reglas de autorización. La UI general reutilizable pertenece a `src/libs/frontend/`; los adaptadores de dispositivo y plataforma, a `src/libs/mobile/`.
+- `src/app/` compone providers y rutas; `src/shell/` contiene layout/navegación transversal; `src/features/<feature>/` agrupa rutas, páginas y responsabilidades relacionadas.
+- Cuando exista contenido, usa `pages/`, `components/`, `state/`, `data-access/` y `models/` dentro de la feature. La UI llama a fachadas/estado; los clientes y mappers permanecen en data-access.
+- Capacidades de varias features de la app pertenecen a `core/<capability>/` o `shared/<capability>/`; no conocen features. Auth control, mensajes y notificaciones futuros siguen esa propiedad, sin carpetas vacías ni implementación ficticia.
+- UI general reutilizable pertenece a `src/libs/frontend/pilot-ui-kit/`; no incluye rutas, permisos ni negocio de CasePilot. Usa su entrada pública.
+- Componentes standalone/OnPush, inputs/outputs tipados, TypeScript y templates estrictos. Usa identidad estable y `track` en listas. Estado derivado se calcula desde una fuente de verdad; recursos/suscripciones tienen dueño y liberación.
+- Angular Router carga features de forma lazy. La UI consume APIs NestJS y contratos; autorización/negocio se validan en backend.
 
-La cadena recomendada es:
+## Temas, recursos y Tailwind
 
-```text
-Page/Route -> Feature container -> Hook/use-case -> Package client/domain -> API
-                  └-> UI components
-```
+- Colores de componentes, estilos, templates y SVG DEBEN usar roles del kit: `PILOT_COLOR`, `PILOT_COLOR_VARIABLE`, nombres CSS registrados o utilidades semánticas como `bg-surface`/`text-primary`. Se prohíben valores literales y paletas Tailwind predeterminadas.
+- Los valores concretos solo son datos de la paleta base o de `src/theme/*.theme.ts`. No se redefinen variables de color en consumidores.
+- Logos, iconos, imágenes, GIFs/animaciones y vídeos se resuelven por nombre con `pilot-asset`. La app instala archivos en `public/themes/` y paths en manifiestos; una variante de tema cambia sus recursos sin editar componentes.
+- Respeta el fallback al tema inicial y reduced motion. Nuevos formatos requieren un renderer/adaptador y pruebas propios.
+- Tailwind organiza layout, spacing y mejoras responsive; CSS local resuelve reglas que no convenga expresar como utilities. Mantén nombres de clases detectables por el compilador.
 
-La carga, error, vacío, éxito, reintento y estado offline deben modelarse antes de dar por terminada una pantalla.
+## Mobile-first y accesibilidad
 
-## Ionic React
+- El mínimo móvil usa estilos sin prefijo; `sm:`/`md:`/`lg:` son mejoras para pantallas mayores. Evita anchos fijos, overflow horizontal y acciones solo hover.
+- Usa HTML semántico y componentes del kit. Verifica nombres accesibles, focus visible, contraste, touch targets, teclado, safe areas, orientación y contenido largo.
+- Comprueba carga/error/vacío/reintento/offline cuando haya comportamiento; el login inicial solo es un placeholder y no simula autenticación.
+- No omitas sanitización Angular ni distribuyas APIs web/nativas por componentes. Capacidades de plataforma se encapsulan en adaptadores y se prueban con fallback web.
 
-- Usa `IonApp` como raíz de la aplicación y `IonRouterOutlet`/React Router para navegación.
-- Cada pantalla enrutable DEBE tener `IonPage` como componente raíz. Dentro de ella usa la estructura Ionic apropiada (`IonHeader`, `IonToolbar`, `IonContent`, `IonFooter`) en vez de reproducirla con divs.
-- Prefiere componentes Ionic para navegación, botones, listas, formularios, modales, alerts, loading y gestos cuando exista un componente equivalente.
-- Usa `ionicons/icons` con imports explícitos; no cargues un catálogo completo ni dependas de nombres de iconos dinámicos sin necesidad.
-- Respeta el ciclo de navegación, botón atrás de Android, teclado, safe areas, scroll y transiciones de Ionic.
-- No anides contenedores con scroll sin una razón clara. Define un único dueño del scroll por pantalla.
+## Configuración y verificaciones
 
-La guía oficial de estructura, `IonPage` y Capacitor está en [Ionic React Quickstart](https://ionicframework.com/docs/react/quickstart) y la integración general en [Ionic React Overview](https://ionicframework.com/docs/react/overview).
+Angular CLI gestiona desarrollo/build; todo valor incorporado a environments, bundle o archivos servidos al cliente es público. No importes backend/Node, persistencia, SDKs administrativos, claves privadas ni tokens privilegiados. Los proveedores mantienen su fuente en [infraestructura](../../docs/architecture/infrastructure-providers.md); Firebase Authentication y despliegues siguen pendientes.
 
-## Mobile-first obligatorio
+Desde la raíz ejecuta `pnpm check:web` para cambios frontend/kit o de sus reglas. Incluye tipos, lint, builds, pruebas de kit/SPA, checkers/regresiones y Playwright/axe en móvil/escritorio. Instala Chromium una vez como indica el [README web](../../src/apps/casepilot/casepilot-web/README.md). No declares cobertura total de semántica, lectores de pantalla, secretos, permisos o dispositivos a partir de checks estáticos; consulta la matriz y añade evidencia proporcional.
 
-- Diseña y prueba primero en un viewport móvil estrecho. El layout base sin prefijo Tailwind representa móvil; `sm:`, `md:`, `lg:` y demás variantes mejoran pantallas mayores.
-- No uses `sm:` para definir el diseño móvil. Usa utilidades sin prefijo para la base y añade overrides progresivos.
-- Usa layout fluido, `max-w-*`, `min-h-*`, grids flexibles y container queries cuando aporten reutilización. Evita anchos fijos que obliguen a hacer scroll horizontal.
-- Las acciones táctiles deben ser cómodas, visibles y operables sin hover. No hagas que una acción crítica dependa solo de `:hover`.
-- Respeta `prefers-reduced-motion`, focus visible, contraste, labels de formulario, tamaño de texto y navegación por teclado.
-- Prueba estados de teclado abierto, contenido largo, orientación horizontal, safe area, modo oscuro si aplica y viewport de escritorio.
-- Una decisión visual que solo funciona en escritorio se considera un defecto, no un detalle pendiente.
+Para modificar reglas, aplica [architecture-rules-sync](../skills/architecture-rules-sync/SKILL.md) y sincroniza normativa, diseño, tooling, regresiones y cobertura en el mismo cambio. El gate backend no certifica el frontend.
 
-Tailwind documenta el enfoque [mobile-first responsive](https://tailwindcss.com/docs/responsive-design). Esta regla es obligatoria para web y sirve como base para Android/iOS.
+## Referencias
 
-## Tailwind CSS y estilos
-
-- Usa Tailwind para layout, spacing, tipografía y estados repetibles. Usa CSS global o CSS del componente para tokens, estilos de Ionic y reglas que realmente no expresen bien como utilities.
-- Define colores, radios, tipografías, sombras y breakpoints como tokens; evita hexadecimales y valores arbitrarios repetidos en JSX.
-- Evita `!important`, selectores globales agresivos y estilos inline salvo para valores dinámicos que no puedan representarse como clase.
-- No mezcles dos sistemas de spacing o breakpoints sin documentarlo. El tema específico permanece en `src/apps/casepilot/<app>/src/theme/`; los tokens compartidos, en `src/libs/frontend/pilot-ui-kit/` cuando corresponda.
-- Revisa que las clases dinámicas sean detectables por el compilador de Tailwind; no construyas nombres completos de clase a partir de strings arbitrarios.
-
-## Vite y configuración
-
-- Solo variables con prefijo `VITE_` pueden llegar al bundle cliente y, por definición, deben considerarse públicas.
-- Nunca pongas secretos, passwords, tokens administrativos o URLs privadas protegidas en `VITE_*`.
-- Trata las variables como strings y valida/convierte tipos en un módulo de configuración único.
-- Mantén `.env.example` con nombres y ejemplos no sensibles. Los archivos `.env.local` y equivalentes no se versionan.
-- No importes APIs Node-only ni módulos server-only desde código que Vite pueda incluir en el navegador.
-- Si cambia la configuración de Vite, comprueba dev, build, preview y el futuro build de Capacitor.
-
-Referencia oficial: [Vite Env Variables and Modes](https://vite.dev/guide/env-and-mode.html).
-
-## Compatibilidad futura con Capacitor
-
-- Mantén la lógica de producto y dominio independiente de browser y native.
-- Encapsula cámara, archivos, notificaciones, biometría, almacenamiento, compartir y sensores detrás de interfaces/adaptadores en `src/libs/mobile/` cuando sean capacidades generales reutilizables, o en una frontera local de la app si solo tienen un consumidor.
-- Cada capability debe tener implementación web/fallback, implementación Capacitor cuando corresponda, detección de disponibilidad, manejo de permisos, manejo de error y prueba.
-- No llames APIs nativas directamente desde componentes de negocio. El componente pide una capacidad; el adaptador decide cómo resolverla.
-- Evita asumir que existen `window`, hover, mouse, filesystem local, tamaño de pantalla fijo o conectividad continua.
-- No persistas información sensible en almacenamiento web o nativo sin una decisión de seguridad documentada.
-- Cuando se añadan plataformas `ios/` y `android/` a la app mobile, registra cambios de permisos, plugins, configuración nativa y pasos de build en su README local y en `docs/operations/` si son transversales.
-
-Capacitor está diseñado para llevar una aplicación web a iOS, Android y web conservando una base de código compartida; consulta su [documentación oficial](https://capacitorjs.com/docs) y el [workflow de desarrollo](https://capacitorjs.com/docs/basics/workflow).
+- [Guía Angular](https://angular.dev/style-guide), [componentes](https://angular.dev/guide/components), [Router](https://angular.dev/guide/routing) y [formularios tipados](https://angular.dev/guide/forms/typed-forms).
+- [Material 21: temas](https://v21.material.angular.dev/guide/theming).
+- [Tailwind mobile-first](https://tailwindcss.com/docs/responsive-design) y [Angular](https://tailwindcss.com/docs/installation/framework-guides/angular).
+- [Capacitor](https://capacitorjs.com/docs) y [workflow](https://capacitorjs.com/docs/basics/workflow).
