@@ -1,8 +1,10 @@
 openapi: 3.0.3
 info:
   title: CasePilot API
-  version: 0.4.0
-  description: CRUD público de los 28 modelos de servicios profesionales y sondas técnicas. Autenticación diferida; businessAccountId es selección de datos, no identidad verificada.
+  version: 0.5.0
+  description: API REST de CasePilot con autenticación Bearer (Firebase Authentication) obligatoria por defecto, autorización en Application sobre cuentas/roles y sondas técnicas públicas (/health y /health/database).
+security:
+  - bearerAuth: []
 servers:
   - url: http://127.0.0.1:3000
     description: Desarrollo local
@@ -67,11 +69,69 @@ paths:
                         enum: [UNEXPECTED_ERROR]
         default:
           $ref: '#/components/responses/ApiError'
+  /auth/me/bootstrap:
+    post:
+      operationId: bootstrapCurrentUser
+      summary: Resuelve o aprovisiona idempotentemente el usuario autenticado, su identidad externa y su cuenta personal inicial
+      responses:
+        '201':
+          description: Perfil resuelto o aprovisionado
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BootstrapProfileResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
+  /auth/me:
+    get:
+      operationId: getCurrentUserProfile
+      summary: Obtiene el perfil del usuario autenticado y sus membresías activas (query pura sin mutaciones)
+      responses:
+        '200':
+          description: Perfil del usuario autenticado
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelopeResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
+    patch:
+      operationId: updateCurrentUserProfile
+      summary: Actualiza campos propios permitidos del perfil autenticado con control optimista de versión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCurrentUserProfileRequest'
+      responses:
+        '200':
+          description: Perfil actualizado
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileEnvelopeResponse'
+        default:
+          $ref: '#/components/responses/ApiError'
   /users:
     get:
       operationId: listUsers
       summary: Listado paginado de User
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","email","emailVerifiedAt","firstName","lastName","displayName","avatarUrl","locale","timezone","status","lastLoginAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -83,7 +143,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createUser
-      security: []
       requestBody:
         required: true
         content:
@@ -101,7 +160,6 @@ paths:
     parameters: [{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getUser
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -113,7 +171,6 @@ paths:
     patch:
       operationId: updateUser
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -130,7 +187,6 @@ paths:
     delete:
       operationId: deleteUser
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -144,7 +200,6 @@ paths:
     get:
       operationId: listBusinessAccounts
       summary: Listado paginado de BusinessAccount
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","name","legalName","slug","type","taxId","email","phone","website","timezone","locale","currency","countryCode","status"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -156,7 +211,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createBusinessAccount
-      security: []
       requestBody:
         required: true
         content:
@@ -174,7 +228,6 @@ paths:
     parameters: [{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getBusinessAccount
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -186,7 +239,6 @@ paths:
     patch:
       operationId: updateBusinessAccount
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -203,7 +255,6 @@ paths:
     delete:
       operationId: deleteBusinessAccount
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -218,7 +269,6 @@ paths:
     get:
       operationId: listMembers
       summary: Listado paginado de Member
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","userId","role","status","title","professionalRegistration","hourlyRate","joinedAt","invitedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -230,7 +280,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createMember
-      security: []
       requestBody:
         required: true
         content:
@@ -248,7 +297,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getMember
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -260,7 +308,6 @@ paths:
     patch:
       operationId: updateMember
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -277,7 +324,6 @@ paths:
     delete:
       operationId: deleteMember
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -292,7 +338,6 @@ paths:
     get:
       operationId: listExternalParties
       summary: Listado paginado de ExternalParty
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","type","displayName","firstName","lastName","legalName","taxId","email","phone","website","addressLine_1","addressLine_2","city","region","postalCode","countryCode","status"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -304,7 +349,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createExternalParty
-      security: []
       requestBody:
         required: true
         content:
@@ -322,7 +366,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getExternalParty
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -334,7 +377,6 @@ paths:
     patch:
       operationId: updateExternalParty
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -351,7 +393,6 @@ paths:
     delete:
       operationId: deleteExternalParty
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -366,7 +407,6 @@ paths:
     get:
       operationId: listCases
       summary: Listado paginado de Case
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseTypeId","number","externalReference","title","status","priority","openedAt","closedAt","responsibleMemberId","billingType","hourlyRate","currency","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -378,7 +418,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCase
-      security: []
       requestBody:
         required: true
         content:
@@ -396,7 +435,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCase
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -408,7 +446,6 @@ paths:
     patch:
       operationId: updateCase
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -425,7 +462,6 @@ paths:
     delete:
       operationId: deleteCase
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -440,7 +476,6 @@ paths:
     get:
       operationId: listCaseTypes
       summary: Listado paginado de CaseType
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","name","code","isActive","defaultWorkflowId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -452,7 +487,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCaseType
-      security: []
       requestBody:
         required: true
         content:
@@ -470,7 +504,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCaseType
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -482,7 +515,6 @@ paths:
     patch:
       operationId: updateCaseType
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -499,7 +531,6 @@ paths:
     delete:
       operationId: deleteCaseType
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -514,7 +545,6 @@ paths:
     get:
       operationId: listCaseExternalParties
       summary: Listado paginado de CaseExternalParty
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","role","isPrimary"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -526,7 +556,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCaseExternalParty
-      security: []
       requestBody:
         required: true
         content:
@@ -544,7 +573,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCaseExternalParty
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -556,7 +584,6 @@ paths:
     patch:
       operationId: updateCaseExternalParty
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -573,7 +600,6 @@ paths:
     delete:
       operationId: deleteCaseExternalParty
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -588,7 +614,6 @@ paths:
     get:
       operationId: listCaseMembers
       summary: Listado paginado de CaseMember
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","role","isPrimary","assignedAt","removedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -600,7 +625,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCaseMember
-      security: []
       requestBody:
         required: true
         content:
@@ -618,7 +642,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCaseMember
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -630,7 +653,6 @@ paths:
     patch:
       operationId: updateCaseMember
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -647,7 +669,6 @@ paths:
     delete:
       operationId: deleteCaseMember
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -662,7 +683,6 @@ paths:
     get:
       operationId: listTasks
       summary: Listado paginado de Task
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","title","status","priority","assignedMemberId","createdByMemberId","dueAt","completedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -674,7 +694,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createTask
-      security: []
       requestBody:
         required: true
         content:
@@ -692,7 +711,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getTask
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -704,7 +722,6 @@ paths:
     patch:
       operationId: updateTask
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -721,7 +738,6 @@ paths:
     delete:
       operationId: deleteTask
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -736,7 +752,6 @@ paths:
     get:
       operationId: listEvents
       summary: Listado paginado de Event
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","title","eventType","startsAt","endsAt","allDay","location","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -748,7 +763,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createEvent
-      security: []
       requestBody:
         required: true
         content:
@@ -766,7 +780,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getEvent
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -778,7 +791,6 @@ paths:
     patch:
       operationId: updateEvent
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -795,7 +807,6 @@ paths:
     delete:
       operationId: deleteEvent
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -810,7 +821,6 @@ paths:
     get:
       operationId: listDeadlines
       summary: Listado paginado de Deadline
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","title","dueAt","status","responsibleMemberId","completedAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -822,7 +832,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createDeadline
-      security: []
       requestBody:
         required: true
         content:
@@ -840,7 +849,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getDeadline
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -852,7 +860,6 @@ paths:
     patch:
       operationId: updateDeadline
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -869,7 +876,6 @@ paths:
     delete:
       operationId: deleteDeadline
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -884,7 +890,6 @@ paths:
     get:
       operationId: listFolders
       summary: Listado paginado de Folder
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","parentFolderId","name","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -896,7 +901,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createFolder
-      security: []
       requestBody:
         required: true
         content:
@@ -914,7 +918,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getFolder
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -926,7 +929,6 @@ paths:
     patch:
       operationId: updateFolder
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -943,7 +945,6 @@ paths:
     delete:
       operationId: deleteFolder
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -958,7 +959,6 @@ paths:
     get:
       operationId: listDocuments
       summary: Listado paginado de Document
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","folderId","name","documentType","currentVersionId","createdByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -970,7 +970,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createDocument
-      security: []
       requestBody:
         required: true
         content:
@@ -988,7 +987,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getDocument
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1000,7 +998,6 @@ paths:
     patch:
       operationId: updateDocument
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1017,7 +1014,6 @@ paths:
     delete:
       operationId: deleteDocument
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1032,7 +1028,6 @@ paths:
     get:
       operationId: listDocumentVersions
       summary: Listado paginado de DocumentVersion
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","documentId","versionNumber","storageKey","fileName","mimeType","sizeBytes","checksum","uploadedByMemberId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1044,7 +1039,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createDocumentVersion
-      security: []
       requestBody:
         required: true
         content:
@@ -1062,7 +1056,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getDocumentVersion
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1074,7 +1067,6 @@ paths:
     patch:
       operationId: updateDocumentVersion
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1091,7 +1083,6 @@ paths:
     delete:
       operationId: deleteDocumentVersion
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1106,7 +1097,6 @@ paths:
     get:
       operationId: listNotes
       summary: Listado paginado de Note
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","authorMemberId","title","isPrivate"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1118,7 +1108,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createNote
-      security: []
       requestBody:
         required: true
         content:
@@ -1136,7 +1125,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getNote
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1148,7 +1136,6 @@ paths:
     patch:
       operationId: updateNote
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1165,7 +1152,6 @@ paths:
     delete:
       operationId: deleteNote
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1180,7 +1166,6 @@ paths:
     get:
       operationId: listComments
       summary: Listado paginado de Comment
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","authorMemberId","targetType","targetId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1192,7 +1177,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createComment
-      security: []
       requestBody:
         required: true
         content:
@@ -1210,7 +1194,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getComment
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1222,7 +1205,6 @@ paths:
     patch:
       operationId: updateComment
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1239,7 +1221,6 @@ paths:
     delete:
       operationId: deleteComment
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1254,7 +1235,6 @@ paths:
     get:
       operationId: listCommunications
       summary: Listado paginado de Communication
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","externalPartyId","memberId","type","direction","subject","occurredAt","externalReference"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1266,7 +1246,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCommunication
-      security: []
       requestBody:
         required: true
         content:
@@ -1284,7 +1263,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCommunication
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1296,7 +1274,6 @@ paths:
     patch:
       operationId: updateCommunication
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1313,7 +1290,6 @@ paths:
     delete:
       operationId: deleteCommunication
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1328,7 +1304,6 @@ paths:
     get:
       operationId: listActivities
       summary: Listado paginado de Activity
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","actorMemberId","action","entityType","entityId","caseId","occurredAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1340,7 +1315,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createActivity
-      security: []
       requestBody:
         required: true
         content:
@@ -1358,7 +1332,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getActivity
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1370,7 +1343,6 @@ paths:
     patch:
       operationId: updateActivity
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1387,7 +1359,6 @@ paths:
     delete:
       operationId: deleteActivity
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1402,7 +1373,6 @@ paths:
     get:
       operationId: listTimeEntries
       summary: Listado paginado de TimeEntry
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","taskId","startedAt","endedAt","durationMinutes","billable","hourlyRate","currency","invoiceLineId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1414,7 +1384,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createTimeEntry
-      security: []
       requestBody:
         required: true
         content:
@@ -1432,7 +1401,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getTimeEntry
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1444,7 +1412,6 @@ paths:
     patch:
       operationId: updateTimeEntry
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1461,7 +1428,6 @@ paths:
     delete:
       operationId: deleteTimeEntry
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1476,7 +1442,6 @@ paths:
     get:
       operationId: listExpenses
       summary: Listado paginado de Expense
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","caseId","memberId","description","amount","currency","occurredOn","billable","invoiceLineId","documentId"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1488,7 +1453,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createExpense
-      security: []
       requestBody:
         required: true
         content:
@@ -1506,7 +1470,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getExpense
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1518,7 +1481,6 @@ paths:
     patch:
       operationId: updateExpense
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1535,7 +1497,6 @@ paths:
     delete:
       operationId: deleteExpense
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1550,7 +1511,6 @@ paths:
     get:
       operationId: listInvoices
       summary: Listado paginado de Invoice
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","externalPartyId","caseId","number","status","currency","issueDate","dueDate","subtotal","taxAmount","total","balanceDue"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1562,7 +1522,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createInvoice
-      security: []
       requestBody:
         required: true
         content:
@@ -1580,7 +1539,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getInvoice
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1592,7 +1550,6 @@ paths:
     patch:
       operationId: updateInvoice
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1609,7 +1566,6 @@ paths:
     delete:
       operationId: deleteInvoice
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1624,7 +1580,6 @@ paths:
     get:
       operationId: listInvoiceLines
       summary: Listado paginado de InvoiceLine
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","invoiceId","caseId","description","quantity","unitPrice","taxRate","subtotal","total","sortOrder"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1636,7 +1591,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createInvoiceLine
-      security: []
       requestBody:
         required: true
         content:
@@ -1654,7 +1608,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getInvoiceLine
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1666,7 +1619,6 @@ paths:
     patch:
       operationId: updateInvoiceLine
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1683,7 +1635,6 @@ paths:
     delete:
       operationId: deleteInvoiceLine
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1698,7 +1649,6 @@ paths:
     get:
       operationId: listPayments
       summary: Listado paginado de Payment
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","invoiceId","amount","currency","paymentMethod","reference","paidAt"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1710,7 +1660,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createPayment
-      security: []
       requestBody:
         required: true
         content:
@@ -1728,7 +1677,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getPayment
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1740,7 +1688,6 @@ paths:
     patch:
       operationId: updatePayment
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1757,7 +1704,6 @@ paths:
     delete:
       operationId: deletePayment
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1772,7 +1718,6 @@ paths:
     get:
       operationId: listCustomFieldDefinitions
       summary: Listado paginado de CustomFieldDefinition
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","entityType","caseTypeId","name","key","dataType","required","sortOrder","isActive"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1784,7 +1729,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCustomFieldDefinition
-      security: []
       requestBody:
         required: true
         content:
@@ -1802,7 +1746,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCustomFieldDefinition
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1814,7 +1757,6 @@ paths:
     patch:
       operationId: updateCustomFieldDefinition
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1831,7 +1773,6 @@ paths:
     delete:
       operationId: deleteCustomFieldDefinition
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1846,7 +1787,6 @@ paths:
     get:
       operationId: listCustomFieldValues
       summary: Listado paginado de CustomFieldValue
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","customFieldDefinitionId","entityType","entityId","valueNumber","valueDate","valueBoolean"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1858,7 +1798,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createCustomFieldValue
-      security: []
       requestBody:
         required: true
         content:
@@ -1876,7 +1815,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getCustomFieldValue
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1888,7 +1826,6 @@ paths:
     patch:
       operationId: updateCustomFieldValue
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1905,7 +1842,6 @@ paths:
     delete:
       operationId: deleteCustomFieldValue
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1920,7 +1856,6 @@ paths:
     get:
       operationId: listStatusDefinitions
       summary: Listado paginado de StatusDefinition
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","entityType","caseTypeId","name","code","category","sortOrder","isInitial","isTerminal","isActive"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -1932,7 +1867,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createStatusDefinition
-      security: []
       requestBody:
         required: true
         content:
@@ -1950,7 +1884,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getStatusDefinition
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -1962,7 +1895,6 @@ paths:
     patch:
       operationId: updateStatusDefinition
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -1979,7 +1911,6 @@ paths:
     delete:
       operationId: deleteStatusDefinition
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -1994,7 +1925,6 @@ paths:
     get:
       operationId: listWorkflows
       summary: Listado paginado de Workflow
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","name","isActive"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -2006,7 +1936,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createWorkflow
-      security: []
       requestBody:
         required: true
         content:
@@ -2024,7 +1953,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getWorkflow
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -2036,7 +1964,6 @@ paths:
     patch:
       operationId: updateWorkflow
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -2053,7 +1980,6 @@ paths:
     delete:
       operationId: deleteWorkflow
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -2068,7 +1994,6 @@ paths:
     get:
       operationId: listWorkflowSteps
       summary: Listado paginado de WorkflowStep
-      security: []
       parameters: [{"name":"pageNumber","in":"query","required":false,"schema":{"type":"integer","minimum":1,"default":1}},{"name":"pageSize","in":"query","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":20}},{"name":"sortBy","in":"query","required":false,"schema":{"type":"string","enum":["id","createdAt","updatedAt","version","businessAccountId","workflowId","statusDefinitionId","name","sortOrder","isInitial","isTerminal"],"default":"id"}},{"name":"sortDirection","in":"query","required":false,"schema":{"type":"string","enum":["asc","desc"],"default":"asc"}}]
       responses:
         '200':
@@ -2080,7 +2005,6 @@ paths:
           $ref: '#/components/responses/ApiError'
     post:
       operationId: createWorkflowStep
-      security: []
       requestBody:
         required: true
         content:
@@ -2098,7 +2022,6 @@ paths:
     parameters: [{"name":"businessAccountId","in":"path","required":true,"schema":{"type":"string","format":"uuid"}},{"name":"id","in":"path","required":true,"schema":{"type":"string","format":"uuid"}}]
     get:
       operationId: getWorkflowStep
-      security: []
       responses:
         '200':
           description: Operación completada
@@ -2110,7 +2033,6 @@ paths:
     patch:
       operationId: updateWorkflowStep
       description: Actualización parcial. Requiere la version actual y al menos un campo mutable.
-      security: []
       requestBody:
         required: true
         content:
@@ -2127,7 +2049,6 @@ paths:
     delete:
       operationId: deleteWorkflowStep
       description: Eliminación física explícita. Devuelve 409 si hay referencias o la version es obsoleta.
-      security: []
       parameters: [{"name":"version","in":"query","required":true,"schema":{"type":"integer","minimum":1,"maximum":2147483646}}]
       responses:
         '200':
@@ -3986,3 +3907,98 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HealthCheckObject'
+    UserAccountMembership:
+      type: object
+      additionalProperties: false
+      required: [memberId, businessAccountId, accountName, accountStatus, role, memberStatus]
+      properties:
+        memberId:
+          type: string
+          format: uuid
+        businessAccountId:
+          type: string
+          format: uuid
+        accountName:
+          type: string
+        accountStatus:
+          type: string
+        role:
+          type: string
+        memberStatus:
+          type: string
+    CurrentUserProfile:
+      type: object
+      additionalProperties: false
+      required: [id, email, emailVerifiedAt, firstName, lastName, displayName, locale, timezone, status, version, memberships]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        emailVerifiedAt:
+          type: string
+          nullable: true
+        firstName:
+          type: string
+        lastName:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        locale:
+          type: string
+          nullable: true
+        timezone:
+          type: string
+          nullable: true
+        status:
+          type: string
+        version:
+          type: integer
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAccountMembership'
+    ProfileEnvelopeResponse:
+      type: object
+      additionalProperties: false
+      required: [profile]
+      properties:
+        profile:
+          $ref: '#/components/schemas/CurrentUserProfile'
+    BootstrapProfileResponse:
+      type: object
+      additionalProperties: false
+      required: [profile, provisioned]
+      properties:
+        profile:
+          $ref: '#/components/schemas/CurrentUserProfile'
+        provisioned:
+          type: boolean
+    UpdateCurrentUserProfileRequest:
+      type: object
+      additionalProperties: false
+      required: [version]
+      properties:
+        version:
+          type: integer
+          minimum: 1
+        firstName:
+          type: string
+        lastName:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        locale:
+          type: string
+          nullable: true
+        timezone:
+          type: string
+          nullable: true
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

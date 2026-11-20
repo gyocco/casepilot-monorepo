@@ -21,6 +21,7 @@ function fixture(context: TestContext): string {
 const remote = {
   APP_ENV: 'staging', DATABASE_HOST: 'db.example.test', DATABASE_PORT: '5432',
   DATABASE_NAME: 'staging_db', DATABASE_USER: 'staging_user', DATABASE_PASSWORD: 'remote_fixture_secret',
+  AUTH_FIREBASE_PROJECT_ID: 'casepilot-staging',
 };
 
 void test('local configuration reads Docker credentials and applies file/process precedence', context => {
@@ -100,4 +101,26 @@ void test('CORS accepts only the explicitly configured origins and custom CA kee
   }, app);
   assert.deepEqual(config.http.corsOrigins, ['https://web.example.test', 'http://localhost:5173']);
   assert.deepEqual(config.database.ssl, { rejectUnauthorized: true, ca: 'fixture-ca' });
+  assert.equal(config.auth.firebaseProjectId, 'casepilot-staging');
+  assert.equal(config.auth.emulatorHost, null);
+});
+
+void test('auth configuration defaults to local emulator and forbids emulator outside local', context => {
+  const app = fixture(context);
+  const localConfig = loadBackendConfig({}, app);
+  assert.equal(localConfig.auth.firebaseProjectId, 'demo-casepilot-local');
+  assert.equal(localConfig.auth.emulatorHost, '127.0.0.1:9099');
+
+  assert.throws(
+    () => loadBackendConfig({ ...remote, AUTH_FIREBASE_PROJECT_ID: undefined }, app),
+    BackendConfigurationError,
+  );
+  assert.throws(
+    () => loadBackendConfig({ ...remote, FIREBASE_AUTH_EMULATOR_HOST: '127.0.0.1:9099' }, app),
+    /only in the local environment/,
+  );
+  assert.throws(
+    () => loadBackendConfig({ FIREBASE_AUTH_EMULATOR_HOST: 'http://127.0.0.1:9099' }, app),
+    /host:port/,
+  );
 });

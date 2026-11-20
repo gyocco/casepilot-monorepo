@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateWorkflowStepData {
   readonly workflowId?: string;
@@ -10,5 +11,5 @@ export interface UpdateWorkflowStepData {
   readonly isTerminal?: boolean;
 }
 export class UpdateWorkflowStepRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateWorkflowStepData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateWorkflowStepData, public readonly actor: VerifiedIdentity) { super(); }
 }

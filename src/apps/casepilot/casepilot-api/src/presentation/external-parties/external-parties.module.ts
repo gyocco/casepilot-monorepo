@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmExternalPartyRepository } from '../../infrastructure/persistence/repositories/typeorm-external-party.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateExternalPartyHandler } from '../../application/external-parties/create-external-party/create-external-party.handler.js';
 import { GetExternalPartyHandler } from '../../application/external-parties/get-external-party/get-external-party.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('ExternalParties_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<ExternalParty>> =>
         new TypeOrmUnitOfWork<CrudScope<ExternalParty>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmExternalPartyRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmExternalPartyRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

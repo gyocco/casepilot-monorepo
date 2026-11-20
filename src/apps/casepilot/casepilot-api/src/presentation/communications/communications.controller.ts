@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateCommunicationHandler } from '../../application/communications/create-communication/create-communication.handler.js';
 import { GetCommunicationHandler } from '../../application/communications/get-communication/get-communication.handler.js';
 import { UpdateCommunicationHandler } from '../../application/communications/update-communication/update-communication.handler.js';
@@ -24,7 +26,7 @@ export class CommunicationsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<CommunicationItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<CommunicationItemHttpResponse> {
     const body = readBody(input, ['caseId', 'externalPartyId', 'memberId', 'type', 'direction', 'subject', 'body', 'occurredAt', 'externalReference']);
     const response = await this.createHandler.execute(new CreateCommunicationRequest(businessAccountId, {
       caseId: nullableString(body, 'caseId'),
@@ -36,33 +38,34 @@ export class CommunicationsController {
       body: nullableString(body, 'body'),
       occurredAt: stringValue(body, 'occurredAt'),
       externalReference: nullableString(body, 'externalReference'),
-    }));
+    }, actor));
     return new CommunicationItemHttpResponse(toCommunicationHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<CommunicationsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListCommunicationsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListCommunicationsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new CommunicationsPageHttpResponse(response.items.map(toCommunicationHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<CommunicationItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetCommunicationRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<CommunicationItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetCommunicationRequest(businessAccountId, id, actor));
     return new CommunicationItemHttpResponse(toCommunicationHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<CommunicationItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<CommunicationItemHttpResponse> {
     const body = readBody(input, ['version', 'caseId', 'externalPartyId', 'memberId', 'type', 'direction', 'subject', 'body', 'occurredAt', 'externalReference']);
     const response = await this.updateHandler.execute(new UpdateCommunicationRequest(businessAccountId, id, numberValue(body, 'version'), {
       caseId: nullableString(body, 'caseId'),
@@ -74,14 +77,14 @@ export class CommunicationsController {
       body: nullableString(body, 'body'),
       occurredAt: optionalString(body, 'occurredAt'),
       externalReference: nullableString(body, 'externalReference'),
-    }));
+    }, actor));
     return new CommunicationItemHttpResponse(toCommunicationHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteCommunicationHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteCommunicationRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteCommunicationHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteCommunicationRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteCommunicationHttpResponse(response.id, response.deleted);
   }
 }

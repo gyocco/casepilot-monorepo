@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface CreateNoteData {
   readonly caseId?: string | null;
@@ -9,5 +10,5 @@ export interface CreateNoteData {
   readonly isPrivate: boolean;
 }
 export class CreateNoteRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateNoteData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateNoteData, public readonly actor: VerifiedIdentity) { super(); }
 }

@@ -17,6 +17,23 @@ const configuration = {
       to: { path: '(^|/)libs/backend/exception-handler/(src|dist)/nestjs/', reachable: true },
     },
     {
+      name: 'CPA-005-auth-public-entry', severity: 'error',
+      from: { path: '^src/' },
+      to: { path: '(^|/)libs/backend/auth/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/firebase/index\\.(?:ts|js|d\\.ts)$', '/nestjs/index\\.(?:ts|js|d\\.ts)$'] },
+    },
+    {
+      name: 'BCK-008-auth-core-no-adapters', severity: 'error',
+      comment: 'Core layers consume only pure VerifiedIdentity/TokenVerifier contracts, never Firebase or NestJS auth adapters.',
+      from: { path: '^src/(domain|application)/' },
+      to: { path: '(^|/)libs/backend/auth/(src|dist)/(firebase|nestjs)/', reachable: true },
+    },
+    {
+      name: 'BCK-003-presentation-no-auth-provider', severity: 'error',
+      comment: 'Presentation transport cannot reach Firebase Admin or auth provider adapters directly.',
+      from: { path: '^src/presentation/', pathNot: resourceModule },
+      to: { path: '(^|/)libs/backend/auth/(src|dist)/firebase/|(^|/)node_modules/firebase-admin/', reachable: true },
+    },
+    {
       name: 'CPA-005-validation-public-entry', severity: 'error',
       from: { path: '^src/' },
       to: { path: '(^|/)libs/backend/validation/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/nestjs/index\\.(?:ts|js|d\\.ts)$'] },
@@ -90,7 +107,7 @@ const configuration = {
       comment: 'Keep framework, ORM and recognized provider SDK types/implementations outside Domain and Application.',
       from: { path: '^src/(domain|application)/' },
       to: {
-        path: '(^|/)node_modules/(@nestjs/|typeorm/|pg/|react/|react-dom/|@ionic/|@capacitor/|@aws-sdk/|@azure/)',
+        path: '(^|/)node_modules/(@nestjs/|typeorm/|pg/|firebase-admin/|firebase/|@google-cloud/|@neondatabase/|@angular/|react/|react-dom/|@ionic/|@capacitor/|@aws-sdk/|@azure/)',
         reachable: true,
       },
     },

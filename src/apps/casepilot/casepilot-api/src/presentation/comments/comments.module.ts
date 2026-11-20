@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCommentRepository } from '../../infrastructure/persistence/repositories/typeorm-comment.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateCommentHandler } from '../../application/comments/create-comment/create-comment.handler.js';
 import { GetCommentHandler } from '../../application/comments/get-comment/get-comment.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('Comments_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Comment>> =>
         new TypeOrmUnitOfWork<CrudScope<Comment>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmCommentRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmCommentRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

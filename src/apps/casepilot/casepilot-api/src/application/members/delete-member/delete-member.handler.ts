@@ -6,6 +6,7 @@ import { type DeleteMemberRequest } from './delete-member.request.js';
 import type { CrudScope } from '../../shared/crud-models.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { validateId } from '@casepilot/validation';
 import { validateVersion } from '../../shared/crud-pagination.js';
 import { ConflictError } from '@casepilot/abstractions';
@@ -15,6 +16,7 @@ export class DeleteMemberHandler implements Handler<DeleteMemberRequest, DeleteM
 
   async execute(request: DeleteMemberRequest): Promise<DeleteMemberResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'admin');
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

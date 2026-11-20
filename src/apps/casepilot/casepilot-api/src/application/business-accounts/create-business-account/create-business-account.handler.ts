@@ -1,11 +1,12 @@
 import type { Handler } from '@casepilot/cqrs';
-import { type UnitOfWork } from '@casepilot/abstractions';
+import { type CrudRuntime, type UnitOfWork } from '@casepilot/abstractions';
 import { BusinessAccount } from '../../../domain/entities/business-account.js';
+import { Member } from '../../../domain/entities/member.js';
 import { CreateBusinessAccountResponse } from './create-business-account.response.js';
 import { toBusinessAccountResponse } from '../shared/business-account.response.js';
 import { type CreateBusinessAccountRequest } from './create-business-account.request.js';
 import { type CrudScope } from '../../shared/crud-models.js';
-import type { CrudRuntime } from '@casepilot/abstractions';
+import { authorizeBusinessAccountAction } from '../../shared/authorization.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
 import { business_accountFields, validateBusinessAccountRelations } from '../shared/business-account.rules.js';
@@ -17,11 +18,13 @@ export class CreateBusinessAccountHandler implements Handler<CreateBusinessAccou
   async execute(request: CreateBusinessAccountRequest): Promise<CreateBusinessAccountResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, false);
+      const { user } = await authorizeBusinessAccountAction(scope, request.actor, 'create');
       validateFields(request.data, business_accountFields, false);
+      const now = this.runtime.now();
       const entity = new BusinessAccount();
       entity.id = this.runtime.newId();
-      entity.createdAt = this.runtime.now();
-      entity.updatedAt = entity.createdAt;
+      entity.createdAt = now;
+      entity.updatedAt = now;
       entity.version = 1;
       entity.name = request.data.name;
       entity.legalName = request.data.legalName ?? null;
@@ -39,6 +42,23 @@ export class CreateBusinessAccountHandler implements Handler<CreateBusinessAccou
       entity.settings = request.data.settings ?? null;
       validateBusinessAccountRelations(entity, scope.references);
       const stored = await scope.resource.add(entity);
+
+      const ownerMember = new Member();
+      ownerMember.id = this.runtime.newId();
+      ownerMember.createdAt = now;
+      ownerMember.updatedAt = now;
+      ownerMember.version = 1;
+      ownerMember.businessAccountId = stored.id;
+      ownerMember.userId = user.id;
+      ownerMember.role = 'OWNER';
+      ownerMember.status = 'ACTIVE';
+      ownerMember.title = null;
+      ownerMember.professionalRegistration = null;
+      ownerMember.hourlyRate = null;
+      ownerMember.joinedAt = now;
+      ownerMember.invitedAt = null;
+      await scope.members.add(ownerMember);
+
       return new CreateBusinessAccountResponse(toBusinessAccountResponse(stored));
     }, 'SERIALIZABLE'));
   }

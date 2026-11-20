@@ -6,6 +6,7 @@ import { type DeleteActivityRequest } from './delete-activity.request.js';
 import type { CrudScope } from '../../shared/crud-models.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { validateId } from '@casepilot/validation';
 import { validateVersion } from '../../shared/crud-pagination.js';
 import { ConflictError } from '@casepilot/abstractions';
@@ -15,6 +16,7 @@ export class DeleteActivityHandler implements Handler<DeleteActivityRequest, Del
 
   async execute(request: DeleteActivityRequest): Promise<DeleteActivityResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'write');
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

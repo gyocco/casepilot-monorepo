@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 import type { JsonValue } from '@casepilot/abstractions';
 
 export interface CreateCustomFieldValueData {
@@ -12,5 +13,5 @@ export interface CreateCustomFieldValueData {
   readonly valueJson?: JsonValue | null;
 }
 export class CreateCustomFieldValueRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateCustomFieldValueData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateCustomFieldValueData, public readonly actor: VerifiedIdentity) { super(); }
 }

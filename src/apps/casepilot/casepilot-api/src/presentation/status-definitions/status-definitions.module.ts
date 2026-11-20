@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmStatusDefinitionRepository } from '../../infrastructure/persistence/repositories/typeorm-status-definition.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateStatusDefinitionHandler } from '../../application/status-definitions/create-status-definition/create-status-definition.handler.js';
 import { GetStatusDefinitionHandler } from '../../application/status-definitions/get-status-definition/get-status-definition.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('StatusDefinitions_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<StatusDefinition>> =>
         new TypeOrmUnitOfWork<CrudScope<StatusDefinition>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmStatusDefinitionRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmStatusDefinitionRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

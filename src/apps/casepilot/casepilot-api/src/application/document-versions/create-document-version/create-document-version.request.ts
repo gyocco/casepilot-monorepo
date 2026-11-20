@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface CreateDocumentVersionData {
   readonly documentId: string;
@@ -11,5 +12,5 @@ export interface CreateDocumentVersionData {
   readonly uploadedByMemberId: string;
 }
 export class CreateDocumentVersionRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateDocumentVersionData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateDocumentVersionData, public readonly actor: VerifiedIdentity) { super(); }
 }

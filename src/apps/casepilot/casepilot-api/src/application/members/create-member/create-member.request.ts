@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface CreateMemberData {
   readonly userId: string;
@@ -11,5 +12,5 @@ export interface CreateMemberData {
   readonly invitedAt?: string | null;
 }
 export class CreateMemberRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateMemberData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateMemberData, public readonly actor: VerifiedIdentity) { super(); }
 }

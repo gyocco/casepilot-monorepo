@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export class ListCommentsRequest extends Request {
   constructor(
@@ -7,5 +8,5 @@ export class ListCommentsRequest extends Request {
     public readonly pageSize: number,
     public readonly sortBy: string,
     public readonly sortDirection: string,
-  ) { super(); }
+    public readonly actor: VerifiedIdentity) { super(); }
 }

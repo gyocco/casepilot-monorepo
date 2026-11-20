@@ -7,6 +7,7 @@ import { type GetDeadlineRequest } from './get-deadline.request.js';
 import type { CrudScope } from '../../shared/crud-models.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { validateId } from '@casepilot/validation';
 
 export class GetDeadlineHandler implements Handler<GetDeadlineRequest, GetDeadlineResponse> {
@@ -14,6 +15,7 @@ export class GetDeadlineHandler implements Handler<GetDeadlineRequest, GetDeadli
 
   async execute(request: GetDeadlineRequest): Promise<GetDeadlineResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'read');
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       const entity = await scope.resource.getById(request.id, request.businessAccountId);

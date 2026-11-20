@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateNoteHandler } from '../../application/notes/create-note/create-note.handler.js';
 import { GetNoteHandler } from '../../application/notes/get-note/get-note.handler.js';
 import { UpdateNoteHandler } from '../../application/notes/update-note/update-note.handler.js';
@@ -24,7 +26,7 @@ export class NotesController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<NoteItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<NoteItemHttpResponse> {
     const body = readBody(input, ['caseId', 'externalPartyId', 'authorMemberId', 'title', 'body', 'isPrivate']);
     const response = await this.createHandler.execute(new CreateNoteRequest(businessAccountId, {
       caseId: nullableString(body, 'caseId'),
@@ -33,33 +35,34 @@ export class NotesController {
       title: nullableString(body, 'title'),
       body: stringValue(body, 'body'),
       isPrivate: booleanValue(body, 'isPrivate'),
-    }));
+    }, actor));
     return new NoteItemHttpResponse(toNoteHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<NotesPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListNotesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListNotesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new NotesPageHttpResponse(response.items.map(toNoteHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<NoteItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetNoteRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<NoteItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetNoteRequest(businessAccountId, id, actor));
     return new NoteItemHttpResponse(toNoteHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<NoteItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<NoteItemHttpResponse> {
     const body = readBody(input, ['version', 'caseId', 'externalPartyId', 'authorMemberId', 'title', 'body', 'isPrivate']);
     const response = await this.updateHandler.execute(new UpdateNoteRequest(businessAccountId, id, numberValue(body, 'version'), {
       caseId: nullableString(body, 'caseId'),
@@ -68,14 +71,14 @@ export class NotesController {
       title: nullableString(body, 'title'),
       body: optionalString(body, 'body'),
       isPrivate: optionalBoolean(body, 'isPrivate'),
-    }));
+    }, actor));
     return new NoteItemHttpResponse(toNoteHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteNoteHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteNoteRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteNoteHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteNoteRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteNoteHttpResponse(response.id, response.deleted);
   }
 }

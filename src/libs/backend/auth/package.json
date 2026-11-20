@@ -1,0 +1,69 @@
+{
+  "name": "@casepilot/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable token verification contracts, Firebase Admin verifier and NestJS authentication guard",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./firebase": {
+      "types": "./dist/firebase/index.d.ts",
+      "import": "./dist/firebase/index.js"
+    },
+    "./nestjs": {
+      "types": "./dist/nestjs/index.d.ts",
+      "import": "./dist/nestjs/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build:contracts": "pnpm --filter @casepilot/abstractions --filter @casepilot/exception-handler build",
+    "build": "pnpm build:contracts && tsc -p tsconfig.json",
+    "typecheck": "pnpm build:contracts && tsc -p tsconfig.test.json --noEmit",
+    "lint": "pnpm build:contracts && eslint src test eslint.config.mjs --max-warnings 0",
+    "test": "pnpm build:contracts && tsc -p tsconfig.test.json && node --test build/test/test/unit/architecture.test.js build/test/test/unit/auth.test.js build/test/test/integration/nestjs.test.js",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@casepilot/abstractions": "workspace:*"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "firebase-admin": "14.5.1"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    },
+    "@nestjs/core": {
+      "optional": true
+    },
+    "firebase-admin": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@casepilot/exception-handler": "workspace:*",
+    "@eslint/js": "9.39.5",
+    "@nestjs/common": "12.1.2",
+    "@nestjs/core": "12.1.2",
+    "@nestjs/platform-express": "12.1.2",
+    "@types/node": "22.12.0",
+    "eslint": "9.39.5",
+    "firebase-admin": "14.5.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0"
+  }
+}

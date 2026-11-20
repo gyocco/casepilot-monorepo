@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateInvoiceData {
   readonly externalPartyId?: string;
@@ -15,5 +16,5 @@ export interface UpdateInvoiceData {
   readonly notes?: string | null;
 }
 export class UpdateInvoiceRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateInvoiceData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateInvoiceData, public readonly actor: VerifiedIdentity) { super(); }
 }

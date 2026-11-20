@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateStatusDefinitionHandler } from '../../application/status-definitions/create-status-definition/create-status-definition.handler.js';
 import { GetStatusDefinitionHandler } from '../../application/status-definitions/get-status-definition/get-status-definition.handler.js';
 import { UpdateStatusDefinitionHandler } from '../../application/status-definitions/update-status-definition/update-status-definition.handler.js';
@@ -24,7 +26,7 @@ export class StatusDefinitionsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<StatusDefinitionItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<StatusDefinitionItemHttpResponse> {
     const body = readBody(input, ['entityType', 'caseTypeId', 'name', 'code', 'category', 'sortOrder', 'isInitial', 'isTerminal', 'isActive']);
     const response = await this.createHandler.execute(new CreateStatusDefinitionRequest(businessAccountId, {
       entityType: stringValue(body, 'entityType'),
@@ -36,33 +38,34 @@ export class StatusDefinitionsController {
       isInitial: booleanValue(body, 'isInitial'),
       isTerminal: booleanValue(body, 'isTerminal'),
       isActive: booleanValue(body, 'isActive'),
-    }));
+    }, actor));
     return new StatusDefinitionItemHttpResponse(toStatusDefinitionHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<StatusDefinitionsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListStatusDefinitionsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListStatusDefinitionsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new StatusDefinitionsPageHttpResponse(response.items.map(toStatusDefinitionHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<StatusDefinitionItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetStatusDefinitionRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<StatusDefinitionItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetStatusDefinitionRequest(businessAccountId, id, actor));
     return new StatusDefinitionItemHttpResponse(toStatusDefinitionHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<StatusDefinitionItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<StatusDefinitionItemHttpResponse> {
     const body = readBody(input, ['version', 'entityType', 'caseTypeId', 'name', 'code', 'category', 'sortOrder', 'isInitial', 'isTerminal', 'isActive']);
     const response = await this.updateHandler.execute(new UpdateStatusDefinitionRequest(businessAccountId, id, numberValue(body, 'version'), {
       entityType: optionalString(body, 'entityType'),
@@ -74,14 +77,14 @@ export class StatusDefinitionsController {
       isInitial: optionalBoolean(body, 'isInitial'),
       isTerminal: optionalBoolean(body, 'isTerminal'),
       isActive: optionalBoolean(body, 'isActive'),
-    }));
+    }, actor));
     return new StatusDefinitionItemHttpResponse(toStatusDefinitionHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteStatusDefinitionHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteStatusDefinitionRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteStatusDefinitionHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteStatusDefinitionRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteStatusDefinitionHttpResponse(response.id, response.deleted);
   }
 }

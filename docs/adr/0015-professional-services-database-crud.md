@@ -1,7 +1,8 @@
 # 0015 — CRUD de los modelos de servicios profesionales
 
-- Estado: aceptada e implementada.
+- Estado: aceptada e implementada (acceso público reemplazado por [ADR 0022](0022-firebase-authentication-and-application-authorization.md)).
 - Fecha: 2026-10-02.
+- Revisión: 2026-11-20.
 - Alcance: CasePilot API, persistencia PostgreSQL y contrato HTTP.
 
 ## Contexto

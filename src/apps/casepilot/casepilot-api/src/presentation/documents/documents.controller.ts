@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateDocumentHandler } from '../../application/documents/create-document/create-document.handler.js';
 import { GetDocumentHandler } from '../../application/documents/get-document/get-document.handler.js';
 import { UpdateDocumentHandler } from '../../application/documents/update-document/update-document.handler.js';
@@ -24,7 +26,7 @@ export class DocumentsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<DocumentItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<DocumentItemHttpResponse> {
     const body = readBody(input, ['caseId', 'externalPartyId', 'folderId', 'name', 'description', 'documentType', 'currentVersionId', 'createdByMemberId']);
     const response = await this.createHandler.execute(new CreateDocumentRequest(businessAccountId, {
       caseId: nullableString(body, 'caseId'),
@@ -35,33 +37,34 @@ export class DocumentsController {
       documentType: nullableString(body, 'documentType'),
       currentVersionId: nullableString(body, 'currentVersionId'),
       createdByMemberId: stringValue(body, 'createdByMemberId'),
-    }));
+    }, actor));
     return new DocumentItemHttpResponse(toDocumentHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<DocumentsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListDocumentsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListDocumentsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new DocumentsPageHttpResponse(response.items.map(toDocumentHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<DocumentItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetDocumentRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<DocumentItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetDocumentRequest(businessAccountId, id, actor));
     return new DocumentItemHttpResponse(toDocumentHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<DocumentItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<DocumentItemHttpResponse> {
     const body = readBody(input, ['version', 'caseId', 'externalPartyId', 'folderId', 'name', 'description', 'documentType', 'currentVersionId', 'createdByMemberId']);
     const response = await this.updateHandler.execute(new UpdateDocumentRequest(businessAccountId, id, numberValue(body, 'version'), {
       caseId: nullableString(body, 'caseId'),
@@ -72,14 +75,14 @@ export class DocumentsController {
       documentType: nullableString(body, 'documentType'),
       currentVersionId: nullableString(body, 'currentVersionId'),
       createdByMemberId: optionalString(body, 'createdByMemberId'),
-    }));
+    }, actor));
     return new DocumentItemHttpResponse(toDocumentHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteDocumentHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteDocumentRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteDocumentHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteDocumentRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteDocumentHttpResponse(response.id, response.deleted);
   }
 }

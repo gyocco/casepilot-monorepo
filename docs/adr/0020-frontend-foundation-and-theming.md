@@ -27,7 +27,7 @@ Las [reglas frontend](../architecture/frontend-architecture-rules.md) tienen IDs
 
 ## Consecuencias
 
-- Login inicial solo presenta contenido placeholder; autenticación y diseño se implementarán después.
+- Login inicial solo presenta contenido placeholder; autenticación y diseño se implementarán después. **Evolución 2026-11-20:** [ADR 0022](0022-firebase-authentication-and-application-authorization.md) implementa login real con Firebase Authentication y pantalla mínima de perfil, actualizando `FRT-009`.
 - El kit tiene build Angular Package Format, API pública y pruebas propias.
 - El gate debe fallar ante imports incompatibles, colores/recursos literales y ámbitos vacíos, y mantener regresiones negativas.
 - El workflow de calidad GitHub Actions invoca `pnpm check:web`. Su ejecución remota y la protección de ramas deben verificarse al incorporarlo a GitHub; el aprovisionamiento y los pipelines de despliegue siguen pendientes.

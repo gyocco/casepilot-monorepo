@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateCaseTypeData {
   readonly name?: string;
@@ -8,5 +9,5 @@ export interface UpdateCaseTypeData {
   readonly defaultWorkflowId?: string | null;
 }
 export class UpdateCaseTypeRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCaseTypeData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCaseTypeData, public readonly actor: VerifiedIdentity) { super(); }
 }

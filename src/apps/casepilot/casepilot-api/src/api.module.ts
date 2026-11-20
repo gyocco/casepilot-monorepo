@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from './presentation/auth/auth.module.js';
 import { HealthModule } from './presentation/health/health.module.js';
 import { UsersModule } from './presentation/users/users.module.js';
 import { BusinessAccountsModule } from './presentation/business-accounts/business-accounts.module.js';
@@ -31,6 +32,6 @@ import { WorkflowStepsModule } from './presentation/workflow-steps/workflow-step
 
 // Register each resource module once; its endpoints and bindings stay in that module.
 @Module({
-  imports: [HealthModule, UsersModule, BusinessAccountsModule, MembersModule, ExternalPartiesModule, CasesModule, CaseTypesModule, CaseExternalPartiesModule, CaseMembersModule, TasksModule, EventsModule, DeadlinesModule, FoldersModule, DocumentsModule, DocumentVersionsModule, NotesModule, CommentsModule, CommunicationsModule, ActivitiesModule, TimeEntriesModule, ExpensesModule, InvoicesModule, InvoiceLinesModule, PaymentsModule, CustomFieldDefinitionsModule, CustomFieldValuesModule, StatusDefinitionsModule, WorkflowsModule, WorkflowStepsModule],
+  imports: [HealthModule, AuthModule, UsersModule, BusinessAccountsModule, MembersModule, ExternalPartiesModule, CasesModule, CaseTypesModule, CaseExternalPartiesModule, CaseMembersModule, TasksModule, EventsModule, DeadlinesModule, FoldersModule, DocumentsModule, DocumentVersionsModule, NotesModule, CommentsModule, CommunicationsModule, ActivitiesModule, TimeEntriesModule, ExpensesModule, InvoicesModule, InvoiceLinesModule, PaymentsModule, CustomFieldDefinitionsModule, CustomFieldValuesModule, StatusDefinitionsModule, WorkflowsModule, WorkflowStepsModule],
 })
 export class ApiModule {}

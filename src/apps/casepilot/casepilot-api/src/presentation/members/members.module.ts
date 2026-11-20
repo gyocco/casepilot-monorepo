@@ -6,6 +6,8 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateMemberHandler } from '../../application/members/create-member/create-member.handler.js';
 import { GetMemberHandler } from '../../application/members/get-member/get-member.handler.js';
@@ -21,7 +23,7 @@ const WORK = Symbol('Members_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Member>> =>
         new TypeOrmUnitOfWork<CrudScope<Member>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmMemberRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmMemberRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

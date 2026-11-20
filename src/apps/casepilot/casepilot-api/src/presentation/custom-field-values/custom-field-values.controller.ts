@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateCustomFieldValueHandler } from '../../application/custom-field-values/create-custom-field-value/create-custom-field-value.handler.js';
 import { GetCustomFieldValueHandler } from '../../application/custom-field-values/get-custom-field-value/get-custom-field-value.handler.js';
 import { UpdateCustomFieldValueHandler } from '../../application/custom-field-values/update-custom-field-value/update-custom-field-value.handler.js';
@@ -24,7 +26,7 @@ export class CustomFieldValuesController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<CustomFieldValueItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<CustomFieldValueItemHttpResponse> {
     const body = readBody(input, ['customFieldDefinitionId', 'entityType', 'entityId', 'valueText', 'valueNumber', 'valueDate', 'valueBoolean', 'valueJson']);
     const response = await this.createHandler.execute(new CreateCustomFieldValueRequest(businessAccountId, {
       customFieldDefinitionId: stringValue(body, 'customFieldDefinitionId'),
@@ -35,33 +37,34 @@ export class CustomFieldValuesController {
       valueDate: nullableString(body, 'valueDate'),
       valueBoolean: nullableBoolean(body, 'valueBoolean'),
       valueJson: nullableJson(body, 'valueJson'),
-    }));
+    }, actor));
     return new CustomFieldValueItemHttpResponse(toCustomFieldValueHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<CustomFieldValuesPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListCustomFieldValuesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListCustomFieldValuesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new CustomFieldValuesPageHttpResponse(response.items.map(toCustomFieldValueHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<CustomFieldValueItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetCustomFieldValueRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<CustomFieldValueItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetCustomFieldValueRequest(businessAccountId, id, actor));
     return new CustomFieldValueItemHttpResponse(toCustomFieldValueHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<CustomFieldValueItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<CustomFieldValueItemHttpResponse> {
     const body = readBody(input, ['version', 'customFieldDefinitionId', 'entityType', 'entityId', 'valueText', 'valueNumber', 'valueDate', 'valueBoolean', 'valueJson']);
     const response = await this.updateHandler.execute(new UpdateCustomFieldValueRequest(businessAccountId, id, numberValue(body, 'version'), {
       customFieldDefinitionId: optionalString(body, 'customFieldDefinitionId'),
@@ -72,14 +75,14 @@ export class CustomFieldValuesController {
       valueDate: nullableString(body, 'valueDate'),
       valueBoolean: nullableBoolean(body, 'valueBoolean'),
       valueJson: nullableJson(body, 'valueJson'),
-    }));
+    }, actor));
     return new CustomFieldValueItemHttpResponse(toCustomFieldValueHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteCustomFieldValueHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteCustomFieldValueRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteCustomFieldValueHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteCustomFieldValueRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteCustomFieldValueHttpResponse(response.id, response.deleted);
   }
 }

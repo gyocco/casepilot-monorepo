@@ -8,6 +8,7 @@ import { type CrudScope } from '../../shared/crud-models.js';
 import type { CrudRuntime } from '@casepilot/abstractions';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { invoice_lineFields, validateInvoiceLineRelations } from '../shared/invoice-line.rules.js';
 import { validateFields } from '../../shared/crud-validation.js';
 
@@ -16,6 +17,7 @@ export class CreateInvoiceLineHandler implements Handler<CreateInvoiceLineReques
 
   async execute(request: CreateInvoiceLineRequest): Promise<CreateInvoiceLineResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'write');
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, invoice_lineFields, false);

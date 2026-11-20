@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateWorkflowHandler } from '../../application/workflows/create-workflow/create-workflow.handler.js';
 import { GetWorkflowHandler } from '../../application/workflows/get-workflow/get-workflow.handler.js';
 import { UpdateWorkflowHandler } from '../../application/workflows/update-workflow/update-workflow.handler.js';
@@ -24,52 +26,53 @@ export class WorkflowsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<WorkflowItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<WorkflowItemHttpResponse> {
     const body = readBody(input, ['name', 'description', 'isActive']);
     const response = await this.createHandler.execute(new CreateWorkflowRequest(businessAccountId, {
       name: stringValue(body, 'name'),
       description: nullableString(body, 'description'),
       isActive: booleanValue(body, 'isActive'),
-    }));
+    }, actor));
     return new WorkflowItemHttpResponse(toWorkflowHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<WorkflowsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListWorkflowsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListWorkflowsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new WorkflowsPageHttpResponse(response.items.map(toWorkflowHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<WorkflowItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetWorkflowRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<WorkflowItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetWorkflowRequest(businessAccountId, id, actor));
     return new WorkflowItemHttpResponse(toWorkflowHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<WorkflowItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<WorkflowItemHttpResponse> {
     const body = readBody(input, ['version', 'name', 'description', 'isActive']);
     const response = await this.updateHandler.execute(new UpdateWorkflowRequest(businessAccountId, id, numberValue(body, 'version'), {
       name: optionalString(body, 'name'),
       description: nullableString(body, 'description'),
       isActive: optionalBoolean(body, 'isActive'),
-    }));
+    }, actor));
     return new WorkflowItemHttpResponse(toWorkflowHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteWorkflowHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteWorkflowRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteWorkflowHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteWorkflowRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteWorkflowHttpResponse(response.id, response.deleted);
   }
 }

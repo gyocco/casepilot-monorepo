@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmTaskRepository } from '../../infrastructure/persistence/repositories/typeorm-task.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateTaskHandler } from '../../application/tasks/create-task/create-task.handler.js';
 import { GetTaskHandler } from '../../application/tasks/get-task/get-task.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('Tasks_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Task>> =>
         new TypeOrmUnitOfWork<CrudScope<Task>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmTaskRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmTaskRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

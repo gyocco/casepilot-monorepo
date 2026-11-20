@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateCommunicationData {
   readonly caseId?: string | null;
@@ -12,5 +13,5 @@ export interface UpdateCommunicationData {
   readonly externalReference?: string | null;
 }
 export class UpdateCommunicationRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCommunicationData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCommunicationData, public readonly actor: VerifiedIdentity) { super(); }
 }

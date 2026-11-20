@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 import type { JsonValue } from '@casepilot/abstractions';
 
 export interface UpdateCustomFieldDefinitionData {
@@ -13,5 +14,5 @@ export interface UpdateCustomFieldDefinitionData {
   readonly isActive?: boolean;
 }
 export class UpdateCustomFieldDefinitionRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCustomFieldDefinitionData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCustomFieldDefinitionData, public readonly actor: VerifiedIdentity) { super(); }
 }

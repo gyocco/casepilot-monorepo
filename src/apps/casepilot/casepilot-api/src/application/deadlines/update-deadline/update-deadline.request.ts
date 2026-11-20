@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateDeadlineData {
   readonly caseId?: string;
@@ -10,5 +11,5 @@ export interface UpdateDeadlineData {
   readonly notes?: string | null;
 }
 export class UpdateDeadlineRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateDeadlineData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateDeadlineData, public readonly actor: VerifiedIdentity) { super(); }
 }

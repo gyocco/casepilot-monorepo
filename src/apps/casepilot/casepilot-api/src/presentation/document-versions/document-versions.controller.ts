@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateDocumentVersionHandler } from '../../application/document-versions/create-document-version/create-document-version.handler.js';
 import { GetDocumentVersionHandler } from '../../application/document-versions/get-document-version/get-document-version.handler.js';
 import { UpdateDocumentVersionHandler } from '../../application/document-versions/update-document-version/update-document-version.handler.js';
@@ -24,7 +26,7 @@ export class DocumentVersionsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<DocumentVersionItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<DocumentVersionItemHttpResponse> {
     const body = readBody(input, ['documentId', 'versionNumber', 'storageKey', 'fileName', 'mimeType', 'sizeBytes', 'checksum', 'uploadedByMemberId']);
     const response = await this.createHandler.execute(new CreateDocumentVersionRequest(businessAccountId, {
       documentId: stringValue(body, 'documentId'),
@@ -35,33 +37,34 @@ export class DocumentVersionsController {
       sizeBytes: stringValue(body, 'sizeBytes'),
       checksum: nullableString(body, 'checksum'),
       uploadedByMemberId: stringValue(body, 'uploadedByMemberId'),
-    }));
+    }, actor));
     return new DocumentVersionItemHttpResponse(toDocumentVersionHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<DocumentVersionsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListDocumentVersionsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListDocumentVersionsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new DocumentVersionsPageHttpResponse(response.items.map(toDocumentVersionHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<DocumentVersionItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetDocumentVersionRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<DocumentVersionItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetDocumentVersionRequest(businessAccountId, id, actor));
     return new DocumentVersionItemHttpResponse(toDocumentVersionHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<DocumentVersionItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<DocumentVersionItemHttpResponse> {
     const body = readBody(input, ['version', 'documentId', 'versionNumber', 'storageKey', 'fileName', 'mimeType', 'sizeBytes', 'checksum', 'uploadedByMemberId']);
     const response = await this.updateHandler.execute(new UpdateDocumentVersionRequest(businessAccountId, id, numberValue(body, 'version'), {
       documentId: optionalString(body, 'documentId'),
@@ -72,14 +75,14 @@ export class DocumentVersionsController {
       sizeBytes: optionalString(body, 'sizeBytes'),
       checksum: nullableString(body, 'checksum'),
       uploadedByMemberId: optionalString(body, 'uploadedByMemberId'),
-    }));
+    }, actor));
     return new DocumentVersionItemHttpResponse(toDocumentVersionHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteDocumentVersionHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteDocumentVersionRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteDocumentVersionHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteDocumentVersionRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteDocumentVersionHttpResponse(response.id, response.deleted);
   }
 }

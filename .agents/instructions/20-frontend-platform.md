@@ -27,7 +27,7 @@ La SPA implementa Angular 21 LTS/TypeScript, Angular Material y Tailwind. Materi
 
 - El mínimo móvil usa estilos sin prefijo; `sm:`/`md:`/`lg:` son mejoras para pantallas mayores. Evita anchos fijos, overflow horizontal y acciones solo hover.
 - Usa HTML semántico y componentes del kit. Verifica nombres accesibles, focus visible, contraste, touch targets, teclado, safe areas, orientación y contenido largo.
-- Comprueba carga/error/vacío/reintento/offline cuando haya comportamiento; el login inicial solo es un placeholder y no simula autenticación.
+- Comprueba carga/error/vacío/reintento/offline cuando haya comportamiento; el login usa el adaptador real de Firebase Authentication en `core/auth/` (emulador solo en `local`), sin sesiones simuladas en producción.
 - No omitas sanitización Angular ni distribuyas APIs web/nativas por componentes. Capacidades de plataforma se encapsulan en adaptadores y se prueban con fallback web.
 
 ## Configuración y verificaciones

@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateStatusDefinitionData {
   readonly entityType?: string;
@@ -12,5 +13,5 @@ export interface UpdateStatusDefinitionData {
   readonly isActive?: boolean;
 }
 export class UpdateStatusDefinitionRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateStatusDefinitionData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateStatusDefinitionData, public readonly actor: VerifiedIdentity) { super(); }
 }

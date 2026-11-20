@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCaseTypeRepository } from '../../infrastructure/persistence/repositories/typeorm-case-type.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateCaseTypeHandler } from '../../application/case-types/create-case-type/create-case-type.handler.js';
 import { GetCaseTypeHandler } from '../../application/case-types/get-case-type/get-case-type.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('CaseTypes_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<CaseType>> =>
         new TypeOrmUnitOfWork<CrudScope<CaseType>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmCaseTypeRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmCaseTypeRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

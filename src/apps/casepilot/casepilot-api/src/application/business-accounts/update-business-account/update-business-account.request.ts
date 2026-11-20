@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 import type { JsonValue } from '@casepilot/abstractions';
 
 export interface UpdateBusinessAccountData {
@@ -18,5 +19,5 @@ export interface UpdateBusinessAccountData {
   readonly settings?: JsonValue | null;
 }
 export class UpdateBusinessAccountRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateBusinessAccountData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateBusinessAccountData, public readonly actor: VerifiedIdentity) { super(); }
 }

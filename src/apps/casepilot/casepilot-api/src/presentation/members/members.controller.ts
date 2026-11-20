@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateMemberHandler } from '../../application/members/create-member/create-member.handler.js';
 import { GetMemberHandler } from '../../application/members/get-member/get-member.handler.js';
 import { UpdateMemberHandler } from '../../application/members/update-member/update-member.handler.js';
@@ -24,7 +26,7 @@ export class MembersController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<MemberItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<MemberItemHttpResponse> {
     const body = readBody(input, ['userId', 'role', 'status', 'title', 'professionalRegistration', 'hourlyRate', 'joinedAt', 'invitedAt']);
     const response = await this.createHandler.execute(new CreateMemberRequest(businessAccountId, {
       userId: stringValue(body, 'userId'),
@@ -35,33 +37,34 @@ export class MembersController {
       hourlyRate: nullableString(body, 'hourlyRate'),
       joinedAt: nullableString(body, 'joinedAt'),
       invitedAt: nullableString(body, 'invitedAt'),
-    }));
+    }, actor));
     return new MemberItemHttpResponse(toMemberHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<MembersPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListMembersRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListMembersRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new MembersPageHttpResponse(response.items.map(toMemberHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<MemberItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetMemberRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<MemberItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetMemberRequest(businessAccountId, id, actor));
     return new MemberItemHttpResponse(toMemberHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<MemberItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<MemberItemHttpResponse> {
     const body = readBody(input, ['version', 'userId', 'role', 'status', 'title', 'professionalRegistration', 'hourlyRate', 'joinedAt', 'invitedAt']);
     const response = await this.updateHandler.execute(new UpdateMemberRequest(businessAccountId, id, numberValue(body, 'version'), {
       userId: optionalString(body, 'userId'),
@@ -72,14 +75,14 @@ export class MembersController {
       hourlyRate: nullableString(body, 'hourlyRate'),
       joinedAt: nullableString(body, 'joinedAt'),
       invitedAt: nullableString(body, 'invitedAt'),
-    }));
+    }, actor));
     return new MemberItemHttpResponse(toMemberHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteMemberHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteMemberRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteMemberHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteMemberRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteMemberHttpResponse(response.id, response.deleted);
   }
 }

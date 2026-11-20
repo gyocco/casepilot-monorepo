@@ -1,0 +1,11 @@
+{
+  "environment": "local",
+  "apiBaseUrl": "http://127.0.0.1:3000",
+  "firebase": {
+    "apiKey": "demo-casepilot-local-api-key",
+    "authDomain": "demo-casepilot-local.firebaseapp.com",
+    "projectId": "demo-casepilot-local",
+    "appId": "1:000000000000:web:localdemo"
+  },
+  "authEmulatorUrl": "http://127.0.0.1:9099"
+}

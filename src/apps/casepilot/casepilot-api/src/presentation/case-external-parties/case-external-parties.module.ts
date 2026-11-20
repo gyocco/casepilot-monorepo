@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCaseExternalPartyRepository } from '../../infrastructure/persistence/repositories/typeorm-case-external-party.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateCaseExternalPartyHandler } from '../../application/case-external-parties/create-case-external-party/create-case-external-party.handler.js';
 import { GetCaseExternalPartyHandler } from '../../application/case-external-parties/get-case-external-party/get-case-external-party.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('CaseExternalParties_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<CaseExternalParty>> =>
         new TypeOrmUnitOfWork<CrudScope<CaseExternalParty>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmCaseExternalPartyRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmCaseExternalPartyRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

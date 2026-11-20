@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface CreateExpenseData {
   readonly caseId: string;
@@ -12,5 +13,5 @@ export interface CreateExpenseData {
   readonly documentId?: string | null;
 }
 export class CreateExpenseRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateExpenseData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateExpenseData, public readonly actor: VerifiedIdentity) { super(); }
 }

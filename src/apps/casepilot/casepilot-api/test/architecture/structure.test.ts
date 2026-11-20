@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import { Project, ts } from 'ts-morph';
 import { validateUseCases, type ArchitectureFinding } from '../../tools/architecture/use-case-rules.js';
 import { validateSourceLayout } from '../../tools/architecture/source-layout-rules.js';
+import { validatePresentationAuth } from '../../tools/architecture/presentation-auth-rules.js';
 
 const apiDirectory = resolve('build/structure-fixture');
 const application = 'src/application/cases/';
@@ -446,4 +447,21 @@ void test('CPA-002 rejects synchronous execution and stays scoped to this API Ap
     project.createSourceFile(resolve(apiDirectory, path), 'export class ReadHandler { execute(): void {} }');
   }
   assert.deepEqual(checkContracts(project), []);
+});
+
+void test('BCK-006 restricts @PublicEndpoint() to technical health probes and requires NestAuthModule in AppModule', () => {
+  const valid = new Project({ useInMemoryFileSystem: true, compilerOptions: { experimentalDecorators: true } });
+  valid.createSourceFile(resolve(apiDirectory, 'src/app.module.ts'), "import { NestAuthModule } from '@casepilot/auth/nestjs'; export const m = NestAuthModule;");
+  valid.createSourceFile(resolve(apiDirectory, 'src/presentation/health/health.controller.ts'), 'declare function PublicEndpoint(): ClassDecorator; @PublicEndpoint() export class HealthController {}');
+  valid.createSourceFile(resolve(apiDirectory, 'src/presentation/cases/cases.controller.ts'), 'export class CasesController {}');
+  assert.deepEqual(validatePresentationAuth(valid, apiDirectory), []);
+
+  const invalidPublic = new Project({ useInMemoryFileSystem: true, compilerOptions: { experimentalDecorators: true } });
+  invalidPublic.createSourceFile(resolve(apiDirectory, 'src/app.module.ts'), "import { NestAuthModule } from '@casepilot/auth/nestjs'; export const m = NestAuthModule;");
+  invalidPublic.createSourceFile(resolve(apiDirectory, 'src/presentation/cases/cases.controller.ts'), 'declare function PublicEndpoint(): MethodDecorator; export class CasesController { @PublicEndpoint() list(): void {} }');
+  assert.ok(validatePresentationAuth(invalidPublic, apiDirectory).some(f => f.rule === 'BCK-006' && f.file.includes('cases.controller.ts')));
+
+  const missingAuthModule = new Project({ useInMemoryFileSystem: true });
+  missingAuthModule.createSourceFile(resolve(apiDirectory, 'src/app.module.ts'), 'export class AppModule {}');
+  assert.ok(validatePresentationAuth(missingAuthModule, apiDirectory).some(f => f.rule === 'BCK-006' && f.file === 'src/app.module.ts'));
 });

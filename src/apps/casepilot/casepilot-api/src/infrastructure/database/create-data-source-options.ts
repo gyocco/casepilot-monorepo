@@ -2,8 +2,10 @@ import type { DataSourceOptions } from 'typeorm';
 import type { DatabaseConfig } from '../config/backend-config.js';
 import { healthCheckObjectSchema } from '../persistence/schemas/health-check-object.schema.js';
 import { professionalServicesSchemas } from '../persistence/schemas/professional-services.schemas.js';
+import { userIdentitySchema } from '../persistence/schemas/user-identity.schema.js';
 import { CreateProfessionalServices1790899200000 } from './migrations/1790899200000-create-professional-services.js';
 import { CreateHealthCheckObject1790726400000 } from './migrations/1790726400000-create-health-check-object.js';
+import { CreateUserIdentities1790985600000 } from './migrations/1790985600000-create-user-identities.js';
 
 export function createDataSourceOptions(config: DatabaseConfig): DataSourceOptions {
   return {
@@ -19,8 +21,8 @@ export function createDataSourceOptions(config: DatabaseConfig): DataSourceOptio
     connectTimeoutMS: config.connectTimeoutMs,
     poolSize: config.poolSize,
     extra: { statement_timeout: config.queryTimeoutMs, query_timeout: config.queryTimeoutMs },
-    entities: [healthCheckObjectSchema, ...professionalServicesSchemas],
-    migrations: [CreateHealthCheckObject1790726400000, CreateProfessionalServices1790899200000],
+    entities: [healthCheckObjectSchema, ...professionalServicesSchemas, userIdentitySchema],
+    migrations: [CreateHealthCheckObject1790726400000, CreateProfessionalServices1790899200000, CreateUserIdentities1790985600000],
     migrationsTableName: 'casepilot_api_migrations',
     synchronize: false,
     migrationsRun: false,

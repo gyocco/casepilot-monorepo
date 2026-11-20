@@ -1,5 +1,9 @@
 export { PilotAssetComponent } from './components/asset/pilot-asset.component';
+export { PilotBadgeComponent } from './components/badge/pilot-badge.component';
+export { PilotBannerComponent, type PilotBannerTone } from './components/banner/pilot-banner.component';
+export { PilotButtonComponent, type PilotButtonVariant } from './components/button/pilot-button.component';
 export { PilotSurfaceComponent } from './components/surface/pilot-surface.component';
+export { PilotTextFieldComponent } from './components/text-field/pilot-text-field.component';
 export { PILOT_COLOR, PILOT_COLOR_VARIABLE, type PilotColorRole, type PilotColors } from './theme/color-tokens';
 export { DEFAULT_PILOT_COLORS } from './theme/default-colors';
 export { PILOT_THEME_HOST, type PilotThemeHost } from './theme/pilot-theme-host';

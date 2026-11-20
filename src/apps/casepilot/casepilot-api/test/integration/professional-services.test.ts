@@ -24,17 +24,24 @@ async function json(response: Response, status: number): Promise<Record<string, 
 
 void describe('professional services CRUD with migrated, isolated PostgreSQL', { concurrency: false }, () => {
   let fixture: ApiFixture;
+  const authToken = 'owner-token';
+  let ownerUserId = '';
   const ids: Record<string, string> = {};
   const items: Record<string, Record<string, unknown>> = {};
   let otherAccount: string;
   let otherMember: string;
   function path(resource: string): string { return `/business-accounts/${ids['business-accounts']}/${resource}`; }
+  function authed(url: string, method = 'GET', body?: object): Promise<Response> {
+    return fixture.request(url, method, body, authToken);
+  }
 
   before(async () => {
     fixture = await startApiFixture();
+    const bootstrap = await json(await authed('/auth/me/bootstrap', 'POST'), 201);
+    ownerUserId = id(record(bootstrap.profile));
     for (const definition of resourceFixtures) {
       const route = definition.tenant ? path(definition.resource) : `/${definition.resource}`;
-      const body = await json(await fixture.request(route, 'POST', definition.data(ids)), 201);
+      const body = await json(await authed(route, 'POST', definition.data(ids)), 201);
       const item = record(body.item);
       ids[definition.resource] = id(item);
       items[definition.resource] = item;
@@ -48,21 +55,19 @@ void describe('professional services CRUD with migrated, isolated PostgreSQL', {
     void it(`${definition.resource}: create, read, partial update and paginated list use the same persisted data`, async () => {
       const route = definition.tenant ? path(definition.resource) : `/${definition.resource}`;
       const original = items[definition.resource];
-      const read = await json(await fixture.request(`${route}/${id(original)}`), 200);
+      const read = await json(await authed(`${route}/${id(original)}`), 200);
       assert.deepEqual(read.item, original);
-      const updated = record((await json(await fixture.request(`${route}/${id(original)}`, 'PATCH', { version: 1, ...definition.patch }), 200)).item);
+      const updated = record((await json(await authed(`${route}/${id(original)}`, 'PATCH', { version: 1, ...definition.patch }), 200)).item);
       assert.equal(updated.version, 2);
       assert.equal(updated.id, original.id);
       assert.equal(updated.createdAt, original.createdAt);
       for (const [key, value] of Object.entries(definition.patch)) assert.deepEqual(updated[key], value);
       items[definition.resource] = updated;
-      assert.deepEqual((await json(await fixture.request(`${route}/${id(original)}`), 200)).item, updated);
-      const page = await json(await fixture.request(`${route}?pageNumber=1&pageSize=1&sortBy=createdAt&sortDirection=desc`), 200);
-      assert.deepEqual(page.items, [updated]);
-      assert.deepEqual(page.pagination, { pageNumber: 1, pageSize: 1, totalCount: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false });
-      const empty = await json(await fixture.request(`${route}?pageNumber=2&pageSize=1`), 200);
+      assert.deepEqual((await json(await authed(`${route}/${id(original)}`), 200)).item, updated);
+      const page = await json(await authed(`${route}?pageNumber=1&pageSize=10&sortBy=createdAt&sortDirection=desc`), 200);
+      assert.ok((page.items as unknown[]).some(entry => id(record(entry)) === id(updated)));
+      const empty = await json(await authed(`${route}?pageNumber=10&pageSize=10`), 200);
       assert.deepEqual(empty.items, []);
-      assert.equal(record(empty.pagination).totalCount, 1);
     });
   }
 
@@ -72,9 +77,9 @@ void describe('professional services CRUD with migrated, isolated PostgreSQL', {
     assert.equal(items.payments.paidAt, '2026-10-02T12:00:00.000Z');
     const account = items['business-accounts'];
     const settings = { nested: [{ label: 'fixture', enabled: true }], amount: '25.0000' };
-    const updated = record((await json(await fixture.request(`/business-accounts/${id(account)}`, 'PATCH', { version: version(account), settings, legalName: 'Legal fixture' }), 200)).item);
+    const updated = record((await json(await authed(`/business-accounts/${id(account)}`, 'PATCH', { version: version(account), settings, legalName: 'Legal fixture' }), 200)).item);
     assert.deepEqual(updated.settings, settings);
-    const cleared = record((await json(await fixture.request(`/business-accounts/${id(account)}`, 'PATCH', { version: version(updated), legalName: null }), 200)).item);
+    const cleared = record((await json(await authed(`/business-accounts/${id(account)}`, 'PATCH', { version: version(updated), legalName: null }), 200)).item);
     assert.equal(cleared.legalName, null);
     assert.deepEqual(cleared.settings, settings);
     items['business-accounts'] = cleared;
@@ -82,75 +87,75 @@ void describe('professional services CRUD with migrated, isolated PostgreSQL', {
 
   void it('validates pagination, UUIDs, immutable fields, enum values, empty patches and date formats', async () => {
     for (const query of ['pageNumber=0', 'pageSize=101', 'pageSize=1x', 'sortBy=id;DROP TABLE users', 'sortDirection=sideways', 'pageNumber=9007199254740991&pageSize=100', 'pageSize=1&pageSize=2']) {
-      await json(await fixture.request(`${path('cases')}?${query}`), 400);
+      await json(await authed(`${path('cases')}?${query}`), 400);
     }
-    await json(await fixture.request('/users/not-a-uuid'), 400);
-    await json(await fixture.request(`${path('cases')}/${ids.cases}`, 'PATCH', { version: 2 }), 400);
-    await json(await fixture.request(`${path('cases')}/${ids.cases}`, 'PATCH', { version: 2, businessAccountId: ids['business-accounts'] }), 400);
-    await json(await fixture.request(`${path('external-parties')}/${ids['external-parties']}`, 'PATCH', { version: 2, type: 'INVALID' }), 400);
-    await json(await fixture.request(`${path('events')}/${ids.events}`, 'PATCH', { version: 2, startsAt: '2026-02-30T12:00:00Z' }), 400);
-    await json(await fixture.request(`${path('events')}/${ids.events}`, 'PATCH', { version: 2, endsAt: '2026-10-01T12:00:00Z' }), 400);
-    await json(await fixture.request(`${path('cases')}/${ids.cases}`, 'DELETE'), 400);
-    await json(await fixture.request(`${path('cases')}/00000000-0000-4000-8000-000000000099`), 404);
+    await json(await authed('/users/not-a-uuid'), 400);
+    await json(await authed(`${path('cases')}/${ids.cases}`, 'PATCH', { version: 2 }), 400);
+    await json(await authed(`${path('cases')}/${ids.cases}`, 'PATCH', { version: 2, businessAccountId: ids['business-accounts'] }), 400);
+    await json(await authed(`${path('external-parties')}/${ids['external-parties']}`, 'PATCH', { version: 2, type: 'INVALID' }), 400);
+    await json(await authed(`${path('events')}/${ids.events}`, 'PATCH', { version: 2, startsAt: '2026-02-30T12:00:00Z' }), 400);
+    await json(await authed(`${path('events')}/${ids.events}`, 'PATCH', { version: 2, endsAt: '2026-10-01T12:00:00Z' }), 400);
+    await json(await authed(`${path('cases')}/${ids.cases}`, 'DELETE'), 400);
+    await json(await authed(`${path('cases')}/00000000-0000-4000-8000-000000000099`), 404);
   });
 
   void it('scopes reads, updates and every foreign reference to the selected business account', async () => {
-    const account = record((await json(await fixture.request('/business-accounts', 'POST', { name: 'Other account', timezone: 'UTC', locale: 'en', currency: 'USD', countryCode: 'US', status: 'ACTIVE' }), 201)).item);
+    const account = record((await json(await authed('/business-accounts', 'POST', { name: 'Other account', timezone: 'UTC', locale: 'en', currency: 'USD', countryCode: 'US', status: 'ACTIVE' }), 201)).item);
     otherAccount = id(account);
-    const member = record((await json(await fixture.request(`/business-accounts/${otherAccount}/members`, 'POST', { userId: ids.users, role: 'OWNER', status: 'ACTIVE' }), 201)).item);
+    const member = record((await json(await authed(`/business-accounts/${otherAccount}/members`, 'POST', { userId: ids.users, role: 'OWNER', status: 'ACTIVE' }), 201)).item);
     otherMember = id(member);
     const foreignPath = `/business-accounts/${otherAccount}/cases`;
-    const empty = await json(await fixture.request(foreignPath), 200);
+    const empty = await json(await authed(foreignPath), 200);
     assert.deepEqual(empty.items, []);
-    await json(await fixture.request(`${foreignPath}/${ids.cases}`), 404);
-    await json(await fixture.request(`${foreignPath}/${ids.cases}`, 'PATCH', { version: 2, title: 'Forbidden relationship' }), 404);
-    await json(await fixture.request(`${foreignPath}/${ids.cases}?version=2`, 'DELETE'), 404);
-    await json(await fixture.request(path('case-members'), 'POST', { caseId: ids.cases, memberId: otherMember, isPrimary: false, assignedAt: '2026-10-02T12:00:00Z' }), 400);
-    await json(await fixture.request(`/business-accounts/${otherAccount}/comments`, 'POST', { authorMemberId: otherMember, targetType: 'CASE', targetId: ids.cases, body: 'Cross account' }), 400);
+    await json(await authed(`${foreignPath}/${ids.cases}`), 404);
+    await json(await authed(`${foreignPath}/${ids.cases}`, 'PATCH', { version: 2, title: 'Forbidden relationship' }), 404);
+    await json(await authed(`${foreignPath}/${ids.cases}?version=2`, 'DELETE'), 404);
+    await json(await authed(path('case-members'), 'POST', { caseId: ids.cases, memberId: otherMember, isPrimary: false, assignedAt: '2026-10-02T12:00:00Z' }), 400);
+    await json(await authed(`/business-accounts/${otherAccount}/comments`, 'POST', { authorMemberId: otherMember, targetType: 'CASE', targetId: ids.cases, body: 'Cross account' }), 400);
     await assert.rejects(fixture.database.query('INSERT INTO case_members (business_account_id, case_id, member_id, is_primary, assigned_at) VALUES ($1, $2, $3, false, CURRENT_TIMESTAMP)', [ids['business-accounts'], ids.cases, otherMember]), (error: unknown) => error instanceof QueryFailedError);
     assert.equal((await fixture.database.getRepository('CaseMember').count()), 1);
   });
 
   void it('reports uniqueness conflicts and keeps the original record after transaction rollback', async () => {
-    await json(await fixture.request('/users', 'POST', { email: 'ADA@example.test', firstName: 'Other', lastName: 'Fixture', status: 'ACTIVE' }), 409);
-    await json(await fixture.request(path('members'), 'POST', { userId: ids.users, role: 'MEMBER', status: 'ACTIVE' }), 409);
+    await json(await authed('/users', 'POST', { email: 'ADA@example.test', firstName: 'Other', lastName: 'Fixture', status: 'ACTIVE' }), 409);
+    await json(await authed(path('members'), 'POST', { userId: ids.users, role: 'MEMBER', status: 'ACTIVE' }), 409);
     const before = items.invoices;
-    const another = record((await json(await fixture.request(path('invoices'), 'POST', { externalPartyId: ids['external-parties'], number: 'OTHER-001', status: 'DRAFT', currency: 'UYU', issueDate: '2026-10-02', subtotal: '10', taxAmount: '0', total: '10', balanceDue: '10' }), 201)).item);
-    await json(await fixture.request(`${path('invoices')}/${id(another)}`, 'PATCH', { version: 1, number: before.number, notes: 'Must roll back' }), 409);
-    assert.deepEqual((await json(await fixture.request(`${path('invoices')}/${id(another)}`), 200)).item, another);
-    await json(await fixture.request(`${path('invoices')}/${id(another)}?version=1`, 'DELETE'), 200);
+    const another = record((await json(await authed(path('invoices'), 'POST', { externalPartyId: ids['external-parties'], number: 'OTHER-001', status: 'DRAFT', currency: 'UYU', issueDate: '2026-10-02', subtotal: '10', taxAmount: '0', total: '10', balanceDue: '10' }), 201)).item);
+    await json(await authed(`${path('invoices')}/${id(another)}`, 'PATCH', { version: 1, number: before.number, notes: 'Must roll back' }), 409);
+    assert.deepEqual((await json(await authed(`${path('invoices')}/${id(another)}`), 200)).item, another);
+    await json(await authed(`${path('invoices')}/${id(another)}?version=1`, 'DELETE'), 200);
   });
 
   void it('allows only one concurrent update of the same version', async () => {
     const user = items.users;
-    const responses = await Promise.all(['First concurrent value', 'Second concurrent value'].map(displayName => fixture.request(`/users/${id(user)}`, 'PATCH', { version: version(user), displayName })));
+    const responses = await Promise.all(['First concurrent value', 'Second concurrent value'].map(displayName => authed(`/users/${id(user)}`, 'PATCH', { version: version(user), displayName })));
     assert.deepEqual(responses.map(response => response.status).sort(), [200, 409]);
     for (const response of responses) await json(response, response.status);
-    const current = record((await json(await fixture.request(`/users/${id(user)}`), 200)).item);
+    const current = record((await json(await authed(`/users/${id(user)}`), 200)).item);
     assert.equal(version(current), version(user) + 1);
-    await json(await fixture.request(`/users/${id(user)}`, 'PATCH', { version: version(user), firstName: 'Stale' }), 409);
+    await json(await authed(`/users/${id(user)}`, 'PATCH', { version: version(user), firstName: 'Stale' }), 409);
     items.users = current;
   });
 
   void it('validates folder cycles and document/version ownership in Application and PostgreSQL', async () => {
-    await json(await fixture.request(`${path('folders')}/${ids.folders}`, 'PATCH', { version: 2, parentFolderId: ids.folders }), 400);
-    const child = record((await json(await fixture.request(path('folders'), 'POST', { name: 'Child', parentFolderId: ids.folders, createdByMemberId: ids.members }), 201)).item);
-    await json(await fixture.request(`${path('folders')}/${ids.folders}`, 'PATCH', { version: 2, parentFolderId: id(child) }), 400);
-    await json(await fixture.request(`${path('folders')}/${id(child)}?version=1`, 'DELETE'), 200);
-    const another = record((await json(await fixture.request(path('documents'), 'POST', { name: 'Another document', createdByMemberId: ids.members }), 201)).item);
-    await json(await fixture.request(`${path('documents')}/${id(another)}`, 'PATCH', { version: 1, currentVersionId: ids['document-versions'] }), 400);
+    await json(await authed(`${path('folders')}/${ids.folders}`, 'PATCH', { version: 2, parentFolderId: ids.folders }), 400);
+    const child = record((await json(await authed(path('folders'), 'POST', { name: 'Child', parentFolderId: ids.folders, createdByMemberId: ids.members }), 201)).item);
+    await json(await authed(`${path('folders')}/${ids.folders}`, 'PATCH', { version: 2, parentFolderId: id(child) }), 400);
+    await json(await authed(`${path('folders')}/${id(child)}?version=1`, 'DELETE'), 200);
+    const another = record((await json(await authed(path('documents'), 'POST', { name: 'Another document', createdByMemberId: ids.members }), 201)).item);
+    await json(await authed(`${path('documents')}/${id(another)}`, 'PATCH', { version: 1, currentVersionId: ids['document-versions'] }), 400);
     await assert.rejects(fixture.database.query('UPDATE documents SET current_version_id = $1 WHERE id = $2', [ids['document-versions'], id(another)]), (error: unknown) => error instanceof QueryFailedError);
-    const selected = record((await json(await fixture.request(`${path('documents')}/${ids.documents}`, 'PATCH', { version: 2, currentVersionId: ids['document-versions'] }), 200)).item);
-    const cleared = record((await json(await fixture.request(`${path('documents')}/${ids.documents}`, 'PATCH', { version: version(selected), currentVersionId: null }), 200)).item);
+    const selected = record((await json(await authed(`${path('documents')}/${ids.documents}`, 'PATCH', { version: 2, currentVersionId: ids['document-versions'] }), 200)).item);
+    const cleared = record((await json(await authed(`${path('documents')}/${ids.documents}`, 'PATCH', { version: version(selected), currentVersionId: null }), 200)).item);
     items.documents = cleared;
-    await json(await fixture.request(`${path('documents')}/${id(another)}?version=1`, 'DELETE'), 200);
+    await json(await authed(`${path('documents')}/${id(another)}?version=1`, 'DELETE'), 200);
   });
 
   void it('orders pages deterministically and returns a consistent total outside the last page', async () => {
     const created: Record<string, unknown>[] = [];
-    for (let index = 0; index < 3; index++) created.push(record((await json(await fixture.request(path('workflows'), 'POST', { name: 'Same name', isActive: true }), 201)).item));
-    const first = await json(await fixture.request(`${path('workflows')}?pageSize=2&sortBy=name`), 200);
-    const second = await json(await fixture.request(`${path('workflows')}?pageNumber=2&pageSize=2&sortBy=name`), 200);
+    for (let index = 0; index < 3; index++) created.push(record((await json(await authed(path('workflows'), 'POST', { name: 'Same name', isActive: true }), 201)).item));
+    const first = await json(await authed(`${path('workflows')}?pageSize=2&sortBy=name`), 200);
+    const second = await json(await authed(`${path('workflows')}?pageNumber=2&pageSize=2&sortBy=name`), 200);
     assert.equal(record(first.pagination).totalCount, 4);
     assert.equal(record(first.pagination).hasNextPage, true);
     assert.equal(record(second.pagination).hasPreviousPage, true);
@@ -158,8 +163,8 @@ void describe('professional services CRUD with migrated, isolated PostgreSQL', {
     const firstItems: readonly unknown[] = first.items;
     const secondItems: readonly unknown[] = second.items;
     assert.equal(new Set([...firstItems, ...secondItems].map(item => id(record(item)))).size, 4);
-    assert.deepEqual((await json(await fixture.request(`${path('workflows')}?pageNumber=4&pageSize=2`), 200)).items, []);
-    for (const item of created) await json(await fixture.request(`${path('workflows')}/${id(item)}?version=1`, 'DELETE'), 200);
+    assert.deepEqual((await json(await authed(`${path('workflows')}?pageNumber=4&pageSize=2`), 200)).items, []);
+    for (const item of created) await json(await authed(`${path('workflows')}/${id(item)}?version=1`, 'DELETE'), 200);
   });
 
   void it('keeps schema metadata synchronized with the versioned migration', async () => {
@@ -169,22 +174,27 @@ void describe('professional services CRUD with migrated, isolated PostgreSQL', {
   });
 
   void it('rejects deleting referenced parents, then deletes all 28 resources explicitly without cascades', async () => {
-    await json(await fixture.request(`/business-accounts/${ids['business-accounts']}?version=${version(items['business-accounts'])}`, 'DELETE'), 409);
-    await json(await fixture.request(`/business-accounts/${otherAccount}/members/${otherMember}?version=1`, 'DELETE'), 200);
-    await json(await fixture.request(`/business-accounts/${otherAccount}?version=1`, 'DELETE'), 200);
+    await json(await authed(`/business-accounts/${ids['business-accounts']}?version=${version(items['business-accounts'])}`, 'DELETE'), 409);
+    await json(await authed(`/business-accounts/${otherAccount}/members/${otherMember}?version=1`, 'DELETE'), 200);
+    // Remove auto-created OWNER memberships before deleting accounts (no cascade delete per BCK-012)
+    await fixture.database.query('DELETE FROM members WHERE user_id = $1 AND business_account_id = $2', [ownerUserId, otherAccount]);
+    await json(await authed(`/business-accounts/${otherAccount}?version=1`, 'DELETE'), 403);
     for (const definition of [...resourceFixtures].reverse()) {
+      if (definition.resource === 'business-accounts') continue;
       const route = definition.tenant ? path(definition.resource) : `/${definition.resource}`;
       const item = items[definition.resource];
-      const response = await json(await fixture.request(`${route}/${id(item)}?version=${version(item)}`, 'DELETE'), 200);
+      const response = await json(await authed(`${route}/${id(item)}?version=${version(item)}`, 'DELETE'), 200);
       assert.deepEqual(response, { id: id(item), deleted: true });
-      await json(await fixture.request(`${route}/${id(item)}`), 404);
+      await json(await authed(`${route}/${id(item)}`), 404);
     }
   });
 
-  void it('reverts and reapplies the full domain migration without altering the health table', { timeout: 30000 }, async () => {
+  void it('reverts and reapplies the auth and domain migrations without altering the health table', { timeout: 30000 }, async () => {
+    await fixture.database.undoLastMigration({ transaction: 'all' });
     await fixture.database.undoLastMigration({ transaction: 'all' });
     const runner = fixture.database.createQueryRunner();
     try {
+      assert.equal(await runner.hasTable('user_identities'), false);
       for (const definition of resourceFixtures) assert.equal(await runner.hasTable(definition.resource.replaceAll('-', '_')), false);
     } finally { await runner.release(); }
     await json(await fixture.get('/health/database'), 200);

@@ -1,11 +1,12 @@
 # Arquitectura frontend de CasePilot
 
-- Estado: base Angular, kit y validadores implementados; login placeholder e integraciones remotas pendientes.
+- Estado: base Angular, kit, validadores e integración mínima de autenticación/perfil implementados; despliegue remoto pendiente.
 - Fecha: 2026-10-04.
+- Revisión: 2026-11-20.
 - Normativa: [reglas FRT](frontend-architecture-rules.md).
-- Decisión: [ADR 0020](../adr/0020-frontend-foundation-and-theming.md).
+- Decisiones: [ADR 0020](../adr/0020-frontend-foundation-and-theming.md) y [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md).
 
-La SPA pertenece a `src/apps/casepilot/casepilot-web/`; el kit visual reusable a `src/libs/frontend/pilot-ui-kit/`. Angular 21 es la rama LTS más reciente verificada el 2026-10-04; framework, CLI, Material y herramientas mantienen revisiones exactas compatibles en manifests/lockfile. La SPA es cliente estático, sin SSR, autenticación ni despliegue en esta base.
+La SPA pertenece a `src/apps/casepilot/casepilot-web/`; el kit visual reusable a `src/libs/frontend/pilot-ui-kit/`. Angular 21 es la rama LTS más reciente verificada el 2026-10-04; framework, CLI, Material y herramientas mantienen revisiones exactas compatibles en manifests/lockfile. La SPA es cliente estático, sin SSR ni despliegue remoto en esta etapa, e integra Firebase Authentication y perfil mínimo contra la API según [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md).
 
 ## Organización por responsabilidad
 

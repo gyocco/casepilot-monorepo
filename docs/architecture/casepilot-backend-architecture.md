@@ -1,10 +1,10 @@
 # Arquitectura particular del backend de CasePilot
 
-- Estado: adoptada; API NestJS/TypeORM con dominio compartido, CRUD de 28 modelos y sondas Health implementadas.
+- Estado: adoptada; API NestJS/TypeORM con dominio compartido, autenticación Firebase, autorización en Application, CRUD de 28 modelos y sondas Health implementadas.
 - Fecha: 2026-10-01.
-- Revisión: 2026-10-04.
+- Revisión: 2026-11-20.
 - Alcance: todo backend de CasePilot, incluidos APIs, workers, schedulers, adaptadores y librerías backend.
-- Decisiones: [ADR 0002](../adr/0002-backend-application-owned-business-logic.md), [ADR 0003](../adr/0003-base-api-and-health-checks.md), [ADR 0006](../adr/0006-reusable-backend-baseline.md), [ADR 0008](../adr/0008-application-wide-backend-layers.md), [ADR 0009](../adr/0009-resource-organized-application.md), [ADR 0010](../adr/0010-shared-cqrs-contracts.md), [ADR 0013](../adr/0013-resource-module-composition.md) y [ADR 0014](../adr/0014-resource-organized-presentation.md).
+- Decisiones: [ADR 0002](../adr/0002-backend-application-owned-business-logic.md), [ADR 0003](../adr/0003-base-api-and-health-checks.md), [ADR 0006](../adr/0006-reusable-backend-baseline.md), [ADR 0008](../adr/0008-application-wide-backend-layers.md), [ADR 0009](../adr/0009-resource-organized-application.md), [ADR 0010](../adr/0010-shared-cqrs-contracts.md), [ADR 0013](../adr/0013-resource-module-composition.md), [ADR 0014](../adr/0014-resource-organized-presentation.md), [ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md) y [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md).
 
 ## Adopción de la arquitectura base
 
@@ -16,7 +16,7 @@ La [skill backend](../../.agents/skills/backend-architecture/SKILL.md) aplica es
 
 ## Propietarios y composición actuales
 
-Además de Health, la API posee los 28 modelos de [servicios profesionales](../product/domain-model-professional-services.md). Cada recurso tiene Domain, handlers de Application, schemas/repositorios de Infrastructure y un módulo propietario de Presentation registrado explícitamente en ApiModule. Rutas, scope de datos, versiones y operaciones: [guía CRUD](../../src/apps/casepilot/casepilot-api/docs/professional-services-crud.md). El [ADR 0015](../adr/0015-professional-services-database-crud.md) registra el alcance exclusivamente de base de datos y la instrucción de endpoints públicos, con autenticación diferida; la selección de cuenta no es autorización.
+Además de Health y Auth (`/auth/me/bootstrap`, `/auth/me`), la API posee los 28 modelos de [servicios profesionales](../product/domain-model-professional-services.md). Cada recurso tiene Domain, handlers de Application, schemas/repositorios de Infrastructure y un módulo propietario de Presentation registrado explícitamente en ApiModule. Rutas, scope de datos, versiones y operaciones: [guía CRUD](../../src/apps/casepilot/casepilot-api/docs/professional-services-crud.md). El [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md) reemplaza el acceso público temporal del [ADR 0015](../adr/0015-professional-services-database-crud.md): todos los endpoints de producto requieren autenticación Bearer vía `@casepilot/auth` y autorización en Application por usuario activo, membresía y rol; únicamente `/health` y `/health/database` permanecen públicos.
 
 
 El host inicial es [CasePilot API](../../src/apps/casepilot/casepilot-api/README.md), una aplicación con composición NestJS y TypeORM como adaptador de persistencia. Mantiene una única `application/`, `domain/`, `infrastructure/` y `presentation/` bajo `src/`, sin división por contextos. Domain/Application mantienen contratos y modelos independientes del framework. `AppModule` configura los mecanismos globales e importa `ApiModule`, que registra los módulos de composición por recurso. Estos módulos construyen los handlers y enlazan los puertos con sus implementaciones, sin definir nuevas fronteras de dominio ni repetir capas.

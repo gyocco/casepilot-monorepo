@@ -1,6 +1,8 @@
 import { provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, type ApplicationConfig } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { providePilotThemes } from '@casepilot/pilot-ui-kit';
+import { provideCoreAuth } from '../core/auth/provide-core-auth';
+import { provideCoreHttp } from '../core/http/provide-core-http';
 import { CASEPILOT_THEMES } from '../theme/casepilot.theme';
 import { APP_ROUTES } from './app.routes';
 
@@ -10,5 +12,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(APP_ROUTES, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     providePilotThemes({ themes: CASEPILOT_THEMES, initialTheme: 'default' }),
+    provideCoreHttp(),
+    provideCoreAuth(),
   ],
 };

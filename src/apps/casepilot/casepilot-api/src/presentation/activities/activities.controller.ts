@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateActivityHandler } from '../../application/activities/create-activity/create-activity.handler.js';
 import { GetActivityHandler } from '../../application/activities/get-activity/get-activity.handler.js';
 import { UpdateActivityHandler } from '../../application/activities/update-activity/update-activity.handler.js';
@@ -24,7 +26,7 @@ export class ActivitiesController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<ActivityItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<ActivityItemHttpResponse> {
     const body = readBody(input, ['actorMemberId', 'action', 'entityType', 'entityId', 'caseId', 'metadata', 'occurredAt']);
     const response = await this.createHandler.execute(new CreateActivityRequest(businessAccountId, {
       actorMemberId: nullableString(body, 'actorMemberId'),
@@ -34,33 +36,34 @@ export class ActivitiesController {
       caseId: nullableString(body, 'caseId'),
       metadata: nullableJson(body, 'metadata'),
       occurredAt: stringValue(body, 'occurredAt'),
-    }));
+    }, actor));
     return new ActivityItemHttpResponse(toActivityHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<ActivitiesPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListActivitiesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListActivitiesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new ActivitiesPageHttpResponse(response.items.map(toActivityHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<ActivityItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetActivityRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<ActivityItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetActivityRequest(businessAccountId, id, actor));
     return new ActivityItemHttpResponse(toActivityHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<ActivityItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<ActivityItemHttpResponse> {
     const body = readBody(input, ['version', 'actorMemberId', 'action', 'entityType', 'entityId', 'caseId', 'metadata', 'occurredAt']);
     const response = await this.updateHandler.execute(new UpdateActivityRequest(businessAccountId, id, numberValue(body, 'version'), {
       actorMemberId: nullableString(body, 'actorMemberId'),
@@ -70,14 +73,14 @@ export class ActivitiesController {
       caseId: nullableString(body, 'caseId'),
       metadata: nullableJson(body, 'metadata'),
       occurredAt: optionalString(body, 'occurredAt'),
-    }));
+    }, actor));
     return new ActivityItemHttpResponse(toActivityHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteActivityHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteActivityRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteActivityHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteActivityRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteActivityHttpResponse(response.id, response.deleted);
   }
 }

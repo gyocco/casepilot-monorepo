@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmDeadlineRepository } from '../../infrastructure/persistence/repositories/typeorm-deadline.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateDeadlineHandler } from '../../application/deadlines/create-deadline/create-deadline.handler.js';
 import { GetDeadlineHandler } from '../../application/deadlines/get-deadline/get-deadline.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('Deadlines_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Deadline>> =>
         new TypeOrmUnitOfWork<CrudScope<Deadline>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmDeadlineRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmDeadlineRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

@@ -1,9 +1,10 @@
 # Reglas obligatorias del frontend de CasePilot
 
-- Estado: aceptadas; implementación y evidencia en esta tarea.
+- Estado: aceptadas; implementación y evidencia sincronizadas.
 - Fecha: 2026-10-04.
+- Revisión: 2026-11-20.
 - Alcance: SPA Angular y `pilot-ui-kit`. Mobile adoptará sus checks antes de declarar cobertura.
-- Decisión: [ADR 0020](../adr/0020-frontend-foundation-and-theming.md).
+- Decisiones: [ADR 0020](../adr/0020-frontend-foundation-and-theming.md) y [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md).
 
 Este es el catálogo normativo frontend. Diseño y ejemplos: [arquitectura frontend](frontend-architecture.md). La cobertura ejecutable y sus límites se documentan con los validadores; no se presupone que un análisis estático demuestre seguridad, accesibilidad o semántica de negocio.
 
@@ -35,7 +36,7 @@ Un tema DEBE declarar todos los roles de color y un conjunto de recursos tipado.
 
 ## FRT-007 — Integraciones en adaptadores
 
-HTTP/proveedores DEBEN estar en `core/` técnico o `data-access/` de su feature, sin acceso directo desde páginas/componentes o el kit. Las APIs web/nativas DEBEN estar detrás de adaptadores; acceso DOM para temas se centraliza en el host del kit. La UI NO DEBE usar persistencia PostgreSQL. Firebase Authentication se integrará después; permisos y negocio pertenecen a NestJS.
+HTTP/proveedores DEBEN estar en `core/` técnico o `data-access/` de su feature, sin acceso directo desde páginas/componentes o el kit. Las APIs web/nativas DEBEN estar detrás de adaptadores; acceso DOM para temas se centraliza en el host del kit. La UI NO DEBE usar persistencia PostgreSQL. Firebase Authentication se encapsula exclusivamente en `core/auth/`; permisos y negocio pertenecen a NestJS.
 
 ## FRT-008 — Configuración pública y seguridad
 
@@ -43,7 +44,9 @@ Todo valor entregado al navegador es público. Se prohíben SDKs administrativos
 
 ## FRT-009 — Rutas y composición
 
-Las features DEBEN cargarse con lazy routes; las rutas públicas de una feature solo componen sus páginas y rutas hijas. El layout transversal pertenece a `shell/`. El login inicial DEBE ser un placeholder sin formulario, credenciales, integración ni simulación de sesión. Las rutas desconocidas DEBEN tener una resolución explícita.
+Las features DEBEN cargarse con lazy routes; las rutas públicas de una feature solo componen sus páginas y rutas hijas. El layout transversal pertenece a `shell/`. Las rutas protegidas DEBEN resguardarse mediante guards de `core/auth/` sin reemplazar la autorización server-side de la API, y el login DEBE autenticarse contra el adaptador real de Firebase Authentication (con emulador permitido únicamente en `local`), prohibiendo sesiones simuladas en producción. Las rutas desconocidas DEBEN tener una resolución explícita.
+
+**Evolución 2026-11-20:** reemplaza el requisito de login placeholder por autenticación real con Firebase Authentication conforme al [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md).
 
 ## FRT-010 — Gate real y pruebas de validadores
 

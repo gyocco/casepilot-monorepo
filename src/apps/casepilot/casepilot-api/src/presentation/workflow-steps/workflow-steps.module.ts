@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmWorkflowStepRepository } from '../../infrastructure/persistence/repositories/typeorm-workflow-step.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateWorkflowStepHandler } from '../../application/workflow-steps/create-workflow-step/create-workflow-step.handler.js';
 import { GetWorkflowStepHandler } from '../../application/workflow-steps/get-workflow-step/get-workflow-step.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('WorkflowSteps_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<WorkflowStep>> =>
         new TypeOrmUnitOfWork<CrudScope<WorkflowStep>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmWorkflowStepRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmWorkflowStepRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

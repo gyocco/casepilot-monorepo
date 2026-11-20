@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmCustomFieldDefinitionRepository } from '../../infrastructure/persistence/repositories/typeorm-custom-field-definition.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/create-custom-field-definition/create-custom-field-definition.handler.js';
 import { GetCustomFieldDefinitionHandler } from '../../application/custom-field-definitions/get-custom-field-definition/get-custom-field-definition.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('CustomFieldDefinitions_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<CustomFieldDefinition>> =>
         new TypeOrmUnitOfWork<CrudScope<CustomFieldDefinition>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmCustomFieldDefinitionRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmCustomFieldDefinitionRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

@@ -7,6 +7,7 @@ import { type GetUserRequest } from './get-user.request.js';
 import type { CrudScope } from '../../shared/crud-models.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeUserAction } from '../../shared/authorization.js';
 import { validateId } from '@casepilot/validation';
 
 export class GetUserHandler implements Handler<GetUserRequest, GetUserResponse> {
@@ -15,6 +16,7 @@ export class GetUserHandler implements Handler<GetUserRequest, GetUserResponse> 
   async execute(request: GetUserRequest): Promise<GetUserResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, false);
+      await authorizeUserAction(scope, request.actor, 'read', request.id);
       validateId(request.id);
       const entity = await scope.resource.getById(request.id, request.businessAccountId);
       if (!entity) throw new NotFoundError();

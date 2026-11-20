@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface CreateUserData {
   readonly email: string;
@@ -13,5 +14,5 @@ export interface CreateUserData {
   readonly lastLoginAt?: string | null;
 }
 export class CreateUserRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateUserData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateUserData, public readonly actor: VerifiedIdentity) { super(); }
 }

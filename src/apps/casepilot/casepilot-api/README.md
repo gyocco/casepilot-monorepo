@@ -28,7 +28,7 @@ pnpm start:api
 
 ## Health checks y contrato
 
-Antes de las sondas, la API también implementa los **28 recursos de servicios profesionales** con POST, GET por ID, PATCH, DELETE y GET paginado. Los endpoints son públicos según la decisión del usuario; autenticación queda diferida. Las rutas, ejemplos, versiones, formatos y límites están en [CRUD de servicios profesionales](docs/professional-services-crud.md) y el contrato completo en [OpenAPI](../../../../contracts/openapi/casepilot-api.yaml). Solo se persisten datos y metadatos de documentos; no se accede a archivos ni servicios externos.
+Antes de las sondas, la API también implementa autenticación Bearer con Firebase (`POST /auth/me/bootstrap`, `GET /auth/me`, `PATCH /auth/me`) y los **28 recursos de servicios profesionales** con POST, GET por ID, PATCH, DELETE y GET paginado protegidos por defecto mediante `@casepilot/auth/nestjs` y autorización por usuario/membresía/rol en `Application` ([ADR 0022](../../../../docs/adr/0022-firebase-authentication-and-application-authorization.md)). Únicamente `/health` y `/health/database` permanecen públicos (`@PublicEndpoint()`). Las rutas, ejemplos, versiones, formatos y límites están en [CRUD de servicios profesionales](docs/professional-services-crud.md) y el contrato completo en [OpenAPI](../../../../contracts/openapi/casepilot-api.yaml). Solo se persisten datos y metadatos de documentos; no se accede a archivos ni servicios externos.
 
 
 | Endpoint | Respuesta | Recorrido |

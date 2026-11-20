@@ -20,4 +20,6 @@
   --color-outline-variant: var(--pilot-color-outline-variant);
   --color-error: var(--pilot-color-error);
   --color-on-error: var(--pilot-color-on-error);
+  --color-error-container: var(--pilot-color-error-container);
+  --color-on-error-container: var(--pilot-color-on-error-container);
 }

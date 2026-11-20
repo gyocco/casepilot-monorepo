@@ -7,6 +7,7 @@ import { type GetTimeEntryRequest } from './get-time-entry.request.js';
 import type { CrudScope } from '../../shared/crud-models.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { validateId } from '@casepilot/validation';
 
 export class GetTimeEntryHandler implements Handler<GetTimeEntryRequest, GetTimeEntryResponse> {
@@ -14,6 +15,7 @@ export class GetTimeEntryHandler implements Handler<GetTimeEntryRequest, GetTime
 
   async execute(request: GetTimeEntryRequest): Promise<GetTimeEntryResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'read');
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       const entity = await scope.resource.getById(request.id, request.businessAccountId);

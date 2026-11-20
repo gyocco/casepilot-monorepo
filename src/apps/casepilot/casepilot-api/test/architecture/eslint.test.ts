@@ -158,3 +158,15 @@ void test('CPA-002 accepts runtime bases and type-only Handler imports; rejects 
     "import type { Handler } from '../../../../../../libs/backend/cqrs/src/handler.js'; export type Contract = Handler<never, never>;",
   ]) assert.ok((await messages(path, code)).some(message => message.includes('CPA-002')), code);
 });
+
+void test('BCK-008/CPA-005 isolate Firebase and NestJS auth adapters while permitting pure auth contracts', async () => {
+  for (const path of ['src/domain/entities/sample.ts', 'src/application/auth/sample.ts']) {
+    assert.deepEqual(await messages(path, "export type { VerifiedIdentity } from '@casepilot/auth';"), []);
+    for (const specifier of ['@casepilot/auth/firebase', '@casepilot/auth/nestjs', 'firebase-admin/auth', '@google-cloud/secret-manager']) {
+      assert.ok((await messages(path, `export { x } from '${specifier}';`)).some(message => message.includes('BCK-008')), `${path}:${specifier}`);
+    }
+    assert.ok((await messages(path, "export { x } from '@casepilot/auth/private';")).some(message => message.includes('CPA-005')), path);
+  }
+  assert.deepEqual(await messages('src/presentation/auth/auth.controller.ts', "export { CurrentIdentity } from '@casepilot/auth/nestjs';"), []);
+  assert.ok((await messages('src/presentation/auth/auth.controller.ts', "export { FirebaseTokenVerifier } from '@casepilot/auth/firebase';")).some(message => message.includes('BCK-003')));
+});

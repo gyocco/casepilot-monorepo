@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 import type { JsonValue } from '@casepilot/abstractions';
 
 export interface UpdateActivityData {
@@ -11,5 +12,5 @@ export interface UpdateActivityData {
   readonly occurredAt?: string;
 }
 export class UpdateActivityRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateActivityData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateActivityData, public readonly actor: VerifiedIdentity) { super(); }
 }

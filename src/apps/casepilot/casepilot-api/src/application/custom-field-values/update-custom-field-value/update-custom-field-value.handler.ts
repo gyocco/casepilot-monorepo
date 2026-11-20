@@ -8,6 +8,7 @@ import { type CrudScope } from '../../shared/crud-models.js';
 import type { CrudRuntime } from '@casepilot/abstractions';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { custom_field_valueFields, validateCustomFieldValueRelations } from '../shared/custom-field-value.rules.js';
 import { validateId } from '@casepilot/validation';
 import { validateFields } from '../../shared/crud-validation.js';
@@ -19,6 +20,7 @@ export class UpdateCustomFieldValueHandler implements Handler<UpdateCustomFieldV
 
   async execute(request: UpdateCustomFieldValueRequest): Promise<UpdateCustomFieldValueResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'write');
       await validateTenant(scope.references, request.businessAccountId, true);
       validateId(request.id);
       validateVersion(request.version);

@@ -171,12 +171,12 @@ void test('BCK-023 only scans Application sources of its owning API', () => {
   assert.deepEqual(check(project), []);
 });
 
-void test('BCK-023 covers all 141 real operations and detects a missing sibling without changing disk files', () => {
+void test('BCK-023 covers all 144 real operations and detects a missing sibling without changing disk files', () => {
   const directory = fileURLToPath(new URL('../../', import.meta.url));
   const project = new Project({ tsConfigFilePath: resolve(directory, 'tsconfig.json') });
   const handlers = project.getSourceFiles().filter(source => source.getFilePath().includes('/src/application/') && source.getBaseName().endsWith('.handler.ts'));
-  assert.equal(handlers.length, 141);
-  assert.equal(new Set(handlers.map(source => source.getFilePath().split('/application/')[1]?.split('/')[0])).size, 29);
+  assert.equal(handlers.length, 144);
+  assert.equal(new Set(handlers.map(source => source.getFilePath().split('/application/')[1]?.split('/')[0])).size, 30);
   assert.deepEqual(validateApplicationOperations(project, directory), []);
   project.getSourceFileOrThrow(resolve(directory, 'src/application/activities/create-activity/create-activity.response.ts')).move(resolve(directory, 'src/application/activities/shared/create-activity.response.ts'));
   assert.ok(validateApplicationOperations(project, directory).some(finding => finding.message.includes('create-activity.response.ts')));

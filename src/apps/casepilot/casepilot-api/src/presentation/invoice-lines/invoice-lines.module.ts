@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmInvoiceLineRepository } from '../../infrastructure/persistence/repositories/typeorm-invoice-line.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateInvoiceLineHandler } from '../../application/invoice-lines/create-invoice-line/create-invoice-line.handler.js';
 import { GetInvoiceLineHandler } from '../../application/invoice-lines/get-invoice-line/get-invoice-line.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('InvoiceLines_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<InvoiceLine>> =>
         new TypeOrmUnitOfWork<CrudScope<InvoiceLine>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmInvoiceLineRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmInvoiceLineRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

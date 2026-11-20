@@ -14,6 +14,7 @@ for (const exposeErrorDetails of [false, true]) {
       http: { host: '127.0.0.1', port: 0, corsOrigins: [], exposeErrorDetails },
       database: { host: '127.0.0.1', port: 1, database: 'unused', username: 'unused', password: 'synthetic',
         schema: 'public', ssl: false, connectTimeoutMs: 10, queryTimeoutMs: 10, poolSize: 1 },
+      auth: { firebaseProjectId: 'demo-casepilot-test', emulatorHost: null },
     };
     const app = await createApp(config, false);
     context.after(() => app.close());
@@ -48,5 +49,10 @@ for (const exposeErrorDetails of [false, true]) {
     const live = await fetch(`${url}/health`, { signal: AbortSignal.timeout(5000) });
     assert.equal(live.status, 200);
     assert.deepEqual(await live.json(), { status: 'ok' });
+
+    const unauthenticated = await fetch(`${url}/auth/me`, { signal: AbortSignal.timeout(5000) });
+    assert.equal(unauthenticated.status, 401);
+    const unauthBody = await unauthenticated.json() as ProblemDetails;
+    assert.equal(unauthBody.code, 'UNAUTHORIZED_ERROR');
   });
 }

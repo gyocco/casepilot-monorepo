@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateExternalPartyData {
   readonly type?: 'PERSON' | 'ORGANIZATION';
@@ -20,5 +21,5 @@ export interface UpdateExternalPartyData {
   readonly status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED' | null;
 }
 export class UpdateExternalPartyRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateExternalPartyData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateExternalPartyData, public readonly actor: VerifiedIdentity) { super(); }
 }

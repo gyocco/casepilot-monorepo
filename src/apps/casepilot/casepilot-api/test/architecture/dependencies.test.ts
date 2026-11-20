@@ -46,8 +46,8 @@ function cruise(files: Readonly<Record<string, string>>): { status: number | nul
   const directory = join(fixture, 'src/apps/casepilot/casepilot-api');
   mkdirSync(directory, { recursive: true });
   try {
-    writeFileSync(join(directory, 'package.json'), JSON.stringify({ type: 'module', dependencies: { typeorm: '0.3.31' }, devDependencies: { 'ts-morph': '27.0.2' } }));
-    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/typeorm': ['../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts'], '@casepilot/abstractions/node': ['../../../libs/backend/abstractions/src/node/index.ts'], '@casepilot/validation': ['../../../libs/backend/validation/src/index.ts'], '@casepilot/validation/nestjs': ['../../../libs/backend/validation/src/nestjs/index.ts'] } } }));
+    writeFileSync(join(directory, 'package.json'), JSON.stringify({ type: 'module', dependencies: { typeorm: '0.3.31', 'firebase-admin': '14.5.1' }, devDependencies: { 'ts-morph': '27.0.2' } }));
+    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/typeorm': ['../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts'], '@casepilot/abstractions/node': ['../../../libs/backend/abstractions/src/node/index.ts'], '@casepilot/validation': ['../../../libs/backend/validation/src/index.ts'], '@casepilot/validation/nestjs': ['../../../libs/backend/validation/src/nestjs/index.ts'], '@casepilot/auth': ['../../../libs/backend/auth/src/index.ts'], '@casepilot/auth/firebase': ['../../../libs/backend/auth/src/firebase/index.ts'], '@casepilot/auth/nestjs': ['../../../libs/backend/auth/src/nestjs/index.ts'] } } }));
     for (const [path, text] of Object.entries(files)) {
       const target = join(directory, path);
       const ownedPath = relative(fixture, target);
@@ -324,4 +324,42 @@ void test('CPA-002 permits the CQRS public entry and rejects direct private modu
   assert.notEqual(forbidden.status, 0);
   assert.match(forbidden.output, /CPA-002-cqrs-public-entry/);
   assert.doesNotMatch(forbidden.output, /BCK-019-resolvable-imports/);
+});
+
+void test('BCK-008/BCK-003/CPA-005 isolate @casepilot/auth adapters and Firebase Admin SDK in dependency graph', () => {
+  const authLib = {
+    '../../../libs/backend/auth/src/index.ts': 'export interface VerifiedIdentity { subject: string }',
+    '../../../libs/backend/auth/src/firebase/index.ts': 'export class FirebaseTokenVerifier {}',
+    '../../../libs/backend/auth/src/nestjs/index.ts': 'export class NestAuthModule {}',
+    '../../../libs/backend/auth/src/private.ts': 'export const secret = 1;',
+  };
+  const allowed = cruise({
+    ...authLib,
+    'src/application/auth/query.ts': "export type { VerifiedIdentity } from '@casepilot/auth';",
+    'src/presentation/auth/auth.module.ts': 'export class AuthModule {}',
+    'src/presentation/auth/auth.controller.ts': "export { NestAuthModule } from '@casepilot/auth/nestjs';",
+  });
+  assert.equal(allowed.status, 0, allowed.output);
+
+  const coreFirebase = cruise({
+    ...authLib,
+    'src/application/auth/query.ts': "export { FirebaseTokenVerifier } from '@casepilot/auth/firebase';",
+  });
+  assert.notEqual(coreFirebase.status, 0);
+  assert.match(coreFirebase.output, /BCK-008-auth-core-no-adapters/);
+
+  const presFirebase = cruise({
+    ...authLib,
+    'src/presentation/auth/auth.module.ts': 'export class AuthModule {}',
+    'src/presentation/auth/auth.controller.ts': "export { FirebaseTokenVerifier } from '@casepilot/auth/firebase';",
+  });
+  assert.notEqual(presFirebase.status, 0);
+  assert.match(presFirebase.output, /BCK-003-presentation-no-auth-provider/);
+
+  const privateImport = cruise({
+    ...authLib,
+    'src/main.ts': "export { secret } from '../../../../libs/backend/auth/src/private.js';",
+  });
+  assert.notEqual(privateImport.status, 0);
+  assert.match(privateImport.output, /CPA-005-auth-public-entry/);
 });

@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmExpenseRepository } from '../../infrastructure/persistence/repositories/typeorm-expense.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateExpenseHandler } from '../../application/expenses/create-expense/create-expense.handler.js';
 import { GetExpenseHandler } from '../../application/expenses/get-expense/get-expense.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('Expenses_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Expense>> =>
         new TypeOrmUnitOfWork<CrudScope<Expense>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmExpenseRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmExpenseRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

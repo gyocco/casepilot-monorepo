@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateCommentData {
   readonly authorMemberId?: string;
@@ -7,5 +8,5 @@ export interface UpdateCommentData {
   readonly body?: string;
 }
 export class UpdateCommentRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCommentData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateCommentData, public readonly actor: VerifiedIdentity) { super(); }
 }

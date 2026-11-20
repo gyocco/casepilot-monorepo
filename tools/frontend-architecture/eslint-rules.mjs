@@ -2,6 +2,7 @@ import path from 'node:path';
 
 const normalize = value => value.replaceAll('\\', '/');
 const integrations = /\/(?:core\/[^/]+\/|features\/[^/]+\/data-access\/)/;
+const authAdapter = /\/core\/auth\//;
 const platformAdapter = /\/(?:core\/platform\/|theme\/pilot-theme-host\.ts$)/;
 
 const boundaries = {
@@ -24,7 +25,10 @@ const boundaries = {
       if (specifier.startsWith('@angular/material') && !file.includes('/pilot-ui-kit/src/components/')) {
         context.report({ node, messageId: 'material' });
       }
-      if (/^(?:@angular\/common\/http|firebase(?:\/|$)|@angular\/fire(?:\/|$))/.test(specifier) && !integrations.test(file)) {
+      if (/^(?:firebase(?:\/|$)|@angular\/fire(?:\/|$))/.test(specifier) && !authAdapter.test(file)) {
+        context.report({ node, messageId: 'integration' });
+      }
+      if (/^@angular\/common\/http(?:\/|$)/.test(specifier) && !integrations.test(file)) {
         context.report({ node, messageId: 'integration' });
       }
       if (file.includes('/casepilot-web/src/') && (

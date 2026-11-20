@@ -8,6 +8,7 @@ import { type CrudScope } from '../../shared/crud-models.js';
 import type { CrudRuntime } from '@casepilot/abstractions';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeTenantAction } from '../../shared/authorization.js';
 import { workflow_stepFields, validateWorkflowStepRelations } from '../shared/workflow-step.rules.js';
 import { validateFields } from '../../shared/crud-validation.js';
 
@@ -16,6 +17,7 @@ export class CreateWorkflowStepHandler implements Handler<CreateWorkflowStepRequ
 
   async execute(request: CreateWorkflowStepRequest): Promise<CreateWorkflowStepResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
+      await authorizeTenantAction(scope, request.actor, request.businessAccountId, 'write');
       await validateTenant(scope.references, request.businessAccountId, true);
       if (request.businessAccountId === null) throw new ValidationError('A business account is required.');
       validateFields(request.data, workflow_stepFields, false);

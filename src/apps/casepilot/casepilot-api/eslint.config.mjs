@@ -2,10 +2,16 @@ import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import { fileURLToPath } from 'node:url';
 
-const sharedEntryRules = [{
-  selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/validation\\/(?!nestjs$)|.*libs\\/backend\\/validation\\/)/]",
-  message: 'CPA-005: Use the public @casepilot/validation entry, never private modules.',
-}];
+const sharedEntryRules = [
+  {
+    selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/validation\\/(?!nestjs$)|.*libs\\/backend\\/validation\\/)/]",
+    message: 'CPA-005: Use the public @casepilot/validation entry, never private modules.',
+  },
+  {
+    selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/auth\\/(?!(?:firebase|nestjs)$)|.*libs\\/backend\\/auth\\/)/]",
+    message: 'CPA-005: Use the public @casepilot/auth entry or its approved /firebase and /nestjs adapters.',
+  },
+];
 
 export default tseslint.config(
   { ignores: ['dist/**', 'build/**', 'node_modules/**'] },
@@ -60,7 +66,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', '@casepilot/auth/nestjs', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', 'firebase', 'firebase/*', '@google-cloud/*', '@neondatabase/*', '@angular/*', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-008: Domain/Application depend on internal models and ports, not runtime adapters.',
         }],
       }],
@@ -99,8 +105,8 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
-          message: 'BCK-003/BCK-008/CPA-004: Transport delegates to Application and cannot import persistence, Domain or composition modules.',
+          group: ['@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', '@google-cloud/*', 'typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
+          message: 'BCK-003/BCK-008/CPA-004: Transport delegates to Application and cannot import persistence, provider SDKs, Domain or composition modules.',
         }],
       }],
     },
@@ -110,7 +116,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', '@casepilot/auth/nestjs', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', 'firebase', 'firebase/*', '@google-cloud/*', '@neondatabase/*', '@angular/*', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-002/BCK-008: Domain contains data/contracts and cannot depend on other layers.',
         }],
       }],

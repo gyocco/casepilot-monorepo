@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface UpdateFolderData {
   readonly caseId?: string | null;
@@ -7,5 +8,5 @@ export interface UpdateFolderData {
   readonly createdByMemberId?: string;
 }
 export class UpdateFolderRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateFolderData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly id: string, public readonly version: number, public readonly data: UpdateFolderData, public readonly actor: VerifiedIdentity) { super(); }
 }

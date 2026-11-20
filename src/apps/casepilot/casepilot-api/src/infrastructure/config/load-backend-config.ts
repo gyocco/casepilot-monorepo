@@ -132,6 +132,23 @@ export function loadBackendConfig(
       throw new BackendConfigurationError('CORS_ORIGINS must contain explicit HTTP/HTTPS origins.');
     }
   }
+
+  const firebaseProjectId = required(
+    variables.AUTH_FIREBASE_PROJECT_ID ?? (local || environment === 'test' ? 'demo-casepilot-local' : undefined),
+    'AUTH_FIREBASE_PROJECT_ID',
+  ).trim();
+  if (!/^[a-z0-9][a-z0-9-]{3,62}$/.test(firebaseProjectId)) {
+    throw new BackendConfigurationError('AUTH_FIREBASE_PROJECT_ID must be a valid Firebase project identifier.');
+  }
+
+  const rawEmulatorHost = variables.FIREBASE_AUTH_EMULATOR_HOST?.trim()
+    || (local ? variables.CASEPILOT_FIREBASE_AUTH_EMULATOR_HOST?.trim() || '127.0.0.1:9099' : '');
+  if (rawEmulatorHost && !local) {
+    throw new BackendConfigurationError('FIREBASE_AUTH_EMULATOR_HOST is permitted only in the local environment.');
+  }
+  if (rawEmulatorHost && !/^[a-zA-Z0-9.-]+:\d{1,5}$/.test(rawEmulatorHost)) {
+    throw new BackendConfigurationError('FIREBASE_AUTH_EMULATOR_HOST must be in host:port format.');
+  }
   return {
     environment,
     http: {
@@ -151,6 +168,10 @@ export function loadBackendConfig(
       connectTimeoutMs: integer(variables.DATABASE_CONNECT_TIMEOUT_MS ?? '3000', 'DATABASE_CONNECT_TIMEOUT_MS', 1, 60000),
       queryTimeoutMs: integer(variables.DATABASE_QUERY_TIMEOUT_MS ?? '3000', 'DATABASE_QUERY_TIMEOUT_MS', 1, 60000),
       poolSize: integer(variables.DATABASE_POOL_SIZE ?? '5', 'DATABASE_POOL_SIZE', 1, 100),
+    },
+    auth: {
+      firebaseProjectId,
+      emulatorHost: rawEmulatorHost || null,
     },
   };
 }

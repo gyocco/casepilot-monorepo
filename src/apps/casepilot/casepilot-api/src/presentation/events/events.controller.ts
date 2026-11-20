@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateEventHandler } from '../../application/events/create-event/create-event.handler.js';
 import { GetEventHandler } from '../../application/events/get-event/get-event.handler.js';
 import { UpdateEventHandler } from '../../application/events/update-event/update-event.handler.js';
@@ -24,7 +26,7 @@ export class EventsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<EventItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<EventItemHttpResponse> {
     const body = readBody(input, ['caseId', 'title', 'description', 'eventType', 'startsAt', 'endsAt', 'allDay', 'location', 'createdByMemberId']);
     const response = await this.createHandler.execute(new CreateEventRequest(businessAccountId, {
       caseId: nullableString(body, 'caseId'),
@@ -36,33 +38,34 @@ export class EventsController {
       allDay: booleanValue(body, 'allDay'),
       location: nullableString(body, 'location'),
       createdByMemberId: stringValue(body, 'createdByMemberId'),
-    }));
+    }, actor));
     return new EventItemHttpResponse(toEventHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<EventsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListEventsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListEventsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new EventsPageHttpResponse(response.items.map(toEventHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<EventItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetEventRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<EventItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetEventRequest(businessAccountId, id, actor));
     return new EventItemHttpResponse(toEventHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<EventItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<EventItemHttpResponse> {
     const body = readBody(input, ['version', 'caseId', 'title', 'description', 'eventType', 'startsAt', 'endsAt', 'allDay', 'location', 'createdByMemberId']);
     const response = await this.updateHandler.execute(new UpdateEventRequest(businessAccountId, id, numberValue(body, 'version'), {
       caseId: nullableString(body, 'caseId'),
@@ -74,14 +77,14 @@ export class EventsController {
       allDay: optionalBoolean(body, 'allDay'),
       location: nullableString(body, 'location'),
       createdByMemberId: optionalString(body, 'createdByMemberId'),
-    }));
+    }, actor));
     return new EventItemHttpResponse(toEventHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteEventHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteEventRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteEventHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteEventRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteEventHttpResponse(response.id, response.deleted);
   }
 }

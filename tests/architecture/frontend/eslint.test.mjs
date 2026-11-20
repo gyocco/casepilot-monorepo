@@ -19,6 +19,11 @@ test('FRT-007 permits technical adapters while rejecting HTTP/providers in compo
   for (const file of ['src/features/auth/pages/login/login.page.ts', 'src/features/auth/state/session.ts']) {
     assert.ok((await messages(file, code)).some(message => message.includes('FRT-007')));
   }
+  const firebaseCode = "export { getAuth } from 'firebase/auth';";
+  assert.deepEqual(await messages('src/core/auth/firebase-auth.adapter.ts', firebaseCode), []);
+  for (const file of ['src/features/auth/data-access/client.ts', 'src/features/auth/pages/login/login.page.ts']) {
+    assert.ok((await messages(file, firebaseCode)).some(message => message.includes('FRT-007')), file);
+  }
 });
 
 test('FRT-007 rejects browser capabilities and global fetch outside adapters', async () => {

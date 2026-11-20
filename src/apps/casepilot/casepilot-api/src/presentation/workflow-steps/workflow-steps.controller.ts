@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateWorkflowStepHandler } from '../../application/workflow-steps/create-workflow-step/create-workflow-step.handler.js';
 import { GetWorkflowStepHandler } from '../../application/workflow-steps/get-workflow-step/get-workflow-step.handler.js';
 import { UpdateWorkflowStepHandler } from '../../application/workflow-steps/update-workflow-step/update-workflow-step.handler.js';
@@ -24,7 +26,7 @@ export class WorkflowStepsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<WorkflowStepItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<WorkflowStepItemHttpResponse> {
     const body = readBody(input, ['workflowId', 'statusDefinitionId', 'name', 'description', 'sortOrder', 'isInitial', 'isTerminal']);
     const response = await this.createHandler.execute(new CreateWorkflowStepRequest(businessAccountId, {
       workflowId: stringValue(body, 'workflowId'),
@@ -34,33 +36,34 @@ export class WorkflowStepsController {
       sortOrder: numberValue(body, 'sortOrder'),
       isInitial: booleanValue(body, 'isInitial'),
       isTerminal: booleanValue(body, 'isTerminal'),
-    }));
+    }, actor));
     return new WorkflowStepItemHttpResponse(toWorkflowStepHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<WorkflowStepsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListWorkflowStepsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListWorkflowStepsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new WorkflowStepsPageHttpResponse(response.items.map(toWorkflowStepHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<WorkflowStepItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetWorkflowStepRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<WorkflowStepItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetWorkflowStepRequest(businessAccountId, id, actor));
     return new WorkflowStepItemHttpResponse(toWorkflowStepHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<WorkflowStepItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<WorkflowStepItemHttpResponse> {
     const body = readBody(input, ['version', 'workflowId', 'statusDefinitionId', 'name', 'description', 'sortOrder', 'isInitial', 'isTerminal']);
     const response = await this.updateHandler.execute(new UpdateWorkflowStepRequest(businessAccountId, id, numberValue(body, 'version'), {
       workflowId: optionalString(body, 'workflowId'),
@@ -70,14 +73,14 @@ export class WorkflowStepsController {
       sortOrder: optionalNumber(body, 'sortOrder'),
       isInitial: optionalBoolean(body, 'isInitial'),
       isTerminal: optionalBoolean(body, 'isTerminal'),
-    }));
+    }, actor));
     return new WorkflowStepItemHttpResponse(toWorkflowStepHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteWorkflowStepHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteWorkflowStepRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteWorkflowStepHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteWorkflowStepRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteWorkflowStepHttpResponse(response.id, response.deleted);
   }
 }

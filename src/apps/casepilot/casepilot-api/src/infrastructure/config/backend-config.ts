@@ -13,6 +13,11 @@ export interface DatabaseConfig {
   readonly poolSize: number;
 }
 
+export interface AuthConfig {
+  readonly firebaseProjectId: string;
+  readonly emulatorHost: string | null;
+}
+
 export interface BackendConfig {
   readonly environment: ApplicationEnvironment;
   readonly http: {
@@ -22,4 +27,5 @@ export interface BackendConfig {
     readonly exposeErrorDetails: boolean;
   };
   readonly database: DatabaseConfig;
+  readonly auth: AuthConfig;
 }

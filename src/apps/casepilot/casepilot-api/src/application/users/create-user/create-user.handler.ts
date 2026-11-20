@@ -8,6 +8,7 @@ import { type CrudScope } from '../../shared/crud-models.js';
 import type { CrudRuntime } from '@casepilot/abstractions';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
+import { authorizeUserAction } from '../../shared/authorization.js';
 import { userFields, validateUserRelations } from '../shared/user.rules.js';
 import { validateFields } from '../../shared/crud-validation.js';
 
@@ -17,6 +18,7 @@ export class CreateUserHandler implements Handler<CreateUserRequest, CreateUserR
   async execute(request: CreateUserRequest): Promise<CreateUserResponse> {
     return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, false);
+      await authorizeUserAction(scope, request.actor, 'create');
       validateFields(request.data, userFields, false);
       const entity = new User();
       entity.id = this.runtime.newId();

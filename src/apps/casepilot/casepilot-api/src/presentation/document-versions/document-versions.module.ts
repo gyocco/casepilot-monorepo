@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmDocumentVersionRepository } from '../../infrastructure/persistence/repositories/typeorm-document-version.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateDocumentVersionHandler } from '../../application/document-versions/create-document-version/create-document-version.handler.js';
 import { GetDocumentVersionHandler } from '../../application/document-versions/get-document-version/get-document-version.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('DocumentVersions_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<DocumentVersion>> =>
         new TypeOrmUnitOfWork<CrudScope<DocumentVersion>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmDocumentVersionRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmDocumentVersionRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

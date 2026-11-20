@@ -1,4 +1,5 @@
 import { Controller, Get, Header, Inject } from '@nestjs/common';
+import { PublicEndpoint } from '@casepilot/auth/nestjs';
 import { GetHealthCheckObjectsHandler } from '../../application/health/get-health-check-objects/get-health-check-objects.handler.js';
 import { GetHealthCheckObjectsRequest } from '../../application/health/get-health-check-objects/get-health-check-objects.request.js';
 import {
@@ -8,6 +9,7 @@ import {
 } from './health-http.response.js';
 
 @Controller('health')
+@PublicEndpoint()
 export class HealthController {
   constructor(@Inject(GetHealthCheckObjectsHandler) private readonly handler: GetHealthCheckObjectsHandler) {}
 

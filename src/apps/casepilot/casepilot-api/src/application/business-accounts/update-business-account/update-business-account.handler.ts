@@ -1,18 +1,17 @@
 import type { Handler } from '@casepilot/cqrs';
-import { type UnitOfWork, NotFoundError, ValidationError } from '@casepilot/abstractions';
+import { ConflictError, NotFoundError, ValidationError, type CrudRuntime, type UnitOfWork } from '@casepilot/abstractions';
 import { BusinessAccount } from '../../../domain/entities/business-account.js';
 import { UpdateBusinessAccountResponse } from './update-business-account.response.js';
 import { toBusinessAccountResponse } from '../shared/business-account.response.js';
 import { type UpdateBusinessAccountRequest } from './update-business-account.request.js';
 import { type CrudScope } from '../../shared/crud-models.js';
-import type { CrudRuntime } from '@casepilot/abstractions';
+import { authorizeBusinessAccountAction } from '../../shared/authorization.js';
 import { runCrudPersistence } from '../../shared/crud-persistence.js';
 import { validateTenant } from '../../shared/crud-relations.js';
 import { business_accountFields, validateBusinessAccountRelations } from '../shared/business-account.rules.js';
 import { validateId } from '@casepilot/validation';
 import { validateFields } from '../../shared/crud-validation.js';
 import { validateVersion } from '../../shared/crud-pagination.js';
-import { ConflictError } from '@casepilot/abstractions';
 
 export class UpdateBusinessAccountHandler implements Handler<UpdateBusinessAccountRequest, UpdateBusinessAccountResponse> {
   constructor(private readonly work: UnitOfWork<CrudScope<BusinessAccount>>, private readonly runtime: CrudRuntime) {}
@@ -21,6 +20,7 @@ export class UpdateBusinessAccountHandler implements Handler<UpdateBusinessAccou
     return runCrudPersistence(() => this.work.execute(async scope => {
       await validateTenant(scope.references, request.businessAccountId, false);
       validateId(request.id);
+      await authorizeBusinessAccountAction(scope, request.actor, 'admin', request.id);
       validateVersion(request.version);
       validateFields(request.data, business_accountFields, true);
       if (Object.values(request.data).every(value => value === undefined)) throw new ValidationError('At least one field is required.');

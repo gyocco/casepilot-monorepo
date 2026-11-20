@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreateInvoiceHandler } from '../../application/invoices/create-invoice/create-invoice.handler.js';
 import { GetInvoiceHandler } from '../../application/invoices/get-invoice/get-invoice.handler.js';
 import { UpdateInvoiceHandler } from '../../application/invoices/update-invoice/update-invoice.handler.js';
@@ -24,7 +26,7 @@ export class InvoicesController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<InvoiceItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<InvoiceItemHttpResponse> {
     const body = readBody(input, ['externalPartyId', 'caseId', 'number', 'status', 'currency', 'issueDate', 'dueDate', 'subtotal', 'taxAmount', 'total', 'balanceDue', 'notes']);
     const response = await this.createHandler.execute(new CreateInvoiceRequest(businessAccountId, {
       externalPartyId: stringValue(body, 'externalPartyId'),
@@ -39,33 +41,34 @@ export class InvoicesController {
       total: stringValue(body, 'total'),
       balanceDue: stringValue(body, 'balanceDue'),
       notes: nullableString(body, 'notes'),
-    }));
+    }, actor));
     return new InvoiceItemHttpResponse(toInvoiceHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<InvoicesPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListInvoicesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListInvoicesRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new InvoicesPageHttpResponse(response.items.map(toInvoiceHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<InvoiceItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetInvoiceRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<InvoiceItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetInvoiceRequest(businessAccountId, id, actor));
     return new InvoiceItemHttpResponse(toInvoiceHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<InvoiceItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<InvoiceItemHttpResponse> {
     const body = readBody(input, ['version', 'externalPartyId', 'caseId', 'number', 'status', 'currency', 'issueDate', 'dueDate', 'subtotal', 'taxAmount', 'total', 'balanceDue', 'notes']);
     const response = await this.updateHandler.execute(new UpdateInvoiceRequest(businessAccountId, id, numberValue(body, 'version'), {
       externalPartyId: optionalString(body, 'externalPartyId'),
@@ -80,14 +83,14 @@ export class InvoicesController {
       total: optionalString(body, 'total'),
       balanceDue: optionalString(body, 'balanceDue'),
       notes: nullableString(body, 'notes'),
-    }));
+    }, actor));
     return new InvoiceItemHttpResponse(toInvoiceHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteInvoiceHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeleteInvoiceRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeleteInvoiceHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeleteInvoiceRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeleteInvoiceHttpResponse(response.id, response.deleted);
   }
 }

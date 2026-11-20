@@ -1,4 +1,5 @@
 import { Request } from '@casepilot/cqrs';
+import type { VerifiedIdentity } from '@casepilot/auth';
 
 export interface CreateTimeEntryData {
   readonly caseId: string;
@@ -14,5 +15,5 @@ export interface CreateTimeEntryData {
   readonly invoiceLineId?: string | null;
 }
 export class CreateTimeEntryRequest extends Request {
-  constructor(public readonly businessAccountId: string | null, public readonly data: CreateTimeEntryData) { super(); }
+  constructor(public readonly businessAccountId: string | null, public readonly data: CreateTimeEntryData, public readonly actor: VerifiedIdentity) { super(); }
 }

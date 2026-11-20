@@ -1,4 +1,6 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Query } from '@nestjs/common';
+import type { VerifiedIdentity } from '@casepilot/auth';
+import { CurrentIdentity } from '@casepilot/auth/nestjs';
 import { CreatePaymentHandler } from '../../application/payments/create-payment/create-payment.handler.js';
 import { GetPaymentHandler } from '../../application/payments/get-payment/get-payment.handler.js';
 import { UpdatePaymentHandler } from '../../application/payments/update-payment/update-payment.handler.js';
@@ -24,7 +26,7 @@ export class PaymentsController {
 
   @Post()
   @Header('Cache-Control', 'no-store')
-  async create(@Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<PaymentItemHttpResponse> {
+  async create(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Body() input: unknown): Promise<PaymentItemHttpResponse> {
     const body = readBody(input, ['invoiceId', 'amount', 'currency', 'paymentMethod', 'reference', 'paidAt', 'notes']);
     const response = await this.createHandler.execute(new CreatePaymentRequest(businessAccountId, {
       invoiceId: stringValue(body, 'invoiceId'),
@@ -34,33 +36,34 @@ export class PaymentsController {
       reference: nullableString(body, 'reference'),
       paidAt: stringValue(body, 'paidAt'),
       notes: nullableString(body, 'notes'),
-    }));
+    }, actor));
     return new PaymentItemHttpResponse(toPaymentHttpResponse(response.item));
   }
 
   @Get()
   @Header('Cache-Control', 'no-store')
   async list(
+    @CurrentIdentity() actor: VerifiedIdentity,
     @Param('businessAccountId') businessAccountId: string,
     @Query('pageNumber') pageNumber: string | undefined,
     @Query('pageSize') pageSize: string | undefined,
     @Query('sortBy') sortBy: string | undefined,
     @Query('sortDirection') sortDirection: string | undefined,
   ): Promise<PaymentsPageHttpResponse> {
-    const response = await this.listHandler.execute(new ListPaymentsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc')));
+    const response = await this.listHandler.execute(new ListPaymentsRequest(businessAccountId, numberQuery(pageNumber, 1), numberQuery(pageSize, 20), textQuery(sortBy, 'id'), textQuery(sortDirection, 'asc'), actor));
     return new PaymentsPageHttpResponse(response.items.map(toPaymentHttpResponse), new PageMetadataHttpResponse(response.pagination));
   }
 
   @Get(':id')
   @Header('Cache-Control', 'no-store')
-  async get(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<PaymentItemHttpResponse> {
-    const response = await this.getHandler.execute(new GetPaymentRequest(businessAccountId, id));
+  async get(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string): Promise<PaymentItemHttpResponse> {
+    const response = await this.getHandler.execute(new GetPaymentRequest(businessAccountId, id, actor));
     return new PaymentItemHttpResponse(toPaymentHttpResponse(response.item));
   }
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async update(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<PaymentItemHttpResponse> {
+  async update(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Body() input: unknown): Promise<PaymentItemHttpResponse> {
     const body = readBody(input, ['version', 'invoiceId', 'amount', 'currency', 'paymentMethod', 'reference', 'paidAt', 'notes']);
     const response = await this.updateHandler.execute(new UpdatePaymentRequest(businessAccountId, id, numberValue(body, 'version'), {
       invoiceId: optionalString(body, 'invoiceId'),
@@ -70,14 +73,14 @@ export class PaymentsController {
       reference: nullableString(body, 'reference'),
       paidAt: optionalString(body, 'paidAt'),
       notes: nullableString(body, 'notes'),
-    }));
+    }, actor));
     return new PaymentItemHttpResponse(toPaymentHttpResponse(response.item));
   }
 
   @Delete(':id')
   @Header('Cache-Control', 'no-store')
-  async delete(@Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeletePaymentHttpResponse> {
-    const response = await this.deleteHandler.execute(new DeletePaymentRequest(businessAccountId, id, numberQuery(version)));
+  async delete(@CurrentIdentity() actor: VerifiedIdentity, @Param('businessAccountId') businessAccountId: string, @Param('id') id: string, @Query('version') version: string | undefined): Promise<DeletePaymentHttpResponse> {
+    const response = await this.deleteHandler.execute(new DeletePaymentRequest(businessAccountId, id, numberQuery(version), actor));
     return new DeletePaymentHttpResponse(response.id, response.deleted);
   }
 }

@@ -6,6 +6,9 @@ import type { CrudScope } from '../../application/shared/crud-models.js';
 import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
 import { TypeOrmFolderRepository } from '../../infrastructure/persistence/repositories/typeorm-folder.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
+import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';
+import { TypeOrmUserIdentityRepository } from '../../infrastructure/persistence/repositories/typeorm-user-identity.repository.js';
+import { TypeOrmMemberRepository } from '../../infrastructure/persistence/repositories/typeorm-member.repository.js';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
 import { CreateFolderHandler } from '../../application/folders/create-folder/create-folder.handler.js';
 import { GetFolderHandler } from '../../application/folders/get-folder/get-folder.handler.js';
@@ -21,7 +24,7 @@ const WORK = Symbol('Folders_WORK');
       provide: WORK, inject: [DatabaseConnection],
       useFactory: (connection: DatabaseConnection): UnitOfWork<CrudScope<Folder>> =>
         new TypeOrmUnitOfWork<CrudScope<Folder>>(() => connection.getDataSource(), manager => ({
-          resource: new TypeOrmFolderRepository(manager), references: new TypeOrmReferenceRepository(manager),
+          resource: new TypeOrmFolderRepository(manager), references: new TypeOrmReferenceRepository(manager), users: new TypeOrmUserRepository(manager), userIdentities: new TypeOrmUserIdentityRepository(manager), members: new TypeOrmMemberRepository(manager),
         })),
     },
     {

@@ -1,6 +1,6 @@
 # Dependencias locales de CasePilot
 
-Este entorno Docker Compose provee las dependencias de las aplicaciones de `src/apps/casepilot/`. Por ahora contiene PostgreSQL. La API NestJS se ejecuta en el host; Compose no arranca aplicaciones.
+Este entorno Docker Compose provee las dependencias locales de las aplicaciones de `src/apps/casepilot/`: **PostgreSQL 18** y **Firebase Auth Emulator** (aislado 100% del proyecto GCP DEV). La API NestJS y la SPA Angular se ejecutan en el host; Compose no arranca aplicaciones.
 
 ## Requisitos y arranque
 
