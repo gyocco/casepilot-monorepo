@@ -2,6 +2,7 @@
 
 ## Documentos disponibles
 
+- [Roadmap, pendientes y próximos pasos](project-management/roadmap-and-next-steps.md): estado actual, verificación pendiente del Bloque A, plan detallado del Bloque B (CI/CD + IaC en Google Cloud DEV), backlog de producto y mejoras del harness IA.
 - [Arquitectura frontend](architecture/frontend-architecture.md): SPA por features, Material, UI kit, temas y recursos configurables por nombre.
 - [Reglas obligatorias frontend FRT-001 a FRT-012](architecture/frontend-architecture-rules.md): fronteras, Angular, tokens, recursos, configuración y calidad.
 - [Validación frontend](../tools/frontend-architecture/README.md): checkers, regresiones y alcance acreditado por regla.
@@ -52,7 +53,6 @@
 
 Las siguientes áreas se crearán cuando exista contenido real, siguiendo la guía de estructura:
 
-- `project-management/`: roadmap, hitos y seguimiento.
 - `development/`: instalación, comandos y calidad.
 - `operations/`: despliegue, entornos, observabilidad e incidentes.
 - `reference/`: APIs, variables, contratos y comandos de consulta.

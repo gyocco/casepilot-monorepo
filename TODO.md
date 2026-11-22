@@ -1,8 +1,11 @@
-TODO:
+# TODO
 
-- Implementar CRUDS de todas las entidades del modelo de datos
-  - refactor application carpetas por operacion
+La fuente canónica y actualizada de pendientes, roadmap y próximos pasos de CasePilot vive en:
 
-- Mejorar mecanismo de Validation para validar las requests de cqrs
-- Implementar Auth con GCP ?? Auth0 ??
-- Deploy API en GCP
+- [Roadmap, pendientes y próximos pasos](docs/project-management/roadmap-and-next-steps.md)
+
+Resumen de foco inmediato:
+
+1. Ejecutar `pnpm check:backend:integration` y smoke test local con Docker Desktop activo (cierre del Bloque A).
+2. Implementar el **Bloque B** (CI backend, Dockerfile API, Terraform para DEV en Google Cloud con OIDC y pipelines `deploy-dev.yml`).
+3. Evaluar mejora de validación de requests CQRS sobre `@casepilot/validation` y continuar con las features de producto en `casepilot-web`.
