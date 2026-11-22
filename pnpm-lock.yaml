@@ -22,6 +22,9 @@ importers:
       '@casepilot/exception-handler':
         specifier: workspace:*
         version: link:../../../libs/backend/exception-handler
+      '@casepilot/persistence':
+        specifier: workspace:*
+        version: link:../../../libs/backend/persistence
       '@casepilot/validation':
         specifier: workspace:*
         version: link:../../../libs/backend/validation
@@ -183,30 +186,12 @@ importers:
       '@eslint/js':
         specifier: 9.39.5
         version: 9.39.5
-      '@testcontainers/postgresql':
-        specifier: 12.0.0
-        version: 12.0.0
       '@types/node':
         specifier: 22.12.0
         version: 22.12.0
-      '@types/pg':
-        specifier: 8.23.1
-        version: 8.23.1
       eslint:
         specifier: 9.39.5
         version: 9.39.5(jiti@2.7.0)
-      pg:
-        specifier: 8.23.1
-        version: 8.23.1
-      reflect-metadata:
-        specifier: 0.2.2
-        version: 0.2.2
-      testcontainers:
-        specifier: 12.0.0
-        version: 12.0.0
-      typeorm:
-        specifier: 0.3.31
-        version: 0.3.31(pg@8.23.1)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -305,6 +290,46 @@ importers:
       rxjs:
         specifier: 7.8.2
         version: 7.8.2
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: 8.71.0
+        version: 8.71.0(eslint@9.39.5(jiti@2.7.0))(typescript@5.9.3)
+
+  src/libs/backend/persistence:
+    dependencies:
+      '@casepilot/abstractions':
+        specifier: workspace:*
+        version: link:../abstractions
+    devDependencies:
+      '@eslint/js':
+        specifier: 9.39.5
+        version: 9.39.5
+      '@testcontainers/postgresql':
+        specifier: 12.0.0
+        version: 12.0.0
+      '@types/node':
+        specifier: 22.12.0
+        version: 22.12.0
+      '@types/pg':
+        specifier: 8.23.1
+        version: 8.23.1
+      eslint:
+        specifier: 9.39.5
+        version: 9.39.5(jiti@2.7.0)
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
+      reflect-metadata:
+        specifier: 0.2.2
+        version: 0.2.2
+      testcontainers:
+        specifier: 12.0.0
+        version: 12.0.0
+      typeorm:
+        specifier: 0.3.31
+        version: 0.3.31(pg@8.23.1)
       typescript:
         specifier: 5.9.3
         version: 5.9.3

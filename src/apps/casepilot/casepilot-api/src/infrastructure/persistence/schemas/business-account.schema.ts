@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { BusinessAccount } from '../../../domain/entities/business-account.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice, sqlJson } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice, sqlJson } from '@casepilot/persistence/typeorm';
 export const business_accountSchema = new EntitySchema<BusinessAccount>({
   name: 'BusinessAccount', target: BusinessAccount, tableName: 'business_accounts',
   columns: {

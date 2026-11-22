@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { UnitOfWorkError, type Repository } from '../../src/index.js';
-import { TypeOrmUnitOfWork } from '../../src/dataaccess/typeorm/index.js';
+import { UnitOfWorkError, type Repository } from '@casepilot/abstractions';
+import { TypeOrmUnitOfWork } from '../../src/typeorm/index.js';
 
 void test('connection failure exposes only the technical contract without executing the callback', async () => {
   const original = new Error('Private driver detail');

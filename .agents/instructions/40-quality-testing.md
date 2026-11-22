@@ -15,7 +15,7 @@ La API dispone de `pnpm lint:api`, `pnpm typecheck:api`, `pnpm build:api`, `pnpm
 
 Para cambios solo de documentación o configuración del scaffold, valida enlaces, rutas, manifests, workspace y diff. Deja constancia de que type-check, lint, build, tests de producto y revisión de viewport/accesibilidad no aplican o no están disponibles.
 
-La [librería abstractions](../../src/libs/backend/abstractions/README.md) tiene `pnpm check:abstractions` y pruebas propias de tipos/modelos. `pnpm test:abstractions:integration` acredita commit/rollback y scopes concurrentes con PostgreSQL efímero, requiere Docker y no utiliza la base persistente local. Los checks de consumidores API incorporan firmas de repositorios y uso de UnitOfWork; consulta su cobertura delimitada.
+La [librería abstractions](../../src/libs/backend/abstractions/README.md) tiene `pnpm check:abstractions` y pruebas puras de tipos/modelos/errores (sin Docker). La [librería persistence](../../src/libs/backend/persistence/README.md) tiene `pnpm check:persistence` y `pnpm test:persistence:integration`, que acredita commit/rollback y scopes concurrentes con PostgreSQL efímero, requiere Docker y no utiliza la base persistente local. Los checks de consumidores API incorporan firmas de repositorios y uso de UnitOfWork; consulta su cobertura delimitada.
 
 ## Estrategia de pruebas
 
@@ -56,4 +56,4 @@ Todas las pruebas específicas de una app o paquete, incluidas integración y en
 
 No se considera completo un cambio que solo “se ve bien” en una pantalla. Debe ser tipeado, testeable, accesible, responsive, documentado y verificable en la ruta de build correspondiente.
 
-La librería validation posee check/typecheck/lint/test/build y tests propios de validación/arquitectura. Ejecuta pnpm check:validation cuando cambien helpers/parsers. La integración de abstractions verifica también el repositorio SQL configurable con un modelo ajeno a CasePilot; cambios de persistencia requieren pnpm test:abstractions:integration y pnpm test:api:integration.
+La librería validation posee check/typecheck/lint/test/build y tests propios de validación/arquitectura. Ejecuta `pnpm check:validation` cuando cambien helpers/parsers. La integración de `persistence` verifica también el repositorio SQL configurable con un modelo ajeno a CasePilot; cambios de persistencia requieren `pnpm test:persistence:integration` y `pnpm test:api:integration`.

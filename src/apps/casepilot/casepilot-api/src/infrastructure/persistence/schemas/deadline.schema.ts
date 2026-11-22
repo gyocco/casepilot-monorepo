@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Deadline } from '../../../domain/entities/deadline.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/persistence/typeorm';
 export const deadlineSchema = new EntitySchema<Deadline>({
   name: 'Deadline', target: Deadline, tableName: 'deadlines',
   columns: {

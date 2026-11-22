@@ -15,7 +15,7 @@ void test('BCK-008 keeps the root error entry pure and permits NestJS only in th
     "export { HttpException } from '@nestjs/common';",
     "export { randomUUID } from 'node:crypto';",
     "export { ExceptionHandlerModule } from './nestjs/index.js';",
-    "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';",
+    "export { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';",
     "export { UnexpectedError } from '@casepilot/abstractions/dist/errors.js';",
   ]) {
     const results = await eslint.lintText(source, { filePath: join(directory, 'src/index.ts') });

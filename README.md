@@ -93,7 +93,7 @@ La web se sirve en `http://127.0.0.1:4200`; antes de e2e instala Chromium como i
 
 `pnpm check:cqrs` verifica tipos, lint, pruebas y build de CQRS; `pnpm build:cqrs` y `pnpm test:cqrs` permiten ejecutar pasos separados. Los scripts de verificaciones/tests/build de la API compilan primero sus declaraciones, también desde la carpeta API.
 
-`pnpm check:abstractions` verifica tipos, lint, errores, modelos y build; `pnpm build:abstractions`/`pnpm test:abstractions` ejecutan pasos separados. `pnpm test:abstractions:integration` usa PostgreSQL efímero y requiere Docker para comprobar transacciones entre repositorios, rollback/commit y scopes concurrentes. La API construye las librerías antes de consumir sus declaraciones.
+`pnpm check:abstractions` verifica tipos, lint, errores, modelos puros y build (sin Docker); `pnpm build:abstractions`/`pnpm test:abstractions` ejecutan pasos separados. `pnpm check:persistence` verifica los adaptadores de persistencia (`@casepilot/persistence/typeorm`), y `pnpm test:persistence:integration` usa PostgreSQL efímero y requiere Docker para comprobar transacciones entre repositorios, rollback/commit y scopes concurrentes. La API construye las librerías antes de consumir sus declaraciones.
 
 `pnpm check:api:architecture` ejecuta TypeScript, ESLint, dependency-cruiser y ts-morph. `pnpm test:api:architecture` prueba sus validadores y forma parte de `test:api`. Cobertura y límites: [guía de validación de la API](src/apps/casepilot/casepilot-api/docs/architecture-validation.md).
 

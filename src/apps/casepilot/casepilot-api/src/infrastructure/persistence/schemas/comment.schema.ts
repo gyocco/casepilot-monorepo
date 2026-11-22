@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Comment } from '../../../domain/entities/comment.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/persistence/typeorm';
 export const commentSchema = new EntitySchema<Comment>({
   name: 'Comment', target: Comment, tableName: 'comments',
   columns: {

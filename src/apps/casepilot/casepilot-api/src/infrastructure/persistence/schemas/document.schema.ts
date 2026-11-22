@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Document } from '../../../domain/entities/document.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/persistence/typeorm';
 export const documentSchema = new EntitySchema<Document>({
   name: 'Document', target: Document, tableName: 'documents',
   columns: {

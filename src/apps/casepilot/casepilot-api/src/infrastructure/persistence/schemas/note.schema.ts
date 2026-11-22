@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Note } from '../../../domain/entities/note.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const noteSchema = new EntitySchema<Note>({
   name: 'Note', target: Note, tableName: 'notes',
   columns: {

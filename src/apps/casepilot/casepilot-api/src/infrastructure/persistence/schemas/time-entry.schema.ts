@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { TimeEntry } from '../../../domain/entities/time-entry.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const time_entrySchema = new EntitySchema<TimeEntry>({
   name: 'TimeEntry', target: TimeEntry, tableName: 'time_entries',
   columns: {

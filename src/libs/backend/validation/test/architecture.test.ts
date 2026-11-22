@@ -11,7 +11,7 @@ const eslint = new ESLint({ cwd: directory, overrideConfigFile: true, overrideCo
 void test('CPA-005 validation remains pure and cannot import apps or runtime adapters', async () => {
   for (const source of [
     "export { randomUUID } from 'node:crypto';",
-    "export { TypeOrmDataRepository } from '@casepilot/abstractions/typeorm';",
+    "export { TypeOrmDataRepository } from '@casepilot/persistence/typeorm';",
     "export { AppModule } from '../../../../apps/casepilot/casepilot-api/src/app.module.js';",
     "export { systemCrudRuntime } from '@casepilot/abstractions/node';",
   ]) {

@@ -1,5 +1,6 @@
 import type { EntitySchema } from 'typeorm';
-import type { StoredEntity } from '../models/stored-entity.js';
+import type { StoredEntity } from '@casepilot/abstractions';
+
 export interface SqlColumn<TEntity extends StoredEntity> {
   readonly property: string;
   readonly name: string;

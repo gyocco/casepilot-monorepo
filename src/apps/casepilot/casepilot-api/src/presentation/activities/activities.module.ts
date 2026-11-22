@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import type { UnitOfWork } from '@casepilot/abstractions';
-import { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';
+import { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';
 import type { Activity } from '../../domain/entities/activity.js';
 import type { CrudScope } from '../../application/shared/crud-models.js';
-import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
+import { DatabaseConnection } from '@casepilot/persistence/typeorm';
 import { TypeOrmActivityRepository } from '../../infrastructure/persistence/repositories/typeorm-activity.repository.js';
 import { TypeOrmReferenceRepository } from '../../infrastructure/persistence/repositories/typeorm-reference.repository.js';
 import { TypeOrmUserRepository } from '../../infrastructure/persistence/repositories/typeorm-user.repository.js';

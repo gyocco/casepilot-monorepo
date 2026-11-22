@@ -1,0 +1,43 @@
+{
+  "name": "@casepilot/persistence",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable backend persistence adapters organized by driver/framework",
+  "engines": { "node": ">=22.12.0" },
+  "exports": {
+    "./typeorm": { "types": "./dist/typeorm/index.d.ts", "import": "./dist/typeorm/index.js" }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build:contracts": "pnpm --filter @casepilot/abstractions build",
+    "build": "pnpm build:contracts && tsc -p tsconfig.json",
+    "typecheck": "pnpm build:contracts && tsc -p tsconfig.test.json --noEmit",
+    "lint": "pnpm build:contracts && eslint src test eslint.config.mjs --max-warnings 0",
+    "test": "pnpm build:contracts && tsc -p tsconfig.test.json && node --test build/test/test/unit/*.test.js",
+    "test:integration": "pnpm build:contracts && tsc -p tsconfig.test.json && node build/test/test/run-integration-tests.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@casepilot/abstractions": "workspace:*"
+  },
+  "peerDependencies": {
+    "typeorm": "0.3.31"
+  },
+  "peerDependenciesMeta": {
+    "typeorm": { "optional": true }
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@testcontainers/postgresql": "12.0.0",
+    "@types/node": "22.12.0",
+    "@types/pg": "8.23.1",
+    "eslint": "9.39.5",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "testcontainers": "12.0.0",
+    "typeorm": "0.3.31",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.0"
+  }
+}

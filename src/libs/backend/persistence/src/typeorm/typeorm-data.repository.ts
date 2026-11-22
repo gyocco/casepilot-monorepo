@@ -1,7 +1,5 @@
 import type { EntityManager } from 'typeorm';
-import type { PageRequest } from '../models/page-request.js';
-import type { ScopedDataRepository } from '../scoped-data-repository.js';
-import type { StoredEntity } from '../models/stored-entity.js';
+import type { PageRequest, ScopedDataRepository, StoredEntity } from '@casepilot/abstractions';
 import type { SqlTable } from './sql-table.js';
 import { sqlRows } from './sql-values.js';
 import { normalizeSqlError } from './sql-error.js';

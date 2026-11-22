@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GetHealthCheckObjectsHandler } from '../../application/health/get-health-check-objects/get-health-check-objects.handler.js';
 import type { HealthCheckObjectRepository } from '../../domain/repositories/health-check-object.repository.js';
-import { DatabaseConnection } from '@casepilot/abstractions/typeorm';
+import { DatabaseConnection } from '@casepilot/persistence/typeorm';
 import { TypeOrmHealthCheckObjectRepository } from '../../infrastructure/persistence/repositories/typeorm-health-check-object.repository.js';
 import { HealthController } from './health.controller.js';
 

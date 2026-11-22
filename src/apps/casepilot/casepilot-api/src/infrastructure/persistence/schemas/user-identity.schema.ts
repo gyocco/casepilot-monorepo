@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { UserIdentity } from '../../../domain/entities/user-identity.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlInteger, sqlString, sqlTimestamp } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlInteger, sqlString, sqlTimestamp } from '@casepilot/persistence/typeorm';
 
 export const userIdentitySchema = new EntitySchema<UserIdentity>({
   name: 'UserIdentity',

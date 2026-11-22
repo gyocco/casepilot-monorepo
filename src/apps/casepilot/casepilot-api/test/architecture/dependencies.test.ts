@@ -47,7 +47,7 @@ function cruise(files: Readonly<Record<string, string>>): { status: number | nul
   mkdirSync(directory, { recursive: true });
   try {
     writeFileSync(join(directory, 'package.json'), JSON.stringify({ type: 'module', dependencies: { typeorm: '0.3.31', 'firebase-admin': '14.5.1' }, devDependencies: { 'ts-morph': '27.0.2' } }));
-    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/typeorm': ['../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts'], '@casepilot/abstractions/node': ['../../../libs/backend/abstractions/src/node/index.ts'], '@casepilot/validation': ['../../../libs/backend/validation/src/index.ts'], '@casepilot/validation/nestjs': ['../../../libs/backend/validation/src/nestjs/index.ts'], '@casepilot/auth': ['../../../libs/backend/auth/src/index.ts'], '@casepilot/auth/firebase': ['../../../libs/backend/auth/src/firebase/index.ts'], '@casepilot/auth/nestjs': ['../../../libs/backend/auth/src/nestjs/index.ts'] } } }));
+    writeFileSync(join(directory, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', baseUrl: '.', paths: { '@infra/*': ['src/infrastructure/*'], '@casepilot/cqrs': ['../../../libs/backend/cqrs/src/index.ts'], '@casepilot/abstractions': ['../../../libs/backend/abstractions/src/index.ts'], '@casepilot/abstractions/node': ['../../../libs/backend/abstractions/src/node/index.ts'], '@casepilot/persistence/typeorm': ['../../../libs/backend/persistence/src/typeorm/index.ts'], '@casepilot/validation': ['../../../libs/backend/validation/src/index.ts'], '@casepilot/validation/nestjs': ['../../../libs/backend/validation/src/nestjs/index.ts'], '@casepilot/auth': ['../../../libs/backend/auth/src/index.ts'], '@casepilot/auth/firebase': ['../../../libs/backend/auth/src/firebase/index.ts'], '@casepilot/auth/nestjs': ['../../../libs/backend/auth/src/nestjs/index.ts'] } } }));
     for (const [path, text] of Object.entries(files)) {
       const target = join(directory, path);
       const ownedPath = relative(fixture, target);
@@ -67,37 +67,45 @@ function cruise(files: Readonly<Record<string, string>>): { status: number | nul
   }
 }
 
-void test('CPA-003 permits public abstractions entries and rejects private modules', () => {
-  const library = '../../../libs/backend/abstractions/src/';
+void test('CPA-003/CPA-005 permits public abstractions and persistence entries and rejects private modules', () => {
+  const abstractions = '../../../libs/backend/abstractions/src/';
+  const persistence = '../../../libs/backend/persistence/src/';
   const files = {
-    [library + 'index.ts']: "export type { Entity } from './dataaccess/models/entity.js';",
-    [library + 'dataaccess/models/entity.ts']: 'export interface Entity { readonly id: string }',
-    [library + 'dataaccess/typeorm/index.ts']: "export { TypeOrmUnitOfWork } from './adapter.js';",
-    [library + 'dataaccess/typeorm/adapter.ts']: 'export class TypeOrmUnitOfWork {}',
+    [abstractions + 'index.ts']: "export type { Entity } from './dataaccess/models/entity.js';",
+    [abstractions + 'dataaccess/models/entity.ts']: 'export interface Entity { readonly id: string }',
+    [persistence + 'typeorm/index.ts']: "export { TypeOrmUnitOfWork } from './adapter.js';",
+    [persistence + 'typeorm/adapter.ts']: 'export class TypeOrmUnitOfWork {}',
   };
   const permitted = cruise({
     ...files,
     'src/domain/model.ts': "export type { Entity } from '@casepilot/abstractions';",
-    'src/infrastructure/transactions.ts': "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';",
+    'src/infrastructure/transactions.ts': "export { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';",
   });
   assert.equal(permitted.status, 0, permitted.output);
-  const privateImport = cruise({
+  const privateAbstractions = cruise({
     ...files,
     'src/domain/model.ts': "export type { Entity } from '../../../../../libs/backend/abstractions/src/dataaccess/models/entity.js';",
   });
-  assert.notEqual(privateImport.status, 0);
-  assert.match(privateImport.output, /CPA-003-abstractions-public-entry/);
-  assert.doesNotMatch(privateImport.output, /BCK-019-resolvable-imports/);
+  assert.notEqual(privateAbstractions.status, 0);
+  assert.match(privateAbstractions.output, /CPA-003-abstractions-public-entry/);
+  assert.doesNotMatch(privateAbstractions.output, /BCK-019-resolvable-imports/);
+  const privatePersistence = cruise({
+    ...files,
+    'src/infrastructure/transactions.ts': "export { TypeOrmUnitOfWork } from '../../../../../libs/backend/persistence/src/typeorm/adapter.js';",
+  });
+  assert.notEqual(privatePersistence.status, 0);
+  assert.match(privatePersistence.output, /CPA-005-persistence-public-entry/);
+  assert.doesNotMatch(privatePersistence.output, /BCK-019-resolvable-imports/);
 });
 
-void test('BCK-008 rejects the abstractions TypeORM adapter through a core barrel', () => {
+void test('BCK-008 rejects the persistence TypeORM adapter through a core barrel', () => {
   const result = cruise({
     'src/application/orders/run.ts': "export { TypeOrmUnitOfWork } from './bridge.js';",
-    'src/application/orders/bridge.ts': "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';",
-    '../../../libs/backend/abstractions/src/dataaccess/typeorm/index.ts': 'export class TypeOrmUnitOfWork {}',
+    'src/application/orders/bridge.ts': "export { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';",
+    '../../../libs/backend/persistence/src/typeorm/index.ts': 'export class TypeOrmUnitOfWork {}',
   });
   assert.notEqual(result.status, 0);
-  assert.match(result.output, /BCK-008-abstractions-core-no-typeorm/);
+  assert.match(result.output, /BCK-008-persistence-core-no-adapters/);
   assert.doesNotMatch(result.output, /BCK-019-resolvable-imports/);
 });
 

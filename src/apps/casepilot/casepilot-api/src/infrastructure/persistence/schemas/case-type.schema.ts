@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { CaseType } from '../../../domain/entities/case-type.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const case_typeSchema = new EntitySchema<CaseType>({
   name: 'CaseType', target: CaseType, tableName: 'case_types',
   columns: {

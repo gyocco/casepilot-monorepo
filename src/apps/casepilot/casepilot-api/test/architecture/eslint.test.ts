@@ -50,7 +50,7 @@ async function messages(path: string, code: string): Promise<string[]> {
 void test('CPA-005 permits public helpers and isolates shared Node/SQL/HTTP adapters', async () => {
   for (const path of ['src/domain/model.ts', 'src/application/orders/sample.ts']) {
     assert.deepEqual(await messages(path, "export { validateId } from '@casepilot/validation';"), []);
-    for (const specifier of ['@casepilot/validation/nestjs', '@casepilot/abstractions/node', '@casepilot/abstractions/typeorm']) {
+    for (const specifier of ['@casepilot/validation/nestjs', '@casepilot/abstractions/node', '@casepilot/persistence/typeorm']) {
       assert.ok((await messages(path, `export { adapter } from '${specifier}';`)).some(message => message.includes('BCK-008')));
     }
     assert.ok((await messages(path, "export { validateId } from '@casepilot/validation/identifiers';")).some(message => message.includes('CPA-005')));
@@ -113,17 +113,18 @@ void test('ESLint blocks repository transaction APIs and composed reads', async 
   assert.ok((await messages(path, 'export function act(repository: { findAndCount(): void }): void { repository["findAndCount"](); }')).some(message => message.includes('BCK-009')));
 });
 
-void test('CPA-003 permits public abstractions but rejects private imports and core ORM adapters', async () => {
+void test('CPA-003/CPA-005 permits public abstractions/persistence entries but rejects private imports and core ORM adapters', async () => {
   for (const path of ['src/domain/entities/sample.ts', 'src/application/orders/sample.ts', 'src/infrastructure/persistence/repositories/sample.ts']) {
     assert.deepEqual(await messages(path, "export type { Entity, CrudRepository, UnitOfWork } from '@casepilot/abstractions';"), []);
-    for (const specifier of ['@casepilot/abstractions/dist/dataaccess/models/entity.js', '../../../../libs/backend/abstractions/src/index.js']) {
+    for (const specifier of ['@casepilot/abstractions/dist/dataaccess/models/entity.js', '../../../../libs/backend/abstractions/src/index.js', '@casepilot/abstractions/typeorm']) {
       assert.ok((await messages(path, `export type { Entity } from '${specifier}';`)).some(message => message.includes('CPA-003')));
     }
   }
   for (const path of ['src/domain/model.ts', 'src/application/orders/sample.ts']) {
-    assert.ok((await messages(path, "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';")).some(message => message.includes('BCK-008')));
+    assert.ok((await messages(path, "export { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';")).some(message => message.includes('BCK-008')));
   }
-  assert.deepEqual(await messages('src/infrastructure/persistence/unit-of-work.ts', "export { TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';"), []);
+  assert.ok((await messages('src/infrastructure/persistence/unit-of-work.ts', "export { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm/typeorm-unit-of-work.js';")).some(message => message.includes('CPA-005')));
+  assert.deepEqual(await messages('src/infrastructure/persistence/unit-of-work.ts', "export { TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';"), []);
 });
 
 void test('ESLint rejects literal hidden persistence effects while accepting safe options', async () => {

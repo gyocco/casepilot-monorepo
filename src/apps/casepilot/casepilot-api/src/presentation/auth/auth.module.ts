@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import type { UnitOfWork } from '@casepilot/abstractions';
 import { systemCrudRuntime } from '@casepilot/abstractions/node';
-import { DatabaseConnection, TypeOrmUnitOfWork } from '@casepilot/abstractions/typeorm';
+import { DatabaseConnection, TypeOrmUnitOfWork } from '@casepilot/persistence/typeorm';
 import { BootstrapCurrentUserHandler } from '../../application/auth/bootstrap-current-user/bootstrap-current-user.handler.js';
 import { GetCurrentUserProfileHandler } from '../../application/auth/get-current-user-profile/get-current-user-profile.handler.js';
 import type { AuthScope } from '../../application/auth/shared/current-user-profile.response.js';

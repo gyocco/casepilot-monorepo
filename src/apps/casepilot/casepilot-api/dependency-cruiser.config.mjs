@@ -51,19 +51,25 @@ const configuration = {
     {
       name: 'BCK-003-presentation-no-shared-runtime-adapters', severity: 'error',
       from: { path: '^src/presentation/', pathNot: resourceModule },
-      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/(node|dataaccess/typeorm)/', reachable: true },
+      to: { path: '(^|/)libs/backend/(?:abstractions/(?:src|dist)/node|persistence/(?:src|dist))/', reachable: true },
     },
     {
       name: 'CPA-003-abstractions-public-entry', severity: 'error',
-      comment: 'Consume only the main public index or the Infrastructure-only TypeORM index.',
+      comment: 'Consume only the pure main public index or the Infrastructure-only /node index.',
       from: { path: '^src/' },
-      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/dataaccess/typeorm/index\\.(?:ts|js|d\\.ts)$', '/node/index\\.(?:ts|js|d\\.ts)$'] },
+      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/', pathNot: ['/(?:src|dist)/index\\.(?:ts|js|d\\.ts)$', '/node/index\\.(?:ts|js|d\\.ts)$'] },
     },
     {
-      name: 'BCK-008-abstractions-core-no-typeorm', severity: 'error',
-      comment: 'Core layers cannot reach the TypeORM adapter, including via barrels.',
+      name: 'CPA-005-persistence-public-entry', severity: 'error',
+      comment: 'Consume persistence adapters only through approved driver public entries (e.g. @casepilot/persistence/typeorm).',
+      from: { path: '^src/' },
+      to: { path: '(^|/)libs/backend/persistence/(src|dist)/', pathNot: ['/typeorm/index\\.(?:ts|js|d\\.ts)$'] },
+    },
+    {
+      name: 'BCK-008-persistence-core-no-adapters', severity: 'error',
+      comment: 'Core layers cannot reach concrete persistence adapters, including via barrels.',
       from: { path: '^src/(domain|application)/' },
-      to: { path: '(^|/)libs/backend/abstractions/(src|dist)/dataaccess/typeorm/', reachable: true },
+      to: { path: '(^|/)libs/backend/persistence/(src|dist)/', reachable: true },
     },
     {
       name: 'CPA-002-cqrs-public-entry', severity: 'error',

@@ -15,7 +15,7 @@ export default tseslint.config(
     files: ['src/**/*.ts'], ignores: ['src/nestjs/**/*.ts'],
     languageOptions: { parserOptions: { project: false, projectService: true } },
     rules: { 'no-restricted-imports': ['error', { patterns: [{
-      regex: '^(?![.]{1,2}/|@casepilot/abstractions$)|(?:apps/|dataaccess/typeorm/|/node/|nestjs/)',
+      regex: '^(?![.]{1,2}/|@casepilot/abstractions$)|(?:apps/|persistence/|typeorm|/node/|nestjs/)',
       message: 'BCK-008/BCK-015/CPA-005: Structural validation uses pure public contracts, never apps or runtime adapters.',
     }] }] },
   },

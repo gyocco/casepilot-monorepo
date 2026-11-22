@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { WorkflowStep } from '../../../domain/entities/workflow-step.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const workflow_stepSchema = new EntitySchema<WorkflowStep>({
   name: 'WorkflowStep', target: WorkflowStep, tableName: 'workflow_steps',
   columns: {

@@ -1,4 +1,4 @@
-import type { DatabaseConnection } from '@casepilot/abstractions/typeorm';
+import type { DatabaseConnection } from '@casepilot/persistence/typeorm';
 import { HealthCheckObject } from '../../../domain/entities/health-check-object.js';
 import {
   HealthCheckObjectRepositoryUnavailableError,

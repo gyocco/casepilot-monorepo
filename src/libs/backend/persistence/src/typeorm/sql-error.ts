@@ -1,5 +1,5 @@
 import { QueryFailedError } from 'typeorm';
-import { PersistenceError } from '../persistence-error.js';
+import { PersistenceError } from '@casepilot/abstractions';
 import { isRow } from './sql-values.js';
 
 export function normalizeSqlError(error: unknown): PersistenceError {

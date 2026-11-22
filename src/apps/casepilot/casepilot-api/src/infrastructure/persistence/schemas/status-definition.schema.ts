@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { StatusDefinition } from '../../../domain/entities/status-definition.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const status_definitionSchema = new EntitySchema<StatusDefinition>({
   name: 'StatusDefinition', target: StatusDefinition, tableName: 'status_definitions',
   columns: {

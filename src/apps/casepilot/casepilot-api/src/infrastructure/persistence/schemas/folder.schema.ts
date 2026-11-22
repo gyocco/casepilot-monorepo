@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Folder } from '../../../domain/entities/folder.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/persistence/typeorm';
 export const folderSchema = new EntitySchema<Folder>({
   name: 'Folder', target: Folder, tableName: 'folders',
   columns: {

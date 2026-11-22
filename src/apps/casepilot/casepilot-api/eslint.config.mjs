@@ -11,6 +11,10 @@ const sharedEntryRules = [
     selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/auth\\/(?!(?:firebase|nestjs)$)|.*libs\\/backend\\/auth\\/)/]",
     message: 'CPA-005: Use the public @casepilot/auth entry or its approved /firebase and /nestjs adapters.',
   },
+  {
+    selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/persistence(?:$|\\/(?!typeorm$))|.*libs\\/backend\\/persistence\\/)/]",
+    message: 'CPA-005: Use an approved public @casepilot/persistence/<driver> adapter entry (e.g. @casepilot/persistence/typeorm), never private modules.',
+  },
 ];
 
 export default tseslint.config(
@@ -56,8 +60,8 @@ export default tseslint.config(
     files: ['src/**/*.ts'],
     rules: {
       'no-restricted-syntax': ['error', ...sharedEntryRules, {
-        selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!(?:typeorm|node)$)|.*libs\\/backend\\/abstractions\\/)/]",
-        message: 'CPA-003: Use the public @casepilot/abstractions entry or its Infrastructure-only /typeorm adapter.',
+        selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!node$)|.*libs\\/backend\\/abstractions\\/)/]",
+        message: 'CPA-003: Use the pure public @casepilot/abstractions entry or its Infrastructure-only /node adapter.',
       }],
     },
   },
@@ -66,7 +70,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', '@casepilot/auth/nestjs', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', 'firebase', 'firebase/*', '@google-cloud/*', '@neondatabase/*', '@angular/*', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', '@casepilot/auth/nestjs', '@casepilot/auth/firebase', '@casepilot/persistence', '@casepilot/persistence/*', 'firebase-admin', 'firebase-admin/*', 'firebase', 'firebase/*', '@google-cloud/*', '@neondatabase/*', '@angular/*', 'typeorm', 'typeorm/*', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-008: Domain/Application depend on internal models and ports, not runtime adapters.',
         }],
       }],
@@ -81,7 +85,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-syntax': ['error', ...sharedEntryRules,
         {
-          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!(?:typeorm|node)$)|.*libs\\/backend\\/abstractions\\/)/]",
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!node$)|.*libs\\/backend\\/abstractions\\/)/]",
           message: 'CPA-003: Use the public abstractions entry point.',
         },
         {
@@ -105,7 +109,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', '@google-cloud/*', 'typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
+          group: ['@casepilot/persistence', '@casepilot/persistence/*', '@casepilot/abstractions/node', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', '@google-cloud/*', 'typeorm', 'typeorm/*', 'pg', 'pg/*', '**/domain/**', '**/infrastructure/**', '**/database/**', '**/*.module', '**/*.module.js', '**/*.module.ts'],
           message: 'BCK-003/BCK-008/CPA-004: Transport delegates to Application and cannot import persistence, provider SDKs, Domain or composition modules.',
         }],
       }],
@@ -116,7 +120,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', '@casepilot/auth/nestjs', '@casepilot/auth/firebase', 'firebase-admin', 'firebase-admin/*', 'firebase', 'firebase/*', '@google-cloud/*', '@neondatabase/*', '@angular/*', 'typeorm', 'typeorm/*', '@casepilot/abstractions/typeorm', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
+          group: ['@nestjs/*', '@casepilot/exception-handler/nestjs', '@casepilot/validation/nestjs', '@casepilot/auth/nestjs', '@casepilot/auth/firebase', '@casepilot/persistence', '@casepilot/persistence/*', 'firebase-admin', 'firebase-admin/*', 'firebase', 'firebase/*', '@google-cloud/*', '@neondatabase/*', '@angular/*', 'typeorm', 'typeorm/*', '@casepilot/abstractions/node', 'pg', 'pg/*', 'node:*', '**/application/**', '**/infrastructure/**', '**/presentation/**', '**/database/**', '**/config/**'],
           message: 'BCK-002/BCK-008: Domain contains data/contracts and cannot depend on other layers.',
         }],
       }],
@@ -127,7 +131,7 @@ export default tseslint.config(
     rules: {
       'no-restricted-syntax': ['error', ...sharedEntryRules,
         {
-          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!(?:typeorm|node)$)|.*libs\\/backend\\/abstractions\\/)/]",
+          selector: ":matches(ImportDeclaration, ExportNamedDeclaration, ExportAllDeclaration)[source.value=/^(?:@casepilot\\/abstractions\\/(?!node$)|.*libs\\/backend\\/abstractions\\/)/]",
           message: 'CPA-003: Use the public abstractions entry point.',
         },
         {

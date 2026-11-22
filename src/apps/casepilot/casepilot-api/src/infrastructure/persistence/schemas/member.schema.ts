@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Member } from '../../../domain/entities/member.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/persistence/typeorm';
 export const memberSchema = new EntitySchema<Member>({
   name: 'Member', target: Member, tableName: 'members',
   columns: {

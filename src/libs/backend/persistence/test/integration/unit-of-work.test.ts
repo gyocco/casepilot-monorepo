@@ -4,8 +4,8 @@ import { randomBytes } from 'node:crypto';
 import { after, before, beforeEach, test } from 'node:test';
 import { PostgreSqlContainer, type StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { DataSource, EntitySchema, type EntityManager } from 'typeorm';
-import { PageRequest, PageResponse, PersistenceError, StoredEntity, UnitOfWorkError, type CrudRepository, type Entity, type JsonValue } from '../../src/index.js';
-import { TypeOrmUnitOfWork, TypeOrmDataRepository, sqlString, sqlInteger, sqlTimestamp, sqlJson, type SqlTable } from '../../src/dataaccess/typeorm/index.js';
+import { PageRequest, PageResponse, PersistenceError, StoredEntity, UnitOfWorkError, type CrudRepository, type Entity, type JsonValue } from '@casepilot/abstractions';
+import { TypeOrmUnitOfWork, TypeOrmDataRepository, sqlString, sqlInteger, sqlTimestamp, sqlJson, type SqlTable } from '../../src/typeorm/index.js';
 
 class Row implements Entity<string> {
   constructor(public readonly id: string, public readonly value: string) {}

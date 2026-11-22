@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { CaseExternalParty } from '../../../domain/entities/case-external-party.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const case_external_partySchema = new EntitySchema<CaseExternalParty>({
   name: 'CaseExternalParty', target: CaseExternalParty, tableName: 'case_external_parties',
   columns: {

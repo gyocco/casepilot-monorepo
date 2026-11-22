@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { DocumentVersion } from '../../../domain/entities/document-version.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/persistence/typeorm';
 export const document_versionSchema = new EntitySchema<DocumentVersion>({
   name: 'DocumentVersion', target: DocumentVersion, tableName: 'document_versions',
   columns: {

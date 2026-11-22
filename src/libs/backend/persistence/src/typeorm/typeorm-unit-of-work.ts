@@ -1,6 +1,5 @@
 import type { DataSource, EntityManager } from 'typeorm';
-import type { RepositoryScope, TransactionIsolation, UnitOfWork } from '../unit-of-work.js';
-import { UnitOfWorkError } from '../unit-of-work-error.js';
+import { UnitOfWorkError, type RepositoryScope, type TransactionIsolation, type UnitOfWork } from '@casepilot/abstractions';
 
 /** Bind NEW repository instances to this manager; never reuse global repositories. */
 export class TypeOrmUnitOfWork<TRepositories extends RepositoryScope<TRepositories>> implements UnitOfWork<TRepositories> {

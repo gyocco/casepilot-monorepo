@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { CustomFieldValue } from '../../../domain/entities/custom-field-value.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean, sqlJson } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean, sqlJson } from '@casepilot/persistence/typeorm';
 export const custom_field_valueSchema = new EntitySchema<CustomFieldValue>({
   name: 'CustomFieldValue', target: CustomFieldValue, tableName: 'custom_field_values',
   columns: {

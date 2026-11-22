@@ -1,5 +1,5 @@
-import { PersistenceError } from '../persistence-error.js';
-import { isJsonValue, type JsonValue } from '../../json-value.js';
+import { PersistenceError, isJsonValue, type JsonValue } from '@casepilot/abstractions';
+
 export function isRow(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }

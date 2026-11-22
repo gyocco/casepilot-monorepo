@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Expense } from '../../../domain/entities/expense.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlDate, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlDate, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const expenseSchema = new EntitySchema<Expense>({
   name: 'Expense', target: Expense, tableName: 'expenses',
   columns: {

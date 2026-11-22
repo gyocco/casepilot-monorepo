@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { InvoiceLine } from '../../../domain/entities/invoice-line.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger } from '@casepilot/persistence/typeorm';
 export const invoice_lineSchema = new EntitySchema<InvoiceLine>({
   name: 'InvoiceLine', target: InvoiceLine, tableName: 'invoice_lines',
   columns: {

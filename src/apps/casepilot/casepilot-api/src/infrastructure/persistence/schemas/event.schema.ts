@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Event } from '../../../domain/entities/event.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlBoolean } from '@casepilot/persistence/typeorm';
 export const eventSchema = new EntitySchema<Event>({
   name: 'Event', target: Event, tableName: 'events',
   columns: {

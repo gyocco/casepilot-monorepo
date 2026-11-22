@@ -3,8 +3,8 @@ import type { ReferenceRepository } from '../../../domain/repositories/reference
 import { ReferenceRecord } from '../../../domain/entities/reference-record.js';
 import type { ResourceKind } from '../../../domain/entities/resource-kind.js';
 import { referenceTables } from '../reference-tables.js';
-import { sqlRows, sqlString } from '@casepilot/abstractions/typeorm';
-import { normalizeSqlError } from '@casepilot/abstractions/typeorm';
+import { sqlRows, sqlString } from '@casepilot/persistence/typeorm';
+import { normalizeSqlError } from '@casepilot/persistence/typeorm';
 export class TypeOrmReferenceRepository implements ReferenceRepository {
   constructor(private readonly manager: EntityManager) {}
   async find(kind: ResourceKind, id: string, businessAccountId: string | null): Promise<ReferenceRecord | null> {

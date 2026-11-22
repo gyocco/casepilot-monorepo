@@ -1,5 +1,5 @@
 import type { EntityManager } from 'typeorm';
-import { TypeOrmDataRepository, normalizeSqlError, sqlRows } from '@casepilot/abstractions/typeorm';
+import { TypeOrmDataRepository, normalizeSqlError, sqlRows } from '@casepilot/persistence/typeorm';
 import type { UserIdentity } from '../../../domain/entities/user-identity.js';
 import type { UserIdentityRepository } from '../../../domain/repositories/user-identity.repository.js';
 import { userIdentityTable } from '../schemas/user-identity.schema.js';

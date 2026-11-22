@@ -24,7 +24,7 @@
   "scripts": {
     "dev": "pnpm build:contracts && tsx watch src/main.ts",
     "start": "node dist/main.js",
-    "build:contracts": "pnpm --filter @casepilot/cqrs --filter @casepilot/abstractions --filter @casepilot/exception-handler --filter @casepilot/validation --filter @casepilot/auth build",
+    "build:contracts": "pnpm --filter @casepilot/cqrs --filter @casepilot/abstractions --filter @casepilot/persistence --filter @casepilot/exception-handler --filter @casepilot/validation --filter @casepilot/auth build",
     "build": "pnpm build:contracts && tsc -p tsconfig.json",
     "typecheck": "pnpm build:contracts && tsc -p tsconfig.test.json --noEmit",
     "lint": "pnpm build:contracts && eslint src test tools eslint.config.mjs dependency-cruiser.config.mjs --max-warnings 0",
@@ -44,6 +44,7 @@
     "@casepilot/auth": "workspace:*",
     "@casepilot/cqrs": "workspace:*",
     "@casepilot/exception-handler": "workspace:*",
+    "@casepilot/persistence": "workspace:*",
     "@casepilot/validation": "workspace:*",
     "@nestjs/common": "12.1.2",
     "@nestjs/core": "12.1.2",

@@ -1,7 +1,7 @@
 import { EntitySchema } from 'typeorm';
 import { Communication } from '../../../domain/entities/communication.js';
-import type { SqlTable } from '@casepilot/abstractions/typeorm';
-import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/abstractions/typeorm';
+import type { SqlTable } from '@casepilot/persistence/typeorm';
+import { sqlString, sqlTimestamp, sqlInteger, sqlChoice } from '@casepilot/persistence/typeorm';
 export const communicationSchema = new EntitySchema<Communication>({
   name: 'Communication', target: Communication, tableName: 'communications',
   columns: {
