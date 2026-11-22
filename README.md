@@ -111,9 +111,11 @@ Con Docker Desktop/Engine activo, desde la raíz:
 pnpm infra:up
 pnpm infra:status
 pnpm infra:down
+pnpm infra:reset
+pnpm seed:local
 ```
 
-El entorno inicia PostgreSQL en `127.0.0.1:55432`, genera una contraseña local en un archivo ignorado por Git y conserva los datos al apagarlo. Los requisitos, variables, conexión de la API y demás comandos están en [Dependencias locales de CasePilot](infra/docker/README.md).
+El entorno inicia PostgreSQL 18 en `127.0.0.1:55432` y Firebase Auth Emulator en `127.0.0.1:9099` (UI en `127.0.0.1:4000`), genera una contraseña local en un archivo ignorado por Git y conserva los datos de ambos servicios al apagarlo. `pnpm infra:reset` reinicia ambos volúmenes a la vez y `pnpm seed:local` crea usuarios verificados de prueba con distintos roles (requiere migraciones aplicadas y la API local corriendo). Los requisitos, variables, conexión de la API y demás comandos están en [Dependencias locales de CasePilot](infra/docker/README.md).
 
 ## Documentación
 

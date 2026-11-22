@@ -10,4 +10,4 @@ El aprovisionamiento remoto, los recursos y los pipelines se implementarán en u
 
 ## Desarrollo local
 
-[Dependencias locales de CasePilot](docker/README.md) contiene el entorno Docker Compose. Actualmente provee PostgreSQL con almacenamiento persistente en `127.0.0.1:55432`. Desde la raíz, `pnpm infra:up` crea la configuración local si hace falta y arranca las dependencias.
+[Dependencias locales de CasePilot](docker/README.md) contiene el entorno Docker Compose. Provee PostgreSQL 18 en `127.0.0.1:55432` y Firebase Auth Emulator en `127.0.0.1:9099` (UI en `127.0.0.1:4000`), ambos con volúmenes persistentes sincronizados. Desde la raíz, `pnpm infra:up` crea la configuración local si hace falta y arranca las dependencias; `pnpm infra:reset` limpia ambos volúmenes a la vez y `pnpm seed:local` siembra usuarios verificados de prueba.

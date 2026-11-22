@@ -28,11 +28,14 @@ docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml up -d -
 | Campo | Valor por defecto |
 | --- | --- |
 | Host desde la máquina de desarrollo | `127.0.0.1` |
-| Puerto de la máquina de desarrollo | `55432` |
+| Puerto PostgreSQL en el host | `55432` |
 | Base de datos | `casepilot` |
 | Usuario | `casepilot` |
 | Contraseña | `CASEPILOT_POSTGRES_PASSWORD` en `infra/docker/.env` |
-| Host y puerto entre servicios del mismo proyecto Compose | `postgres:5432` |
+| Host y puerto PostgreSQL dentro de Compose | `postgres:5432` |
+| Firebase Auth Emulator (API) | `http://127.0.0.1:9099` |
+| Firebase Emulator UI | `http://127.0.0.1:4000` |
+| Proyecto del emulador local | `demo-casepilot-local` |
 
 El mapeo `127.0.0.1:55432:5432` mantiene libre el puerto habitual `5432` del host para otras instalaciones de PostgreSQL y limita la publicación a esta máquina. El puerto interno del contenedor sigue siendo `5432`.
 
@@ -51,11 +54,13 @@ La contraseña generada usa caracteres hexadecimales válidos en una URL. Si eli
 | Comando desde la raíz | Efecto |
 | --- | --- |
 | `pnpm infra:env` | Crear el archivo local si no existe; conservarlo si existe |
-| `pnpm infra:up` | Arrancar dependencias y esperar su health check |
+| `pnpm infra:up` | Construir si hace falta, arrancar dependencias y esperar su health check |
 | `pnpm infra:status` | Consultar contenedores, puertos y salud |
 | `pnpm infra:logs` | Seguir los últimos logs; salir con Ctrl+C |
 | `pnpm infra:check` | Validar Compose sin imprimir credenciales |
-| `pnpm infra:down` | Eliminar contenedores y red, conservando los datos |
+| `pnpm infra:down` | Detener y eliminar contenedores y red, conservando los volúmenes de PostgreSQL y Auth Emulator |
+| `pnpm infra:reset` | Eliminar contenedores y **ambos volúmenes** (`postgres-data` y `firebase-auth-data`) y volver a levantar limpio |
+| `pnpm seed:local` | Sembrar de forma idempotente 4 usuarios verificados (`owner`, `admin`, `member`, `viewer` `@local.test`) y un workspace compartido `CasePilot Local Team` vía Auth Emulator + API local |
 
 Para abrir `psql` dentro del contenedor con los nombres por defecto:
 
@@ -65,7 +70,14 @@ docker compose --env-file infra/docker/.env -f infra/docker/compose.yaml exec po
 
 ## Persistencia y mantenimiento
 
-Los datos viven en el volumen `casepilot-local_postgres-data`, montado en `/var/lib/postgresql` según el layout de la imagen PostgreSQL 18. Sobreviven a `infra:down`, reinicios y recreación del contenedor. No uses `down --volumes` si necesitas conservarlos.
+Tanto PostgreSQL como Firebase Auth Emulator persisten su estado en volúmenes Docker locales para mantener sincronizados `users`/`user_identities` con las cuentas del emulador:
+
+- **PostgreSQL**: volumen `casepilot-local_postgres-data`, montado en `/var/lib/postgresql` según el layout de PostgreSQL 18.
+- **Firebase Auth Emulator**: volumen `casepilot-local_firebase-auth-data`, montado en `/emulator/data`. Su entrypoint ([`firebase/entrypoint.sh`](firebase/entrypoint.sh)) inicia con `--export-on-exit=/emulator/data/snapshot` (usando `stop_signal: SIGINT` en Compose para disparar el export limpio al detenerse) y reimporta automáticamente con `--import=/emulator/data/snapshot` cuando existe un snapshot previo.
+
+Ambos volúmenes sobreviven a `pnpm infra:down`, reinicios y recreación de contenedores. Cuando necesites empezar desde cero, usa `pnpm infra:reset` (en lugar de borrar solo uno de los volúmenes) para evitar desincronización entre `user_identities` y el emulador; luego ejecuta `pnpm migration:api:run`, arranca la API (`pnpm dev:api`) y corre `pnpm seed:local`.
+
+`seed:local` opera exclusivamente contra hosts loopback (`127.0.0.1`/`localhost`) y rechaza ejecutarse contra entornos remotos. Usa por defecto la contraseña de desarrollo local `LocalDev123!` (solo para el emulador local; sobreescribible con `CASEPILOT_LOCAL_SEED_PASSWORD`).
 
 `CASEPILOT_POSTGRES_DB`, `CASEPILOT_POSTGRES_USER` y `CASEPILOT_POSTGRES_PASSWORD` solo inicializan un volumen vacío. Modificar esos valores en `.env` no cambia una base de datos existente; aplica los cambios mediante SQL autenticado y sincroniza la configuración local. Conserva `.env` mientras uses su volumen.
 
