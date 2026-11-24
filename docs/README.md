@@ -2,7 +2,7 @@
 
 ## Documentos disponibles
 
-- [Roadmap, pendientes y próximos pasos](project-management/roadmap-and-next-steps.md): estado actual, verificación pendiente del Bloque A, plan detallado del Bloque B (CI/CD + IaC en Google Cloud DEV), backlog de producto y mejoras del harness IA.
+- [Roadmap, pendientes y próximos pasos](project-management/roadmap-and-next-steps.md): estado actual, plan detallado del Bloque B (CI/CD + IaC en Google Cloud + Neon PostgreSQL Free Tier para DEV), backlog de producto y mejoras del harness IA.
 - [Arquitectura frontend](architecture/frontend-architecture.md): SPA por features, Material, UI kit, temas y recursos configurables por nombre.
 - [Reglas obligatorias frontend FRT-001 a FRT-012](architecture/frontend-architecture-rules.md): fronteras, Angular, tokens, recursos, configuración y calidad.
 - [Validación frontend](../tools/frontend-architecture/README.md): checkers, regresiones y alcance acreditado por regla.
@@ -11,7 +11,7 @@
 - [Arquitectura del monorepo](architecture/monorepo-architecture.md): organización de `src/apps/` y `src/libs/`, responsabilidades por runtime, dirección de dependencias y ubicación de contratos, tests, infraestructura y CI/CD.
 - [Infraestructura, proveedores y ambientes](architecture/infrastructure-providers.md): proveedores aceptados, PostgreSQL independiente del proveedor, coexistencia Neon/Cloud SQL por ambiente y automatización futura con GitHub Actions.
 - [ADR 0018 — Proveedores de infraestructura y PostgreSQL por ambiente](adr/0018-infrastructure-providers-and-environments.md): Firebase Authentication, Cloud Run, Firebase Hosting, Neon inicialmente, Cloud SQL como opción por ambiente y GitHub Actions.
-- [ADR 0021 — Google Cloud como proveedor absoluto en DEV](adr/0021-gcp-absolute-dev-infrastructure.md): Firebase Auth/Hosting, Cloud Run, Cloud SQL `db-f1-micro`, Artifact Registry, Secret Manager y OIDC en GitHub Actions, manteniendo separación `local` vs `DEV`.
+- [ADR 0021 — Infraestructura DEV en Google Cloud + Neon PostgreSQL (Free Tier)](adr/0021-gcp-absolute-dev-infrastructure.md): Firebase Auth/Hosting, Cloud Run, Neon PostgreSQL Free Tier, Artifact Registry, Secret Manager y OIDC en GitHub Actions, manteniendo separación `local` vs `DEV`.
 - [ADR 0022 — Autenticación con Firebase Auth y autorización en Application](adr/0022-firebase-authentication-and-application-authorization.md): `@casepilot/auth`, `user_identities`, protección por defecto de la API, autorización en `Application`, endpoints `/auth/me` y pantalla mínima de login/perfil en SPA.
 - [Librería de autenticación](../src/libs/backend/auth/README.md): contratos puros de verificación de identidad, adaptador Firebase Admin y guard técnico NestJS.
 - [ADR 0019 — SPA Angular y TypeScript](adr/0019-angular-spa.md): elección inicial Angular; su propuesta de Ionic evoluciona a Material mediante ADR 0020.

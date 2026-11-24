@@ -2,11 +2,11 @@
 
 - Estado: decisiones aceptadas; autenticación local/emulador implementada, aprovisionamiento remoto pendiente.
 - Fecha: 2026-10-04.
-- Revisión: 2026-11-20.
+- Revisión: 2026-11-24.
 - Alcance: identidad, API, SPA, PostgreSQL y CI/CD de CasePilot.
 - Decisiones: [ADR 0018](../adr/0018-infrastructure-providers-and-environments.md), [ADR 0019](../adr/0019-angular-spa.md), [ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md) y [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md).
 
-Este documento es la fuente canónica de los proveedores elegidos y de la independencia de PostgreSQL por ambiente. Según el [ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md), el ambiente DEV remoto adopta **Google Cloud como proveedor absoluto** (Firebase Authentication, Cloud Run, Firebase Hosting, Cloud SQL for PostgreSQL `db-f1-micro`, Artifact Registry y Secret Manager), conservando la portabilidad PostgreSQL hacia Neon u otros destinos definida en el [ADR 0018](../adr/0018-infrastructure-providers-and-environments.md). El montaje de los servicios remotos y su automatización con GitHub Actions se implementarán en una tarea futura (Bloque B). La autenticación Firebase y la autorización en `Application` están implementadas con aislamiento completo para `local` (emulador) y `test` ([ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md)).
+Este documento es la fuente canónica de los proveedores elegidos y de la independencia de PostgreSQL por ambiente. Según el [ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md), el ambiente DEV remoto utiliza **Google Cloud** para cómputo, hosting, identidad y secretos (Firebase Authentication, Cloud Run, Firebase Hosting, Artifact Registry y Secret Manager) junto con **Neon PostgreSQL (Free Tier)** para la base de datos de DEV, conservando la portabilidad PostgreSQL hacia Cloud SQL u otros destinos definida en el [ADR 0018](../adr/0018-infrastructure-providers-and-environments.md). El montaje de los servicios remotos y su automatización con GitHub Actions se implementarán en el Bloque B. La autenticación Firebase y la autorización en `Application` están implementadas y verificadas para `local` (emulador) y `test` ([ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md)).
 
 ## Proveedores elegidos
 
@@ -50,7 +50,7 @@ La elección del proveedor es independiente en cada ambiente. Esta matriz es un 
 | --- | --- | --- | --- | --- |
 | LOCAL | `local` | Docker Compose local | Firebase Auth Emulator local | Implementado; aislado de GCP DEV. |
 | Pruebas aisladas | `test` | PostgreSQL efímero con Testcontainers | Verificador determinista in-memory | Implementado; sin red ni recursos remotos. |
-| DEV | `development` | Cloud SQL `db-f1-micro` (GCP) | Firebase Authentication (proyecto GCP DEV) | Proveedor GCP elegido ([ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md)); aprovisionamiento pendiente. |
+| DEV | `development` | Neon PostgreSQL (Free Tier) | Firebase Authentication (proyecto GCP DEV) | Proveedores DEV elegidos ([ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md)); aprovisionamiento pendiente (Bloque B). |
 | QA | `staging` | Cloud SQL / Neon (por ambiente) | Firebase Authentication (proyecto dedicado) | Ejemplo posible; aprovisionamiento pendiente. |
 | Prod | `production` | Cloud SQL | Firebase Authentication (proyecto dedicado) | Ejemplo posible; aprovisionamiento pendiente. |
 
