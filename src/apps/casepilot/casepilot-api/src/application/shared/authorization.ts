@@ -105,7 +105,7 @@ export async function authorizeUserAction(
     validateId(targetUserId);
     const targetMemberships = await scope.members.listByUser(targetUserId);
     const sharesAccount = targetMemberships.some(member => adminAccountIds.has(member.businessAccountId));
-    if (!sharesAccount) {
+    if (targetMemberships.length > 0 && !sharesAccount) {
       throw new ForbiddenError('You do not have administrative access to this user.');
     }
   }

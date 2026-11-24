@@ -1,8 +1,8 @@
 # Roadmap, pendientes y próximos pasos de CasePilot
 
 - Estado: fuente canónica de seguimiento y próximos pasos.
-- Última actualización: 2026-11-22.
-- Alcance: verificación local restante del Bloque A, implementación del Bloque B (CI/CD + IaC en Google Cloud para DEV), backlog de producto/plataforma y mejoras del harness de ingeniería IA.
+- Última actualización: 2026-11-23.
+- Alcance: implementación del Bloque B (CI/CD + IaC en Google Cloud para DEV), backlog de producto/plataforma y mejoras del harness de ingeniería IA.
 
 Este documento centraliza el estado de avance y la secuencia recomendada de trabajo. Sustituye el listado informal del `TODO.md` raíz (que ahora enlaza aquí) conforme a la regla de fuente única de [60 — Documentación](../../.agents/instructions/60-documentation.md).
 
@@ -15,28 +15,17 @@ Este documento centraliza el estado de avance y la secuencia recomendada de trab
 | **Base backend + 28 CRUDs** | Completado | `casepilot-api` (NestJS 12, TypeORM 0.3, PostgreSQL 18), 28 modelos CRUD + Health, 144 handlers organizados por operación (`BCK-023`), migraciones reversibles y validadores `TypeScript + ESLint + dependency-cruiser + ts-morph` con regresiones. | [Arquitectura backend](../architecture/casepilot-backend-architecture.md), [validación API](../../src/apps/casepilot/casepilot-api/docs/architecture-validation.md) |
 | **Librerías backend compartidas** | Completado | 6 paquetes con checks propios: `@casepilot/cqrs`, `@casepilot/abstractions` (puro sin ORM), `@casepilot/persistence` (adaptador TypeORM separado), `@casepilot/exception-handler` (RFC 9457), `@casepilot/validation` y `@casepilot/auth`. | [ADR 0016](../adr/0016-reusable-backend-mechanisms.md), [ADR 0023](../adr/0023-persistence-library-and-pure-abstractions.md) |
 | **Punto 0 — Decisiones previas y normativa** | Completado | Google Cloud como proveedor absoluto en DEV, modelo de autenticación Firebase + autorización en `Application`, evolución de `FRT-009` y matrices de cobertura sincronizadas. | [ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md), [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md), [Proveedores](../architecture/infrastructure-providers.md) |
-| **Bloque A — Auth + Autorización + SPA ↔ API mínima** | Completado (falta solo corrida local con Docker) | `@casepilot/auth`, tabla `user_identities`, guard global por defecto (solo `/health*` públicos), autorización en `Application` en los 28 CRUDs, `/auth/me/bootstrap`, `GET /auth/me`, `PATCH /auth/me`, OpenAPI `0.5.0`, Firebase Auth Emulator en Docker Compose + `seed:local`, controles Material en `@casepilot/pilot-ui-kit`, `/auth/login` real, `/profile` protegido con prueba en vivo `200`/`403` y Playwright + axe en verde (8/8). | [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md), [README web](../../src/apps/casepilot/casepilot-web/README.md), [README API](../../src/apps/casepilot/casepilot-api/README.md) |
+| **Bloque A — Auth + Autorización + SPA ↔ API mínima** | Completado y verificado end-to-end | `@casepilot/auth`, tabla `user_identities`, guard global por defecto (solo `/health*` públicos), autorización en `Application` en los 28 CRUDs, `/auth/me/bootstrap`, `GET /auth/me`, `PATCH /auth/me`, OpenAPI `0.5.0`, Firebase Auth Emulator en Docker Compose + `seed:local`, controles Material en `@casepilot/pilot-ui-kit`, `/auth/login` real, `/profile` protegido con prueba en vivo `200`/`403`, integración backend completa (`persistence` 7/7 + `api` 49/49) y Playwright + axe en verde (8/8). | [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md), [README web](../../src/apps/casepilot/casepilot-web/README.md), [README API](../../src/apps/casepilot/casepilot-api/README.md) |
 
 ---
 
-## 2. Prioridad 0 — Cierre de verificación local del Bloque A (inmediato)
+## 2. Prioridad 0 — Cierre de verificación local del Bloque A (completado)
 
-Antes de iniciar el Bloque B, cerrar estas verificaciones locales pendientes con Docker Desktop activo:
+Verificaciones locales cerradas con Docker Desktop activo:
 
-- [ ] **Ejecutar integración backend completa con Testcontainers** (migraciones reales, `user_identities`, `auth.test.ts` y `professional-services.test.ts`):
-  ```bash
-  pnpm check:backend:integration
-  ```
-- [ ] **Smoke test manual local aislado (PostgreSQL + Firebase Auth Emulator + API + SPA)**:
-  ```bash
-  pnpm infra:up
-  pnpm migration:api:run
-  pnpm seed:local
-  pnpm dev:api
-  pnpm dev:web
-  ```
-  Verificar en `http://127.0.0.1:4200`: redirección a `/auth/login`, login/alta contra el emulador (`127.0.0.1:9099`), carga y edición en `/profile`, respuesta `200 OK` en cuenta propia, respuesta `403 FORBIDDEN_ERROR` en cuenta ajena y cierre de sesión.
-- [ ] **Consolidar commit de cierre del entorno local** (cambios pendientes en `infra/docker/`, `tools/scripts/seed-local-users.mjs`, `package.json` y documentación).
+- [x] **Ejecutar integración backend completa con Testcontainers** (`pnpm check:backend` + `pnpm check:backend:integration`: `@casepilot/persistence` 7/7 y `casepilot-api` 49/49 en verde, incluyendo `health.test.ts`, `auth.test.ts` y `professional-services.test.ts`).
+- [x] **Smoke test local end-to-end aislado (PostgreSQL + Firebase Auth Emulator + API + SPA)** (`pnpm infra:up`, `pnpm migration:api:run`, `pnpm seed:local` idempotente, API + `casepilot-web` en `http://127.0.0.1:4200`): verificados redirección `/ -> /auth/login`, login con `owner@local.test`, carga de `/profile` + membresías (`Local Workspace`, `CasePilot Local Team`), `PATCH /auth/me` con incremento de versión y persistencia tras recarga, verificación `200 OK`, rechazo `403 FORBIDDEN_ERROR` en cuenta ajena y cierre de sesión.
+- [x] **Consolidar commit de cierre del entorno local** (`infra/docker/`, `tools/scripts/seed-local-users.mjs`, `package.json`, fixes de integración y documentación).
 
 ---
 
