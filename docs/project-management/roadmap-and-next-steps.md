@@ -43,7 +43,7 @@ Objetivo: desplegar de forma 100% automatizada el ambiente `development` (DEV) c
 ### 3.2 Iteración B1 — Paridad de CI Backend + Contenedor API + Compatibilidad Neon TLS (completada)
 
 - [x] **Workflow de calidad backend ([`.github/workflows/backend-quality.yml`](../../.github/workflows/backend-quality.yml))**:
-  - Dispara en `pull_request`, `push`, `workflow_dispatch` y `workflow_call`, con `permissions: contents: read` y `concurrency`.
+  - Dispara en `pull_request` hacia `development`/`main`, `workflow_dispatch` y `workflow_call` (sin `push` redundante en ramas feature), con `permissions: contents: read` y `concurrency`.
   - Ejecuta `pnpm check:backend`, `pnpm test:ci-scripts` y `pnpm check:backend:integration` (PostgreSQL efímero vía Testcontainers).
 - [x] **Script raíz unificado**: añadido `pnpm check:all` en [package.json](../../package.json) encadenando `check:backend` + `check:web`, más `pnpm test:ci-scripts`.
 - [x] **Dockerfile multi-stage de la API ([`infra/docker/casepilot-api.Dockerfile`](../../infra/docker/casepilot-api.Dockerfile) + [`.dockerignore`](../../.dockerignore))**:
