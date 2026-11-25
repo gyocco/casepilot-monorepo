@@ -69,7 +69,16 @@ La [librería exception-handler](src/libs/backend/exception-handler/README.md) a
 
 `pnpm-workspace.yaml` incluye aplicaciones en `src/apps/*/*`, librerías en `src/libs/backend/*`, `src/libs/frontend/*` y `src/libs/mobile/*`, y `tools/frontend-architecture`. Cada proyecto conserva manifest, fuentes y pruebas; Testcontainers pertenece a API y abstractions. `tests/architecture/frontend/` contiene regresiones multiproyecto ejecutadas por el paquete de tooling; `tests/` global no es un paquete de producto.
 
-Para ejecutar la API local desde la raíz:
+Para levantar todo el entorno local de forma idempotente con un solo comando (PostgreSQL + Firebase Auth Emulator, migraciones, API `:3000` y Web `:4200` en terminales externas divididas, y seed de usuarios locales):
+
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+`pnpm dev` (alias de `pnpm dev:local`) verifica qué servicios ya están activos antes de iniciar solo los faltantes; admite `--inline` (ejecutar en la misma consola), `--skip-seed`, `--skip-migrate`, `--force-infra` y `--no-wait`. Sus pruebas se ejecutan con `pnpm test:scripts`.
+
+Si prefieres ejecutar la API local paso a paso desde la raíz:
 
 ```bash
 pnpm install --frozen-lockfile

@@ -118,3 +118,9 @@ variable "initial_api_image" {
   type        = string
   default     = "us-docker.pkg.dev/cloudrun/container/hello"
 }
+
+variable "secret_admin_members" {
+  description = "Authorized human IAM members (e.g., user:dev@example.com) allowed to read DEV Secret Manager secrets via gcloud."
+  type        = list(string)
+  default     = []
+}

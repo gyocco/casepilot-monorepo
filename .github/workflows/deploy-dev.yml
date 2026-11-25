@@ -248,7 +248,7 @@ jobs:
       - name: Prepare Firebase Hosting config for DEV site
         env:
           FIREBASE_SOURCE_CONFIG: deploy/dev/firebase.json
-          FIREBASE_OUTPUT_CONFIG: build/firebase.dev.generated.json
+          FIREBASE_OUTPUT_CONFIG: firebase.dev.generated.json
           FIREBASE_HOSTING_SITE: ${{ vars.FIREBASE_HOSTING_SITE }}
         run: node tools/ci/prepare-firebase-hosting-config.mjs
 
@@ -264,7 +264,7 @@ jobs:
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
         run: |
           npx --yes firebase-tools@14 deploy \
-            --config build/firebase.dev.generated.json \
+            --config firebase.dev.generated.json \
             --project "${GCP_PROJECT_ID}" \
             --only hosting \
             --non-interactive

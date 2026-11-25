@@ -42,3 +42,5 @@ terraform.tfvars
 crash.log
 override.tf
 override.tf.json
+firebase.*.generated.json
+.neon

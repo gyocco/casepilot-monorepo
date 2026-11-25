@@ -54,6 +54,7 @@ jobs:
   plan-dev:
     name: Terraform plan (GCP DEV via OIDC)
     needs: validate-and-lint
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     environment: dev
     timeout-minutes: 15

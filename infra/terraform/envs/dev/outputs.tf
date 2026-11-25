@@ -87,3 +87,8 @@ output "migrator_password_secret_id" {
   description = "Secret Manager ID for migrator DB password."
   value       = module.secret_manager.migrator_password_secret_id
 }
+
+output "owner_url_secret_id" {
+  description = "Secret Manager ID for the Neon admin/owner connection string (human admins only)."
+  value       = module.secret_manager.owner_url_secret_id
+}

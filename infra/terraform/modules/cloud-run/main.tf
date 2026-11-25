@@ -13,9 +13,10 @@ terraform {
 # Uses the exact same immutable container image as the API service, overriding the command
 # to run `typeorm migration:run` against the direct (unpooled) PostgreSQL endpoint.
 resource "google_cloud_run_v2_job" "migrate" {
-  project  = var.project_id
-  location = var.region
-  name     = var.migrate_job_name
+  project             = var.project_id
+  location            = var.region
+  name                = var.migrate_job_name
+  deletion_protection = var.deletion_protection
 
   template {
     template {
@@ -114,10 +115,11 @@ resource "google_cloud_run_v2_job" "migrate" {
 # Cloud Run Service for the NestJS API runtime.
 # Connects to the pooled PostgreSQL endpoint with min_instance_count=0 (free tier scale-to-zero).
 resource "google_cloud_run_v2_service" "api" {
-  project  = var.project_id
-  location = var.region
-  name     = var.service_name
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  project             = var.project_id
+  location            = var.region
+  name                = var.service_name
+  ingress             = "INGRESS_TRAFFIC_ALL"
+  deletion_protection = var.deletion_protection
 
   template {
     service_account = var.runtime_service_account_email

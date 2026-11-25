@@ -1,3 +1,10 @@
+---
+name: mobile-first-ui
+description: Diseña e implementa pantallas, componentes, formularios, modales, navegación, layouts, comportamiento responsive o cambios de tema con enfoque mobile-first para web y compatibilidad Capacitor en CasePilot.
+metadata:
+  short-description: Diseñar UI mobile-first para web y móvil
+---
+
 # Skill: UI mobile-first web + native
 
 ## Cuándo usarla

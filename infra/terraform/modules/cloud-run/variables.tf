@@ -33,6 +33,12 @@ variable "initial_image" {
   type        = string
 }
 
+variable "deletion_protection" {
+  description = "Protect Cloud Run service and job against Terraform destruction (false in DEV, true in Prod)."
+  type        = bool
+  default     = false
+}
+
 variable "runtime_service_account_email" {
   description = "Service account email attached to the Cloud Run API Service."
   type        = string

@@ -1,3 +1,10 @@
+---
+name: feature-delivery
+description: Implementa funcionalidades de CasePilot que atraviesan dos o más capas (UI, librerías reutilizables, servicios NestJS, contratos, autenticación, tests o documentación) siguiendo las fronteras del monorepo y las reglas de arquitectura.
+metadata:
+  short-description: Entregar funcionalidades multi-capa en CasePilot
+---
+
 # Skill: entrega de funcionalidad
 
 ## Cuándo usarla

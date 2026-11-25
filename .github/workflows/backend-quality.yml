@@ -2,7 +2,9 @@ name: Backend quality
 
 on:
   pull_request:
-  push:
+    branches:
+      - development
+      - main
   workflow_dispatch:
   workflow_call:
 
