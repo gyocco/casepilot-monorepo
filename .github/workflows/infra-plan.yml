@@ -2,6 +2,8 @@ name: Terraform plan (DEV)
 
 on:
   pull_request:
+    branches:
+      - development
     paths:
       - 'infra/terraform/**'
       - '.github/workflows/infra-plan.yml'

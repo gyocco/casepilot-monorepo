@@ -136,7 +136,7 @@ En GitHub → **Settings → Environments → New environment → `dev`**:
 
 ## Paso 6 — Primer despliegue y verificación end-to-end en DEV remoto
 
-1. Dispara manualmente el workflow **Deploy DEV** (`.github/workflows/deploy-dev.yml`) desde la pestaña *Actions* (o haz merge a `main`).
+1. Dispara manualmente el workflow **Deploy DEV** (`.github/workflows/deploy-dev.yml`) desde la pestaña *Actions* sobre la rama `development` (o haz merge a `development`).
 2. El pipeline ejecutará en orden:
    - `quality-gate` (`backend-quality.yml` + `frontend-quality.yml`),
    - `build-and-push-api` (imagen inmutable `sha-<short_sha>` en Artifact Registry),

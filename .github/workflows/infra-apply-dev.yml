@@ -3,7 +3,7 @@ name: Terraform apply (DEV)
 on:
   push:
     branches:
-      - main
+      - development
     paths:
       - 'infra/terraform/**'
   workflow_dispatch:
