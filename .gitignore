@@ -31,3 +31,14 @@ pnpm-debug.log*
 .angular/
 playwright-report/
 test-results/
+
+# Terraform local state, caches and environment-specific variable files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+*.auto.tfvars
+crash.log
+override.tf
+override.tf.json

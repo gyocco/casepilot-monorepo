@@ -1,6 +1,6 @@
 # 0021 — Infraestructura DEV en Google Cloud + Neon PostgreSQL (Free Tier)
 
-- Estado: aceptada (revisada 2026-11-24 para adoptar Neon PostgreSQL Free Tier en DEV); aprovisionamiento remoto pendiente (Bloque B).
+- Estado: aceptada; IaC Terraform, Dockerfile multi-stage, scripts CI/CD y workflows implementados y validados localmente (2026-11-24); pendiente ejecución del bootstrap único remoto con credenciales GCP/Neon del operador.
 - Fecha: 2026-11-20 (revisión: 2026-11-24).
 - Alcance: ambiente DEV remoto de CasePilot, separación local vs DEV y gestión de secretos.
 - Relacionada con: [ADR 0018](0018-infrastructure-providers-and-environments.md).
@@ -37,4 +37,4 @@ El [ADR 0018](0018-infrastructure-providers-and-environments.md) eligió Firebas
 - Todo el ambiente DEV apunta a **costo ~USD \$0/mes** dentro de los free tiers de Google Cloud (Cloud Run, Firebase Auth/Hosting, Artifact Registry, Secret Manager) y Neon PostgreSQL.
 - Al conectar por TCP estándar con TLS (`DATABASE_SSL=true`) hacia Neon, DEV no requiere Cloud SQL Auth Proxy ni socket Unix (ese soporte queda reservado para cuando QA/Prod adopten Cloud SQL).
 - Se introduce Neon como proveedor administrado de PostgreSQL en DEV; sus credenciales y endpoints se gobiernan exclusivamente desde Google Secret Manager e IaC, nunca en el repositorio ni en GitHub Secrets.
-- La implementación de Terraform, Dockerfile y pipelines de despliegue se ejecutará en el Bloque B; este ADR no acredita recursos remotos ya provisionados.
+- El Bloque B deja implementados y validados localmente `infra/terraform/` (módulos + `envs/dev/` + `bootstrap/`), `infra/docker/casepilot-api.Dockerfile`, `deploy/dev/firebase.json`, `tools/ci/` y los workflows `.github/workflows/{backend-quality,frontend-quality,infra-plan,infra-apply-dev,deploy-dev}.yml` ([guía operativa DEV](../operations/dev-deployment-and-iac.md)). Los recursos remotos se crearán al ejecutar el bootstrap del operador; este ADR no afirma que el proyecto GCP DEV ni Neon DEV ya estén provisionados en la nube.

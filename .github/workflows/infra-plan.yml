@@ -1,0 +1,113 @@
+name: Terraform plan (DEV)
+
+on:
+  pull_request:
+    paths:
+      - 'infra/terraform/**'
+      - '.github/workflows/infra-plan.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-plan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-lint:
+    name: Format, validate & tflint
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.8'
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: Initialize Terraform without remote backend
+        working-directory: infra/terraform/envs/dev
+        run: terraform init -backend=false -input=false
+
+      - name: Validate Terraform configuration
+        working-directory: infra/terraform/envs/dev
+        run: terraform validate
+
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.54.0
+
+      - name: Run tflint on DEV composition and modules
+        working-directory: infra/terraform/envs/dev
+        run: |
+          tflint --init
+          tflint --recursive
+
+  plan-dev:
+    name: Terraform plan (GCP DEV via OIDC)
+    needs: validate-and-lint
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Check whether DEV OIDC variables are configured
+        id: config
+        env:
+          WIF_PROVIDER: ${{ vars.WIF_PROVIDER }}
+          WIF_TERRAFORM_SA: ${{ vars.WIF_TERRAFORM_SA }}
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+        run: |
+          if [[ -n "$WIF_PROVIDER" && -n "$WIF_TERRAFORM_SA" && -n "$TF_STATE_BUCKET" ]]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping remote terraform plan: DEV GitHub Environment OIDC variables are not bootstrapped yet."
+          fi
+
+      - name: Authenticate to Google Cloud via OIDC
+        if: steps.config.outputs.ready == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_TERRAFORM_SA }}
+
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.config.outputs.ready == 'true'
+        with:
+          terraform_version: '1.9.8'
+
+      - name: Terraform init (GCS remote state)
+        if: steps.config.outputs.ready == 'true'
+        working-directory: infra/terraform/envs/dev
+        run: terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+
+      - name: Terraform plan (read-only, no apply)
+        if: steps.config.outputs.ready == 'true'
+        working-directory: infra/terraform/envs/dev
+        env:
+          TF_VAR_gcp_project_id: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_gcp_region: ${{ vars.GCP_REGION }}
+          TF_VAR_github_repository: ${{ github.repository }}
+          TF_VAR_github_environment: dev
+          TF_VAR_workload_identity_pool_name: ${{ vars.WORKLOAD_IDENTITY_POOL_NAME }}
+          TF_VAR_artifact_registry_repo_id: ${{ vars.ARTIFACT_REGISTRY_REPO }}
+          TF_VAR_firebase_hosting_site_id: ${{ vars.FIREBASE_HOSTING_SITE }}
+          TF_VAR_database_runtime_host: ${{ vars.NEON_DEV_POOLED_HOST }}
+          TF_VAR_database_migrator_host: ${{ vars.NEON_DEV_DIRECT_HOST }}
+          TF_VAR_database_name: ${{ vars.NEON_DEV_DATABASE_NAME }}
+          TF_VAR_database_runtime_user: ${{ vars.NEON_DEV_RUNTIME_USER }}
+          TF_VAR_database_migrator_user: ${{ vars.NEON_DEV_MIGRATOR_USER }}
+        run: terraform plan -no-color -input=false

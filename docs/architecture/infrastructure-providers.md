@@ -1,6 +1,6 @@
 # Infraestructura, proveedores y ambientes de CasePilot
 
-- Estado: decisiones aceptadas; autenticación local/emulador implementada, aprovisionamiento remoto pendiente.
+- Estado: decisiones aceptadas; autenticación local/emulador verificada y código IaC/CI/CD/Docker del Bloque B implementado y validado localmente; pendiente ejecución del bootstrap remoto DEV con credenciales del operador.
 - Fecha: 2026-10-04.
 - Revisión: 2026-11-24.
 - Alcance: identidad, API, SPA, PostgreSQL y CI/CD de CasePilot.
@@ -50,7 +50,7 @@ La elección del proveedor es independiente en cada ambiente. Esta matriz es un 
 | --- | --- | --- | --- | --- |
 | LOCAL | `local` | Docker Compose local | Firebase Auth Emulator local | Implementado; aislado de GCP DEV. |
 | Pruebas aisladas | `test` | PostgreSQL efímero con Testcontainers | Verificador determinista in-memory | Implementado; sin red ni recursos remotos. |
-| DEV | `development` | Neon PostgreSQL (Free Tier) | Firebase Authentication (proyecto GCP DEV) | Proveedores DEV elegidos ([ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md)); aprovisionamiento pendiente (Bloque B). |
+| DEV | `development` | Neon PostgreSQL (Free Tier) | Firebase Authentication (proyecto GCP DEV) | IaC Terraform (`infra/terraform/envs/dev/`), Dockerfile, scripts CI/CD y workflows implementados y validados localmente ([ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md)); pendiente bootstrap único remoto y primer despliegue. |
 | QA | `staging` | Cloud SQL / Neon (por ambiente) | Firebase Authentication (proyecto dedicado) | Ejemplo posible; aprovisionamiento pendiente. |
 | Prod | `production` | Cloud SQL | Firebase Authentication (proyecto dedicado) | Ejemplo posible; aprovisionamiento pendiente. |
 
@@ -79,11 +79,11 @@ En una tarea futura se montarán los servicios y se automatizarán los siguiente
 5. Desplegar la API en Cloud Run y la SPA en Firebase Hosting; comprobar health checks y recorridos de autenticación/API.
 6. Aplicar las protecciones y autorizaciones de despliegue correspondientes y registrar el procedimiento de recuperación.
 
-Los workflows vivirán en `.github/workflows/`; la infraestructura en `infra/`; la configuración de release en `deploy/`; los scripts transversales necesarios en `tools/ci/`. Para acceso a Google Cloud se priorizarán credenciales temporales mediante OIDC/Workload Identity Federation; la configuración concreta de permisos se hará al montar la infraestructura. El [workflow frontend](../../.github/workflows/frontend-quality.yml) solo verifica calidad; no provisiona ni despliega. Los workflows de infraestructura y release siguen pendientes.
+Los workflows viven en `.github/workflows/` (`backend-quality.yml`, `frontend-quality.yml`, `infra-plan.yml`, `infra-apply-dev.yml`, `deploy-dev.yml`); la infraestructura en `infra/terraform/` e `infra/docker/casepilot-api.Dockerfile`; la configuración de release DEV en `deploy/dev/firebase.json`; y los scripts reutilizables de CI/CD en `tools/ci/`. Para acceso a Google Cloud se usan exclusivamente credenciales temporales mediante OIDC/Workload Identity Federation sin claves JSON estáticas; la guía operativa completa vive en [Operación, IaC y CI/CD DEV](../operations/dev-deployment-and-iac.md).
 
 ## Evidencia y pendientes
 
-Los checks backend existentes verifican fronteras y propiedades delimitadas de la API; no prueban selección de proveedores por ambiente ni portabilidad remota. La base Angular/kit y sus checks están implementados; el workflow de calidad está definido y aún debe verificarse en GitHub. Firebase Authentication, Cloud Run, Hosting, aprovisionamiento y workflows de release todavía requieren implementación y verificaciones propias. La compatibilidad Neon/Cloud SQL se acreditará mediante pruebas contra ambos destinos, además de las pruebas PostgreSQL locales existentes; los detalles de esa ejecución se definirán sin usar la base de producción para pruebas.
+Los checks backend y frontend (`pnpm check:all`, `pnpm check:backend:integration` y `pnpm test:ci-scripts`) verifican fronteras, tests unitarios/integración y scripts de CI/CD. El Dockerfile de la API ha sido construido y verificado localmente ejecutando el mismo artefacto tanto para migraciones TypeORM como para el runtime no-root en puerto `8080`, y la composición Terraform DEV pasa `terraform fmt -check`, `terraform validate` (con `hashicorp/google` y `google-beta` 6.x) y `tflint`. Siguen pendientes las acciones que requieren credenciales remotas del operador: ejecutar el bootstrap único en GCP + Neon (`infra/terraform/bootstrap/README.md`), cargar las contraseñas en Secret Manager, configurar las `vars` del GitHub Environment `dev` y ejecutar el primer despliegue + smoke test E2E en DEV remoto. La compatibilidad remota contra Cloud SQL se acreditará al montar QA/producción.
 
 ## Referencias
 

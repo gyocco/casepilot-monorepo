@@ -1,0 +1,40 @@
+# Dependencies and build artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+coverage/
+**/coverage/
+
+# VCS and local environment files (never bake secrets or local state into images)
+.git/
+.gitignore
+.vscode/
+.idea/
+.env
+.env.*
+**/.env
+**/.env.*
+
+# Test outputs and caches
+.angular/
+.cache/
+.nestjs/
+.turbo/
+playwright-report/
+test-results/
+
+# Non-API monorepo directories
+.agents/
+.github/
+deploy/
+docs/
+infra/terraform/
+src/apps/casepilot/casepilot-web/
+src/apps/casepilot/casepilot-mobile/
+src/libs/frontend/
+src/libs/mobile/
+tests/
+tools/

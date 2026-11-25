@@ -1,0 +1,72 @@
+name: Terraform apply (DEV)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/terraform/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-apply-dev
+  cancel-in-progress: false
+
+jobs:
+  apply-dev:
+    name: Apply GCP DEV Terraform via OIDC
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Authenticate to Google Cloud via OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_TERRAFORM_SA }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.9.8'
+
+      - name: Check Terraform formatting
+        run: terraform fmt -check -recursive infra/terraform
+
+      - name: Terraform init (GCS remote state)
+        working-directory: infra/terraform/envs/dev
+        run: terraform init -input=false -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}"
+
+      - name: Terraform validate
+        working-directory: infra/terraform/envs/dev
+        run: terraform validate
+
+      - name: Terraform plan
+        working-directory: infra/terraform/envs/dev
+        env:
+          TF_VAR_gcp_project_id: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_gcp_region: ${{ vars.GCP_REGION }}
+          TF_VAR_github_repository: ${{ github.repository }}
+          TF_VAR_github_environment: dev
+          TF_VAR_workload_identity_pool_name: ${{ vars.WORKLOAD_IDENTITY_POOL_NAME }}
+          TF_VAR_artifact_registry_repo_id: ${{ vars.ARTIFACT_REGISTRY_REPO }}
+          TF_VAR_firebase_hosting_site_id: ${{ vars.FIREBASE_HOSTING_SITE }}
+          TF_VAR_database_runtime_host: ${{ vars.NEON_DEV_POOLED_HOST }}
+          TF_VAR_database_migrator_host: ${{ vars.NEON_DEV_DIRECT_HOST }}
+          TF_VAR_database_name: ${{ vars.NEON_DEV_DATABASE_NAME }}
+          TF_VAR_database_runtime_user: ${{ vars.NEON_DEV_RUNTIME_USER }}
+          TF_VAR_database_migrator_user: ${{ vars.NEON_DEV_MIGRATOR_USER }}
+        run: terraform plan -no-color -input=false -out=dev.tfplan
+
+      - name: Terraform apply
+        working-directory: infra/terraform/envs/dev
+        run: terraform apply -no-color -input=false -auto-approve dev.tfplan

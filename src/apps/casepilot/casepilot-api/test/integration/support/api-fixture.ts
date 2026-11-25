@@ -92,7 +92,7 @@ export async function startApiFixture(
       database: {
         host: container.getHost(), port: container.getPort(),
         database: container.getDatabase(), username: container.getUsername(), password: container.getPassword(),
-        schema: 'public', ssl: false, connectTimeoutMs: 1000, queryTimeoutMs: 1000, poolSize: 5,
+        schema: 'public', ssl: false, connectTimeoutMs: 1000, queryTimeoutMs: 1000, statementTimeoutEnabled: true, poolSize: 5,
       },
       auth: { firebaseProjectId: 'demo-casepilot-test', emulatorHost: null },
     };

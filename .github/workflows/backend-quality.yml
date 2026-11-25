@@ -1,0 +1,38 @@
+name: Backend quality
+
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.13.1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Check backend libraries, architecture, unit tests and build
+        run: pnpm check:backend
+      - name: Run CI helper script tests
+        run: pnpm test:ci-scripts
+      - name: Run isolated backend integration tests (Testcontainers PostgreSQL)
+        run: pnpm check:backend:integration

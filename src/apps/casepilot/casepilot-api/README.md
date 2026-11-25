@@ -126,16 +126,17 @@ Puedes copiar `.env.example` a `.env` para overrides locales. Los archivos con v
 
 | Variable | Uso y valor por defecto |
 | --- | --- |
-| `API_HOST` / `API_PORT` | `127.0.0.1:3000` en local/test; `0.0.0.0:3000` en otros entornos. |
+| `API_HOST` / `API_PORT` | `127.0.0.1:3000` en local/test; `0.0.0.0:3000` en otros entornos. Si `API_PORT` no se define, usa `PORT` (inyectado por Cloud Run, p. ej. `8080`) y luego `3000`. |
 | `API_ERROR_DETAILS` | Booleano estricto `true`/`false`. Default true en local/test/development, false en staging/production. Permite override con la precedencia existente. |
 | `CORS_ORIGINS` | Lista de origins HTTP/HTTPS separados por coma, sin paths; vacía = sin cabeceras CORS. Ejemplo para Angular local: `http://localhost:4200`. Sin wildcard ni cookies CORS. |
 | `DATABASE_URL` | URL `postgresql://usuario:password@host:puerto/base`; si existe reemplaza los cinco campos discretos. Codificar componentes especiales; sin query parameters. |
 | `DATABASE_HOST` / `DATABASE_PORT` | Host/puerto; local lee el puerto Docker, otros entornos usan `5432` si no se especifica. |
 | `DATABASE_NAME` / `DATABASE_USER` / `DATABASE_PASSWORD` | Credenciales server-side; local utiliza las variables `CASEPILOT_POSTGRES_*` de Docker como fallback. |
 | `DATABASE_SCHEMA` | `public`; identificador minúsculo validado. Un schema alternativo debe existir antes de migrar. |
-| `DATABASE_SSL` | `false` en local/test; `true` fuera de esos entornos. Con TLS se verifica siempre el certificado. |
+| `DATABASE_SSL` | `false` en local/test; `true` fuera de esos entornos. Con TLS se verifica siempre el certificado (`rejectUnauthorized: true`). |
 | `DATABASE_SSL_CA_FILE` | Ruta absoluta a la CA del proveedor; exige TLS. No se utiliza `rejectUnauthorized: false`. |
-| `DATABASE_CONNECT_TIMEOUT_MS` / `DATABASE_QUERY_TIMEOUT_MS` | `3000` cada uno. Límite de conexión, de ejecución servidor y de consulta cliente. |
+| `DATABASE_CONNECT_TIMEOUT_MS` / `DATABASE_QUERY_TIMEOUT_MS` | `3000` cada uno (rango `1..60000`). En Neon Free Tier con *scale-to-zero*, DEV usa `15000`/`15000` en runtime y `30000`/`60000` en migraciones. |
+| `DATABASE_STATEMENT_TIMEOUT_ENABLED` | Booleano estricto `true`/`false` (default `true`). Desactívalo (`false`) al conectar vía un pooler en modo transacción como Neon `-pooler` / PgBouncer para evitar `08P01: unsupported startup parameter: statement_timeout`, manteniendo activo `query_timeout` del cliente. |
 | `DATABASE_POOL_SIZE` | `5` conexiones por proceso; ajustar según réplicas y capacidad del servidor. |
 
 La misma carga de configuración y fábrica de opciones se usan en runtime y CLI. No se imprimen valores de configuración ni SQL en requests. El bootstrap devuelve un mensaje genérico si la configuración o el puerto impiden iniciar.

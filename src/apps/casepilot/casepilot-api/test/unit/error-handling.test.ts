@@ -13,7 +13,7 @@ for (const exposeErrorDetails of [false, true]) {
       environment: 'test',
       http: { host: '127.0.0.1', port: 0, corsOrigins: [], exposeErrorDetails },
       database: { host: '127.0.0.1', port: 1, database: 'unused', username: 'unused', password: 'synthetic',
-        schema: 'public', ssl: false, connectTimeoutMs: 10, queryTimeoutMs: 10, poolSize: 1 },
+        schema: 'public', ssl: false, connectTimeoutMs: 10, queryTimeoutMs: 10, statementTimeoutEnabled: true, poolSize: 1 },
       auth: { firebaseProjectId: 'demo-casepilot-test', emulatorHost: null },
     };
     const app = await createApp(config, false);

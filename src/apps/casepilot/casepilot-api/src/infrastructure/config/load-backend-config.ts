@@ -50,7 +50,9 @@ function environmentName(value: string): ApplicationEnvironment {
 export function findApplicationRoot(startDirectory: string = dirname(fileURLToPath(import.meta.url))): string {
   let current = resolve(startDirectory);
   while (true) {
-    if (existsSync(resolve(current, 'package.json')) && existsSync(resolve(current, 'tsconfig.json'))) {
+    const hasManifest = existsSync(resolve(current, 'package.json'));
+    const hasAppMarker = existsSync(resolve(current, 'tsconfig.json')) || existsSync(resolve(current, 'dist', 'main.js'));
+    if (hasManifest && hasAppMarker) {
       return current;
     }
     const parent = dirname(current);
@@ -118,6 +120,10 @@ export function loadBackendConfig(
       throw new BackendConfigurationError('Unable to read DATABASE_SSL_CA_FILE.');
     }
   }
+  const statementTimeoutEnabled = variables.DATABASE_STATEMENT_TIMEOUT_ENABLED ?? 'true';
+  if (statementTimeoutEnabled !== 'true' && statementTimeoutEnabled !== 'false') {
+    throw new BackendConfigurationError('DATABASE_STATEMENT_TIMEOUT_ENABLED must be true or false.');
+  }
   const databasePassword = required(password, 'DATABASE_PASSWORD');
   if (['replace-with-local-password', 'REPLACE_WITH_PASSWORD', 'REPLACE_WITH_LOCAL_PASSWORD'].includes(databasePassword)) {
     throw new BackendConfigurationError('DATABASE_PASSWORD must not be an example placeholder.');
@@ -153,7 +159,7 @@ export function loadBackendConfig(
     environment,
     http: {
       host: required(variables.API_HOST ?? (local || environment === 'test' ? '127.0.0.1' : '0.0.0.0'), 'API_HOST'),
-      port: integer(variables.API_PORT ?? '3000', 'API_PORT', 1, 65535),
+      port: integer(variables.API_PORT ?? variables.PORT ?? '3000', 'API_PORT', 1, 65535),
       corsOrigins,
       exposeErrorDetails: exposeErrorDetails === 'true',
     },
@@ -167,6 +173,7 @@ export function loadBackendConfig(
       ssl: tls === 'false' ? false : { rejectUnauthorized: true, ...(ca ? { ca } : {}) },
       connectTimeoutMs: integer(variables.DATABASE_CONNECT_TIMEOUT_MS ?? '3000', 'DATABASE_CONNECT_TIMEOUT_MS', 1, 60000),
       queryTimeoutMs: integer(variables.DATABASE_QUERY_TIMEOUT_MS ?? '3000', 'DATABASE_QUERY_TIMEOUT_MS', 1, 60000),
+      statementTimeoutEnabled: statementTimeoutEnabled === 'true',
       poolSize: integer(variables.DATABASE_POOL_SIZE ?? '5', 'DATABASE_POOL_SIZE', 1, 100),
     },
     auth: {

@@ -3,7 +3,8 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
-import { BackendConfigurationError, loadBackendConfig } from '../../src/infrastructure/config/load-backend-config.js';
+import { BackendConfigurationError, findApplicationRoot, loadBackendConfig } from '../../src/infrastructure/config/load-backend-config.js';
+import { createDataSourceOptions } from '../../src/infrastructure/database/create-data-source-options.js';
 
 function fixture(context: TestContext): string {
   const root = mkdtempSync(join(tmpdir(), 'casepilot-api-config-'));
@@ -123,4 +124,73 @@ void test('auth configuration defaults to local emulator and forbids emulator ou
     () => loadBackendConfig({ FIREBASE_AUTH_EMULATOR_HOST: 'http://127.0.0.1:9099' }, app),
     /host:port/,
   );
+});
+
+void test('discrete TLS configuration supports Neon pooled runtime and direct migration endpoints', context => {
+  const app = fixture(context);
+  const pooledConfig = loadBackendConfig({
+    APP_ENV: 'development',
+    PORT: '8080',
+    DATABASE_HOST: 'ep-demo-123456-pooler.us-east-1.aws.neon.tech',
+    DATABASE_PORT: '5432',
+    DATABASE_NAME: 'casepilot_dev',
+    DATABASE_USER: 'casepilot_app',
+    DATABASE_PASSWORD: 'neon_runtime_fixture_secret',
+    DATABASE_SSL: 'true',
+    DATABASE_STATEMENT_TIMEOUT_ENABLED: 'false',
+    DATABASE_CONNECT_TIMEOUT_MS: '15000',
+    DATABASE_QUERY_TIMEOUT_MS: '15000',
+    DATABASE_POOL_SIZE: '5',
+    AUTH_FIREBASE_PROJECT_ID: 'casepilot-dev',
+    CORS_ORIGINS: 'https://casepilot-dev.web.app',
+  }, app);
+
+  assert.equal(pooledConfig.environment, 'development');
+  assert.equal(pooledConfig.http.host, '0.0.0.0');
+  assert.equal(pooledConfig.http.port, 8080);
+  assert.deepEqual(pooledConfig.database.ssl, { rejectUnauthorized: true });
+  assert.equal(pooledConfig.database.statementTimeoutEnabled, false);
+  assert.equal(pooledConfig.database.connectTimeoutMs, 15000);
+  assert.equal(pooledConfig.database.queryTimeoutMs, 15000);
+  assert.equal(pooledConfig.database.poolSize, 5);
+
+  const pooledOptions = createDataSourceOptions(pooledConfig.database);
+  assert.equal(pooledOptions.type, 'postgres');
+  assert.deepEqual(pooledOptions.ssl, { rejectUnauthorized: true });
+  assert.deepEqual(pooledOptions.extra, { query_timeout: 15000 });
+
+  const directConfig = loadBackendConfig({
+    APP_ENV: 'development',
+    API_PORT: '9090',
+    PORT: '8080',
+    DATABASE_HOST: 'ep-demo-123456.us-east-1.aws.neon.tech',
+    DATABASE_PORT: '5432',
+    DATABASE_NAME: 'casepilot_dev',
+    DATABASE_USER: 'casepilot_migrator',
+    DATABASE_PASSWORD: 'neon_migrator_fixture_secret',
+    DATABASE_SSL: 'true',
+    DATABASE_CONNECT_TIMEOUT_MS: '30000',
+    DATABASE_QUERY_TIMEOUT_MS: '60000',
+    DATABASE_POOL_SIZE: '2',
+    AUTH_FIREBASE_PROJECT_ID: 'casepilot-dev',
+  }, app);
+
+  assert.equal(directConfig.http.port, 9090);
+  assert.equal(directConfig.database.statementTimeoutEnabled, true);
+  const directOptions = createDataSourceOptions(directConfig.database);
+  assert.deepEqual(directOptions.extra, { statement_timeout: 60000, query_timeout: 60000 });
+
+  assert.throws(
+    () => loadBackendConfig({ ...remote, DATABASE_STATEMENT_TIMEOUT_ENABLED: 'yes' }, app),
+    BackendConfigurationError,
+  );
+});
+
+void test('findApplicationRoot resolves slim container layouts without tsconfig.json', context => {
+  const root = mkdtempSync(join(tmpdir(), 'casepilot-api-container-'));
+  context.after(() => rmSync(root, { recursive: true, force: true }));
+  mkdirSync(join(root, 'dist', 'infrastructure', 'config'), { recursive: true });
+  writeFileSync(join(root, 'package.json'), '{"name":"@casepilot/casepilot-api"}');
+  writeFileSync(join(root, 'dist', 'main.js'), 'export {};\n');
+  assert.equal(findApplicationRoot(join(root, 'dist', 'infrastructure', 'config')), root);
 });

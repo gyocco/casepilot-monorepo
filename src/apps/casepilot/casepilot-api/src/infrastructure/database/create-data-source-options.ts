@@ -20,7 +20,10 @@ export function createDataSourceOptions(config: DatabaseConfig): DataSourceOptio
     ssl: config.ssl,
     connectTimeoutMS: config.connectTimeoutMs,
     poolSize: config.poolSize,
-    extra: { statement_timeout: config.queryTimeoutMs, query_timeout: config.queryTimeoutMs },
+    extra: {
+      query_timeout: config.queryTimeoutMs,
+      ...(config.statementTimeoutEnabled ? { statement_timeout: config.queryTimeoutMs } : {}),
+    },
     entities: [healthCheckObjectSchema, ...professionalServicesSchemas, userIdentitySchema],
     migrations: [CreateHealthCheckObject1790726400000, CreateProfessionalServices1790899200000, CreateUserIdentities1790985600000],
     migrationsTableName: 'casepilot_api_migrations',

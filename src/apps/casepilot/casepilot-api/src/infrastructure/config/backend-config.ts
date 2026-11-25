@@ -10,6 +10,7 @@ export interface DatabaseConfig {
   readonly ssl: false | { readonly rejectUnauthorized: true; readonly ca?: string };
   readonly connectTimeoutMs: number;
   readonly queryTimeoutMs: number;
+  readonly statementTimeoutEnabled: boolean;
   readonly poolSize: number;
 }
 

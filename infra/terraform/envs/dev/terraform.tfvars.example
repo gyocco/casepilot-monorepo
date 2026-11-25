@@ -1,0 +1,21 @@
+# Copy to terraform.tfvars (gitignored) for local Terraform runs, or pass as TF_VAR_*
+# from GitHub Environment `dev` variables in CI/CD. Never place DB passwords here.
+
+gcp_project_id              = "casepilot-dev"
+gcp_region                  = "us-east1"
+github_repository           = "your-org/casepilot-monorepo"
+github_environment          = "dev"
+workload_identity_pool_name = "projects/123456789012/locations/global/workloadIdentityPools/github-actions-pool"
+
+artifact_registry_repo_id = "casepilot-dev"
+firebase_hosting_site_id  = "casepilot-dev-web"
+
+enable_email_password_auth = true
+enable_google_auth         = false
+
+# Neon PostgreSQL DEV endpoints (aligned region: aws-us-east-1)
+database_runtime_host  = "ep-example-pooler.us-east-1.aws.neon.tech"
+database_migrator_host = "ep-example.us-east-1.aws.neon.tech"
+database_name          = "casepilot_dev"
+database_runtime_user  = "casepilot_app"
+database_migrator_user = "casepilot_migrator"

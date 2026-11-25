@@ -3,6 +3,7 @@
 ## Documentos disponibles
 
 - [Roadmap, pendientes y próximos pasos](project-management/roadmap-and-next-steps.md): estado actual, plan detallado del Bloque B (CI/CD + IaC en Google Cloud + Neon PostgreSQL Free Tier para DEV), backlog de producto y mejoras del harness IA.
+- [Operación, IaC y CI/CD DEV (GCP + Neon)](operations/dev-deployment-and-iac.md): arquitectura desplegada DEV, comunicación entre SPA/Cloud Run/Firebase Auth/Secret Manager/Neon, workflows GitHub Actions y bootstrap único.
 - [Arquitectura frontend](architecture/frontend-architecture.md): SPA por features, Material, UI kit, temas y recursos configurables por nombre.
 - [Reglas obligatorias frontend FRT-001 a FRT-012](architecture/frontend-architecture-rules.md): fronteras, Angular, tokens, recursos, configuración y calidad.
 - [Validación frontend](../tools/frontend-architecture/README.md): checkers, regresiones y alcance acreditado por regla.
@@ -54,7 +55,6 @@
 Las siguientes áreas se crearán cuando exista contenido real, siguiendo la guía de estructura:
 
 - `development/`: instalación, comandos y calidad.
-- `operations/`: despliegue, entornos, observabilidad e incidentes.
 - `reference/`: APIs, variables, contratos y comandos de consulta.
 
 La documentación específica de una aplicación o librería vive en su README local. Cada tema transversal mantiene una fuente canónica y se enlaza desde este índice.

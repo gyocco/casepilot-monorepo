@@ -1,0 +1,277 @@
+name: Deploy DEV
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '.agents/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  quality-backend:
+    name: Quality Gate — Backend
+    uses: ./.github/workflows/backend-quality.yml
+
+  quality-frontend:
+    name: Quality Gate — Frontend
+    uses: ./.github/workflows/frontend-quality.yml
+
+  build-and-push-api:
+    name: Build & push immutable API image
+    needs:
+      - quality-backend
+      - quality-frontend
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image_uri: ${{ steps.publish.outputs.image_uri }}
+      short_sha: ${{ steps.publish.outputs.short_sha }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Authenticate to Google Cloud via OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_DEPLOYER_SA }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "${{ vars.GCP_REGION }}-docker.pkg.dev" --quiet
+
+      - name: Build and push immutable API container image
+        id: publish
+        env:
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          ARTIFACT_REGISTRY_REPO: ${{ vars.ARTIFACT_REGISTRY_REPO }}
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          IMAGE_REPO="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO}/casepilot-api"
+          IMAGE_TAG="${IMAGE_REPO}:sha-${SHORT_SHA}"
+
+          docker build \
+            -f infra/docker/casepilot-api.Dockerfile \
+            -t "${IMAGE_TAG}" \
+            .
+          docker push "${IMAGE_TAG}"
+
+          DIGEST="$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_TAG}")"
+          echo "short_sha=${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "image_uri=${DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "Published immutable image: ${IMAGE_TAG} (${DIGEST})"
+
+  migrate-dev:
+    name: Run coordinated Neon migrations (Cloud Run Job)
+    needs:
+      - build-and-push-api
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Authenticate to Google Cloud via OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_DEPLOYER_SA }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Update migration job image and execute synchronously (BCK-017)
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          CLOUD_RUN_MIGRATE_JOB: ${{ vars.CLOUD_RUN_MIGRATE_JOB }}
+          IMAGE_URI: ${{ needs.build-and-push-api.outputs.image_uri }}
+        run: |
+          gcloud run jobs update "${CLOUD_RUN_MIGRATE_JOB}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --image="${IMAGE_URI}" \
+            --quiet
+
+          gcloud run jobs execute "${CLOUD_RUN_MIGRATE_JOB}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --wait
+
+  deploy-api-dev:
+    name: Deploy API to Cloud Run + smoke test & rollback
+    needs:
+      - build-and-push-api
+      - migrate-dev
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      service_url: ${{ steps.deploy.outputs.service_url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+
+      - name: Authenticate to Google Cloud via OIDC
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_DEPLOYER_SA }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Capture current Cloud Run serving revision for rollback
+        id: previous
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+        run: |
+          PREV_REV="$(gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --format='value(status.latestReadyRevisionName)' 2>/dev/null || true)"
+          echo "revision=${PREV_REV}" >> "$GITHUB_OUTPUT"
+          echo "Previous ready revision: ${PREV_REV:-<none>}"
+
+      - name: Deploy immutable API image to Cloud Run Service
+        id: deploy
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+          IMAGE_URI: ${{ needs.build-and-push-api.outputs.image_uri }}
+        run: |
+          gcloud run services update "${CLOUD_RUN_SERVICE}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --image="${IMAGE_URI}" \
+            --quiet
+
+          SERVICE_URL="$(gcloud run services describe "${CLOUD_RUN_SERVICE}" \
+            --project="${GCP_PROJECT_ID}" \
+            --region="${GCP_REGION}" \
+            --format='value(status.url)')"
+          echo "service_url=${SERVICE_URL}" >> "$GITHUB_OUTPUT"
+          echo "Deployed Cloud Run service URL: ${SERVICE_URL}"
+
+      - name: Run API smoke tests (rollback to previous revision on failure)
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          CLOUD_RUN_SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+          PREVIOUS_REVISION: ${{ steps.previous.outputs.revision }}
+          API_BASE_URL: ${{ vars.DEV_API_URL || steps.deploy.outputs.service_url }}
+        run: |
+          if ! node tools/ci/smoke-test-api.mjs; then
+            echo "::error::API smoke tests failed against ${API_BASE_URL}."
+            if [[ -n "${PREVIOUS_REVISION}" ]]; then
+              echo "Rolling traffic back to previous revision: ${PREVIOUS_REVISION}"
+              gcloud run services update-traffic "${CLOUD_RUN_SERVICE}" \
+                --project="${GCP_PROJECT_ID}" \
+                --region="${GCP_REGION}" \
+                --to-revisions="${PREVIOUS_REVISION}=100" \
+                --quiet
+            fi
+            exit 1
+          fi
+
+  deploy-web-dev:
+    name: Build & deploy SPA to Firebase Hosting + smoke test
+    needs:
+      - deploy-api-dev
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.13.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Angular SPA and pilot-ui-kit
+        run: pnpm build:web
+
+      - name: Generate DEV public runtime config (/app-config.json)
+        env:
+          WEB_ENVIRONMENT: development
+          API_BASE_URL: ${{ vars.DEV_API_URL || needs.deploy-api-dev.outputs.service_url }}
+          FIREBASE_WEB_API_KEY: ${{ vars.FIREBASE_WEB_API_KEY }}
+          FIREBASE_WEB_AUTH_DOMAIN: ${{ vars.FIREBASE_WEB_AUTH_DOMAIN }}
+          FIREBASE_WEB_PROJECT_ID: ${{ vars.FIREBASE_WEB_PROJECT_ID }}
+          FIREBASE_WEB_APP_ID: ${{ vars.FIREBASE_WEB_APP_ID }}
+          OUTPUT_PATH: src/apps/casepilot/casepilot-web/dist/browser/app-config.json
+        run: node tools/ci/generate-web-app-config.mjs
+
+      - name: Prepare Firebase Hosting config for DEV site
+        env:
+          FIREBASE_SOURCE_CONFIG: deploy/dev/firebase.json
+          FIREBASE_OUTPUT_CONFIG: build/firebase.dev.generated.json
+          FIREBASE_HOSTING_SITE: ${{ vars.FIREBASE_HOSTING_SITE }}
+        run: node tools/ci/prepare-firebase-hosting-config.mjs
+
+      - name: Authenticate to Google Cloud via OIDC (ADC for Firebase CLI)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_DEPLOYER_SA }}
+          create_credentials_file: true
+
+      - name: Deploy SPA to Firebase Hosting DEV
+        env:
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          npx --yes firebase-tools@14 deploy \
+            --config build/firebase.dev.generated.json \
+            --project "${GCP_PROJECT_ID}" \
+            --only hosting \
+            --non-interactive
+
+      - name: Run Firebase Hosting DEV smoke tests
+        env:
+          WEB_BASE_URL: https://${{ vars.FIREBASE_HOSTING_SITE }}.web.app
+          WEB_ENVIRONMENT: development
+          API_BASE_URL: ${{ vars.DEV_API_URL || needs.deploy-api-dev.outputs.service_url }}
+        run: node tools/ci/smoke-test-web.mjs
