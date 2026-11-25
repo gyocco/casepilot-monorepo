@@ -1,3 +1,10 @@
+---
+name: mobile-first-ui
+description: Guía de diseño e implementación mobile-first web y native en CasePilot. Úsala para cualquier pantalla, componente, formulario, modal, navegación, layout, responsive behavior o cambio de tema.
+metadata:
+  short-description: Diseñar e implementar UI mobile-first web y native
+---
+
 # Skill: UI mobile-first web + native
 
 ## Cuándo usarla

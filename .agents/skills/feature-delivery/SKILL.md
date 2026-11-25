@@ -1,3 +1,10 @@
+---
+name: feature-delivery
+description: Guía de entrega de funcionalidades transversales en CasePilot. Úsala cuando una funcionalidad atraviese dos o más capas (pantalla, feature, librería reusable, servicio NestJS, contrato, autenticación, tests o documentación).
+metadata:
+  short-description: Entregar funcionalidades que atraviesan múltiples capas
+---
+
 # Skill: entrega de funcionalidad
 
 ## Cuándo usarla
