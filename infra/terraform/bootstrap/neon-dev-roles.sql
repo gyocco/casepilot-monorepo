@@ -38,6 +38,8 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO casepilot_app;
 
 -- 6. Automatically grant minimal DML privileges to `casepilot_app` on every table/sequence
 --    created in the future by `casepilot_migrator` during TypeORM migrations.
+--    Note: On managed non-superuser PostgreSQL (e.g., Neon), execute these two statements
+--    while connected as `casepilot_migrator` (omitting `FOR ROLE casepilot_migrator`).
 ALTER DEFAULT PRIVILEGES FOR ROLE casepilot_migrator IN SCHEMA public
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO casepilot_app;
 

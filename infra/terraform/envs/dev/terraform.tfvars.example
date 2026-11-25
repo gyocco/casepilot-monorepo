@@ -19,3 +19,8 @@ database_migrator_host = "ep-example.us-east-1.aws.neon.tech"
 database_name          = "casepilot_dev"
 database_runtime_user  = "casepilot_app"
 database_migrator_user = "casepilot_migrator"
+
+# Human developers/admins authorized to read DEV secrets via `gcloud secrets versions access`
+secret_admin_members = [
+  "user:dev@example.com",
+]

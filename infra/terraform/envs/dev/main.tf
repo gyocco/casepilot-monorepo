@@ -58,8 +58,10 @@ module "secret_manager" {
   environment_short              = local.environment_short
   runtime_password_secret_id     = "neon-db-runtime-password"
   migrator_password_secret_id    = "neon-db-migrator-password"
+  owner_url_secret_id            = "neon-db-owner-url"
   runtime_service_account_email  = module.iam.api_runtime_service_account_email
   migrator_service_account_email = module.iam.api_migrator_service_account_email
+  secret_admin_members           = var.secret_admin_members
 
   depends_on = [module.project_services]
 }

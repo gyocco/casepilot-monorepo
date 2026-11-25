@@ -85,11 +85,13 @@ Cloud Run v2 valida al crearse que los secretos referenciados tengan al menos un
      -target=module.iam \
      -target=module.secret_manager
    ```
-3. Carga las contraseñas de los roles de Neon en Google Secret Manager (usando stdin para no dejarlas en el historial del shell):
+3. Carga las contraseñas de los roles de Neon (y opcionalmente el connection string admin para operadores/agentes autorizados) en Google Secret Manager usando stdin para no dejarlas en el historial del shell ni en archivos del repo:
    ```bash
    printf '%s' '<PASSWORD_CASEPILOT_APP>' | gcloud secrets versions add neon-db-runtime-password --project="<GCP_PROJECT_ID>" --data-file=-
    printf '%s' '<PASSWORD_CASEPILOT_MIGRATOR>' | gcloud secrets versions add neon-db-migrator-password --project="<GCP_PROJECT_ID>" --data-file=-
+   printf '%s' '<NEON_OWNER_CONNECTION_STRING>' | gcloud secrets versions add neon-db-owner-url --project="<GCP_PROJECT_ID>" --data-file=-
    ```
+   *(Cualquier developer autorizado con `roles/secretmanager.secretAccessor` vía `var.secret_admin_members` puede leer estos secretos desde cualquier PC tras `gcloud auth login` con `gcloud secrets versions access latest --secret="<NOMBRE>" --project="<GCP_PROJECT_ID>"`.)*
 4. Aplica el resto de la infraestructura DEV (Artifact Registry, Firebase Auth/Hosting, Cloud Run Job y Cloud Run Service):
    ```bash
    terraform apply

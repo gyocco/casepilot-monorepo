@@ -48,6 +48,10 @@ flowchart LR
    - `sa-deployer-dev`: sube imágenes a Artifact Registry, ejecuta migraciones, actualiza Cloud Run Service y publica en Firebase Hosting vía OIDC desde `deploy-dev.yml`, limitado estrictamente al repositorio GitHub + `environment == 'dev'`. Solo puede hacer `iam.serviceAccountUser` sobre `sa-api-runtime-dev` y `sa-api-migrator-dev`.
    - `sa-api-runtime-dev`: accede únicamente al secreto `neon-db-runtime-password`, escribe logs y lee estado de revocación en Firebase Auth (`roles/firebaseauth.viewer`).
    - `sa-api-migrator-dev`: accede únicamente al secreto `neon-db-migrator-password` y escribe logs.
+   - **Secretos de administración para developers y agentes (`neon-db-owner-url`)**: el connection string admin de Neon vive únicamente en Google Secret Manager (`neon-db-owner-url`) con `roles/secretmanager.secretAccessor` otorgado solo a miembros humanos explícitos (`var.secret_admin_members`) y **nunca** a Cloud Run ni a `sa-deployer-dev`. Desde cualquier PC, un developer autorizado (o un agente ejecutándose bajo su sesión `gcloud auth login`) lo lee en memoria sin archivos locales:
+     ```bash
+     gcloud secrets versions access latest --secret="neon-db-owner-url" --project="<GCP_PROJECT_ID>"
+     ```
 
 ---
 

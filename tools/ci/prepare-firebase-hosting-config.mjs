@@ -39,7 +39,7 @@ export function prepareFirebaseHostingConfig({
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const sourceConfigPath = process.env.FIREBASE_SOURCE_CONFIG?.trim() || 'deploy/dev/firebase.json';
-  const outputConfigPath = process.env.FIREBASE_OUTPUT_CONFIG?.trim() || 'build/firebase.dev.generated.json';
+  const outputConfigPath = process.env.FIREBASE_OUTPUT_CONFIG?.trim() || 'firebase.dev.generated.json';
   const siteId = process.env.FIREBASE_HOSTING_SITE?.trim() || '';
 
   const { outputConfigPath: written } = prepareFirebaseHostingConfig({
