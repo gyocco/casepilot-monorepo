@@ -4,7 +4,7 @@
 - Fecha: 2026-11-24.
 - Decisiones canónicas: [ADR 0018](../adr/0018-infrastructure-providers-and-environments.md), [ADR 0021](../adr/0021-gcp-absolute-dev-infrastructure.md), [ADR 0022](../adr/0022-firebase-authentication-and-application-authorization.md) e [Infraestructura, proveedores y ambientes](../architecture/infrastructure-providers.md).
 
-Este documento describe cómo se integran, comunican y configuran todas las piezas del ambiente remoto `development` (DEV), qué automatiza cada workflow y qué pasos únicos ejecuta el operador para levantar DEV por primera vez.
+Este documento describe de forma resumida cómo se integran, comunican y configuran las piezas del ambiente remoto `development` (DEV), qué automatiza cada workflow y qué pasos únicos ejecuta el operador para levantar DEV por primera vez. Para la guía completa orientada a desarrolladores (recursos, IAM, Secret Manager, observabilidad, rotación, ramas/PRs y troubleshooting), consulta [Guía completa del ambiente DEV](dev-environment-guide.md).
 
 ---
 
@@ -61,7 +61,7 @@ flowchart LR
 | --- | --- | --- | --- |
 | [`backend-quality.yml`](../../.github/workflows/backend-quality.yml) | `pull_request` hacia `development`/`main`, `workflow_dispatch`, `workflow_call` | Sin credenciales cloud | Ejecuta `pnpm check:backend`, `pnpm test:ci-scripts` y `pnpm check:backend:integration` (Testcontainers PostgreSQL efímero). |
 | [`frontend-quality.yml`](../../.github/workflows/frontend-quality.yml) | `pull_request` hacia `development`/`main`, `workflow_dispatch`, `workflow_call` | Sin credenciales cloud | Ejecuta `pnpm check:web` (UI kit, reglas FRT, regresiones, unitarias, build y Playwright + axe). |
-| [`infra-plan.yml`](../../.github/workflows/infra-plan.yml) | `pull_request` hacia `development` sobre `infra/terraform/**`, `workflow_dispatch` | OIDC opcional en `plan-dev` | Ejecuta `terraform fmt -check`, `validate` y `tflint` siempre; si el environment `dev` ya tiene OIDC configurado, ejecuta `terraform plan` de solo lectura. |
+| [`infra-plan.yml`](../../.github/workflows/infra-plan.yml) | `pull_request` hacia `development` sobre `infra/terraform/**`, `workflow_dispatch` | OIDC en `plan-dev` (solo `workflow_dispatch`) | Ejecuta `terraform fmt -check`, `validate` y `tflint` en PRs y ejecución manual; en `workflow_dispatch` sobre `development`, ejecuta `terraform plan` de solo lectura contra `environment: dev`. |
 | [`infra-apply-dev.yml`](../../.github/workflows/infra-apply-dev.yml) | `push` / merge a `development` sobre `infra/terraform/**`, `workflow_dispatch` | OIDC (`sa-terraform-dev`) | Valida formato/sintaxis y aplica Terraform DEV contra el estado remoto GCS con concurrencia exclusiva (`cancel-in-progress: false`). |
 | [`deploy-dev.yml`](../../.github/workflows/deploy-dev.yml) | `push` / merge a `development` (ignorando docs), `workflow_dispatch` | OIDC (`sa-deployer-dev`) | 1) Quality gate (`backend-quality` + `frontend-quality`) → 2) Build & push imagen inmutable `sha-<short_sha>` → 3) Cloud Run Job de migraciones (`--wait`) → 4) Deploy Cloud Run Service + `smoke-test-api.mjs` (rollback automático a revisión previa si falla) → 5) Build SPA + `/app-config.json` + deploy Firebase Hosting + `smoke-test-web.mjs`. |
 
