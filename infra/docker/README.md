@@ -53,6 +53,7 @@ La contraseña generada usa caracteres hexadecimales válidos en una URL. Si eli
 
 | Comando desde la raíz | Efecto |
 | --- | --- |
+| `pnpm dev` (`pnpm dev:local`) | Orquestador idempotente todo en uno: verifica puertos, ejecuta `infra:up`, migraciones, abre API y Web en terminales externas divididas y corre `seed:local` |
 | `pnpm infra:env` | Crear el archivo local si no existe; conservarlo si existe |
 | `pnpm infra:up` | Construir si hace falta, arrancar dependencias y esperar su health check |
 | `pnpm infra:status` | Consultar contenedores, puertos y salud |
